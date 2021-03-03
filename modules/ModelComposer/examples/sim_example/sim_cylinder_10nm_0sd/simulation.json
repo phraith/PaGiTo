@@ -1,0 +1,59 @@
+{
+  "name": "cylinders-hcp",
+  "cylinder_1": {
+    "type": "cylinder",
+    "refindex": {
+      "delta": 0.001,
+      "beta": 1e-05
+    },
+    "params": {
+      "radius": {
+        "mean": 5,
+        "stddev": 0
+      },
+      "height": {
+        "mean": 5,
+        "stddev": 0
+      }
+    }
+  },
+  "sphere_1": {
+    "type": "sphere",
+    "refindex": {
+      "delta": 0.001,
+      "beta": 1e-05
+    },
+    "params": {
+      "radius": {
+        "mean": 5,
+        "stddev": 0
+      }
+    }
+  },
+  "unitcell": {
+    "components": [
+      {
+        "shape": "cylinder_1",
+        "locations": [
+          [0,0,0]
+        ]
+      },
+      {
+        "shape": "sphere_1",
+        "locations": [
+          [80,0,0]
+        ]
+      }
+    ],
+    "repetitions": [9, 9, 1],
+    "distances": [10, 10, 10]
+
+  },
+  "substrate": {
+    "order": -1,
+    "refindex": {
+      "delta": 6e-06,
+      "beta": 2e-08
+    }
+  }
+}

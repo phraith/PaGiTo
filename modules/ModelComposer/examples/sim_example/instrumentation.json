@@ -1,0 +1,26 @@
+{
+    "scattering": {
+        "alphai": 0.2,
+        "photon": {
+            "ev": 12398.4
+        }
+    },
+    "detector": {
+        "pixelsize": 57.3e-3,
+        "resolution": [
+            1475,
+            1679
+        ],
+        "sdd": 1000,
+        "directbeam": [
+            737,
+            0
+        ]
+    },
+    "fitting": {
+        "evolutions": 1,
+        "generations": 2,
+        "populations": 4,
+        "individuals": 100
+    }
+}
