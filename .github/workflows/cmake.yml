@@ -23,7 +23,7 @@ jobs:
       run:  |
         sudo apt-get purge *nvidia*
         sudo apt autoremove
-        sudo apt install nvidia-driver-463
+        sudo apt install nvidia-driver-455
         sudo apt install nvidia-cuda-toolkit
         
       
