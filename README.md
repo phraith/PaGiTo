@@ -1,5 +1,7 @@
 # GISAXS-ModelFitter
 
+![cmake_workflow](https://github.com/phraith/GISAXS-SimFit/actions/workflows/cmake.yml/badge.svg)
+
 ## Requirements to build the C++-Framework:
 ### Building was tested with gcc 8.3 and MSVC 2019
 ### CMake (at least version 3.18):
