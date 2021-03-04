@@ -18,8 +18,17 @@
 - Link to source (https://github.com/boostorg/boost/releases/tag/boost-1.74.0)
 - Build and install with CMake
 - Set BOOST_ROOT environment variable to path: "install_dir\"
-## Requirements to use the Python-Framework (ModelComposer)
-### Capn Proto:
-- pip install --user pycapnp
-### ZMQ:
-- pip install --user zmq
+### Actual building:
+- ./build.ps1 on Windows
+- ./build.sh on Linux
+- check CUDA-version in CMakeLists.txt and set it to the correct one for the used GPU
+## How to install the Python-Lib(while in folder GISAXS-ModelFitter/modules/ModelComposer)
+### Needed libraries to build wheel from setup.py:
+- pip install wheel
+- pip install setuptools
+### Build python wheel:
+- python setup.py bdist_wheel
+### Install created wheel:
+- pip install .\dist\"wheel_name".whl
+### Check:
+- run one of the examples in ModelComposer/examples (be aware that the corresponding C++-server must be running!)
