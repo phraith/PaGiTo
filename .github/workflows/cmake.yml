@@ -27,8 +27,7 @@ jobs:
         sudo bash -c 'echo "deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64 /" > /etc/apt/sources.list.d/cuda.list'
         sudo bash -c 'echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64 /" > /etc/apt/sources.list.d/cuda_learn.list'
         sudo apt update
-        sudo apt install cuda-11-2
-        sudo apt install libcudnn7
+        sudo apt-get install nvidia-cuda-dev  nvidia-cuda-toolkit 
         
       
     - name: Install Boost
