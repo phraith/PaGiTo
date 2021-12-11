@@ -11,5 +11,5 @@ setup(
                            'serialized_simulation_description.capnp']},
     include_package_data=True,
     install_requires=['datetime', 'pyzmq', 'pycapnp',
-                      'pandas', 'matplotlib', 'numpy', 'fabio']
+                      'pandas', 'matplotlib', 'numpy', 'fabio', 'pathlib']
 )

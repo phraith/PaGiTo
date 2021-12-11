@@ -24,12 +24,12 @@ public:
 
 	std::string InfoStr() const;
 
-	const std::vector<MyType> Qx() const;
-	const std::vector<MyType> Qy() const;
-	const std::vector<MyType> Qz() const;
+	const std::vector<MyType> &Qx() const;
+	const std::vector<MyType> &Qy() const;
+	const std::vector<MyType> &Qz() const;
 
-	const std::vector<MyType2> QPar() const;
-	const std::vector<MyType2> Q() const;
+	const std::vector<MyType2> &QPar() const;
+	const std::vector<MyType2> &Q() const;
 
 	MyType2I Resolution() const;
 

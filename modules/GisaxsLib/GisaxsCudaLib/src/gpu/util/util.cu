@@ -72,8 +72,6 @@ __global__ void reduce_scaled_diff(float* in_real, float* in_sim, float* sum, fl
         float real_int = in_real[i];
         float sim_int = in_sim[i] * scale;
         float abs_diff = real_int - sim_int;
-        //local_sum += (abs_diff * abs_diff) / real_int;
-        //printf("%f %f %f\n", in_real[i], in_sim[i], (abs_diff * abs_diff));
         local_sum += (abs_diff * abs_diff);
     }
 
@@ -89,6 +87,69 @@ __global__ void reduce_scaled_diff(float* in_real, float* in_sim, float* sum, fl
 
     if (tid == 0) {
         sum[blockIdx.x] = sdata[0];
+    }
+}
+
+__device__ float3 scalar_mult(float factor, float3 vec)
+{
+    return { factor * vec.x, factor * vec.y, factor * vec.z };
+}
+
+__device__ float3 vector_add(float3 a, float3 b)
+{
+    return { a.x + b.x, a.y + b.y, a.z + b.z };
+}
+
+__global__ void preprocess_easy(float* in, float* out, float* my_max, int n)
+{
+    int tid = threadIdx.x;
+    float logmax = logf(*my_max);
+    float logmin = logf(fmaxf(2.f, 1e-10f * *my_max));
+    for (int i = blockDim.x * blockIdx.x + tid; i < n; i += blockDim.x * gridDim.x)
+    {
+
+        float log_val = logf(in[i]);
+        log_val -= logmin;
+        log_val /= (logmax - logmin);
+        out[i] = log_val;
+    }
+}
+
+__global__ void normalize(float* in, unsigned char* out, int n)
+{
+    int tid = threadIdx.x;
+    for (int i = blockDim.x * blockIdx.x + tid; i < n; i += blockDim.x * gridDim.x)
+    {
+        out[i] = (unsigned char)(in[i] * 255.0);
+    }
+}
+
+__global__ void reorder(float* in, float* out, int size, int width, int height, int blocksize)
+{
+    int tid = threadIdx.x;
+
+    int blockMaxX = width / blocksize;
+    int blockMaxY = height / blocksize;
+
+    int blockCount = blockMaxX * blockMaxY;
+
+    int blockCells = blocksize * blocksize;
+    for (int i = blockDim.x * blockIdx.x + tid; i < size ; i += blockDim.x * gridDim.x)
+    {
+        int yCoord = i / width;
+        int xCoord = i % width;
+
+        int blockIdX = xCoord / blocksize;
+        int blockIdY = yCoord / blocksize;
+
+        int posBlockX = xCoord % blocksize;
+        int posBlockY = yCoord % blocksize;
+
+        int blockId = blockIdX * blockMaxX + blockIdY;
+        int startPos = blockId * blockCells;
+        int newIdx = startPos + (posBlockX * blocksize) + posBlockY;
+
+        out[newIdx] = in[i];
     }
 }
 
@@ -131,6 +192,38 @@ void max(float* data, int size, float* partial_sums, float* res, cudaStream_t wo
 
     reduce_max << <num_blocks, num_threads, shared_size, work_stream >> > (data, partial_sums, size);
     reduce_max << <1, num_threads, shared_size, work_stream >> > (partial_sums, res, num_blocks);
+}
+
+void Preprocess(float* input, int size, float* output, float *my_max, cudaStream_t work_stream)
+{
+    int num_threads = 256;
+    int num_blocks = 256;
+
+    int shared_size = num_threads * sizeof(float);
+
+    //preprocess << < num_blocks, num_threads, shared_size, work_stream >> > (input, output, my_max, size);
+    preprocess_easy << < num_blocks, num_threads, shared_size, work_stream >> > (input, output, my_max, size);
+}
+
+void Normalize(float* input, int size, unsigned char* output, cudaStream_t work_stream)
+{
+    int num_threads = 256;
+    int num_blocks = 256;
+
+    int shared_size = num_threads * sizeof(float);
+
+    //preprocess << < num_blocks, num_threads, shared_size, work_stream >> > (input, output, my_max, size);
+    normalize << < num_blocks, num_threads, shared_size, work_stream >> > (input, output, size);
+}
+
+void Reorder(float* input, int size, float *output, int width, int height, int blockSize, cudaStream_t work_stream)
+{
+    int num_threads = 256;
+    int num_blocks = 256;
+
+    int shared_size = num_threads * sizeof(float);
+
+    reorder << < num_blocks, num_threads, shared_size, work_stream >> > (input, output, size, width, height, blockSize);
 }
 
 void SumReduce(float* data, int size, float* partial_sums, float* res, cudaStream_t work_stream)

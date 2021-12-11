@@ -39,7 +39,6 @@ see https://www.gnu.org/licenses/. */
 #include <typeinfo>
 #include <utility>
 #include <vector>
-
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/type_traits/integral_constant.hpp>
 #include <boost/type_traits/is_virtual_base_of.hpp>

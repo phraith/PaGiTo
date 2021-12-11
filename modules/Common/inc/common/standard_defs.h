@@ -42,6 +42,7 @@ typedef struct SimData
 {
 	MyType fitness;
 	std::vector<MyType> intensities;
+    std::vector<unsigned char> normalized_intensities;
     std::vector<MyType> qx;
     std::vector<MyType> qy;
     std::vector<MyType> qz;

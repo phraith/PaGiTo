@@ -68,8 +68,8 @@ struct gisaxs {
 ModelFitter::ModelFitter()
 	:
 	ms_(std::make_shared<ModelSimulator>()),
-	job_provider_("127.0.0.1:5556"),
-	result_publisher_("127.0.0.1:5557"),
+	job_provider_("0.0.0.0:5556"),
+	result_publisher_("0.0.0.0:5557"),
 	quit_work_(false)
 {
 }

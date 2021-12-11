@@ -3,16 +3,13 @@
 #include <memory>
 
 #include "vector_types.h"
-
 #include "gpu/core/gpu_helper.h"
 #include "gpu/util/cuda_numerics.h"
-
-
 #include "gpu/core/gpu_helper.h"
 #include "gpu/util/test.h"
 #include "gpu/util/util.h"
-#include "common/unitcell.h"
 
+#include "common/unitcell.h"
 #include "common/standard_constants.h"
 #include "common/standard_defs.h"
 
@@ -33,6 +30,7 @@ GpuDevice::GpuDevice(gpu_info_t info, int device_id)
 	memory_provider_c4_(device_id_),
 	memory_provider_i_(device_id_),
 	memory_provider_s_(device_id_),
+	memory_provider_uchar_(device_id_),
 	workers(0),
 	complete_runtime_(0),
 	kernel_runtime_(0),
@@ -90,6 +88,8 @@ SimData GpuDevice::RunGISAXS(const SimJob& descr, const ImageData *real_img, boo
 
 	//get cuda memory for work
 	std::shared_ptr<GpuMemoryBlock<MyType>> dev_sim_intensities = ProvideMemory<MyType>(qcount);
+	std::shared_ptr<GpuMemoryBlock<MyType>> dev_sim_intensities_prep = ProvideMemory<MyType>(qcount);
+	std::shared_ptr<GpuMemoryBlock<unsigned char>> dev_sim_intensities_uchar = ProvideMemory<unsigned char>(qcount);
 	std::shared_ptr<GpuMemoryBlock<MyType>> dev_partial_sums = ProvideMemory<MyType>(256);
 	std::shared_ptr<GpuMemoryBlock<MyType>> dev_sum = ProvideMemory<MyType>(1);
 	std::shared_ptr<GpuMemoryBlock<MyType>> dev_max = ProvideMemory<MyType>(1);
@@ -127,22 +127,20 @@ SimData GpuDevice::RunGISAXS(const SimJob& descr, const ImageData *real_img, boo
 		Gisaxs::CreateUnitcell(dev_unitcell_, dev_shapes->Get(), dev_shapes->Size(), dev_locations->Get(), dev_location_counts->Get(), RANDOM_DRAWS, repetitions, distances, work_stream->Get());
 	}
 
-	//kernel_timer_.Start();
-
-
 	start->Record();
 	GenerateRandoms(dev_rands->Get(), dev_rands->Size(), 0, 1);
 	Gisaxs::Update(dev_rands->Get(), qcount, dev_params->Get(), descr.HUnitcell().ShapeCount(), work_stream->Get());
 	Gisaxs::RunSim(dev_qpar->Get(), dev_q->Get(), dev_qpoints_xy->Get(), dev_qpoints_z_coeffs->Get(), qcount, dev_coefficients->Get(), dev_sim_intensities->Get(), descr.HUnitcell().ShapeCount(), dev_sfs->Get(),  work_stream->Get());
 	
+	max(dev_sim_intensities->Get(), dev_sim_intensities->Size(), dev_partial_sums->Get(), dev_max->Get(), work_stream->Get());
+
+	Preprocess(dev_sim_intensities->Get(), dev_sim_intensities->Size(), dev_sim_intensities_prep->Get(), dev_max->Get(), work_stream->Get());
+	Normalize(dev_sim_intensities_prep->Get(), dev_sim_intensities_prep->Size(), dev_sim_intensities_uchar->Get(), work_stream->Get());
 
 	float scale = 1;
 	if (real_img != nullptr)
 	{
 		std::shared_ptr<const GpuMemoryBlock<MyType>> dev_real_intensities = ProvideConstantMemory(real_img->Id(), real_img->Intensities());
-		
-		// MultSumReduce(dev_real_intensities->Get(), dev_sim_intensities->Get(), dev_real_intensities->Size(), dev_partial_sums->Get(), dev_scale_prod_, work_stream->Get());
-		// MultSumReduce(dev_real_intensities->Get(), dev_real_intensities->Get(), dev_real_intensities->Size(), dev_partial_sums->Get(), dev_scale_denom_, work_stream->Get());
 		
 		SumReduce(dev_real_intensities->Get(), dev_real_intensities->Size(), dev_partial_sums->Get(), dev_scale_prod_, work_stream->Get());
 		SumReduce(dev_sim_intensities->Get(), dev_sim_intensities->Size(), dev_partial_sums->Get(), dev_scale_denom_, work_stream->Get());
@@ -154,8 +152,6 @@ SimData GpuDevice::RunGISAXS(const SimJob& descr, const ImageData *real_img, boo
 	}
 	stop->Record();
 	gpuErrchk(cudaDeviceSynchronize());
-	
-	//kernel_timer_.End();
 
 	float milliseconds = 0;
 	
@@ -182,13 +178,13 @@ SimData GpuDevice::RunGISAXS(const SimJob& descr, const ImageData *real_img, boo
 
 	if (copy_intensities)
 	{
-		std::vector<float> copied_intensities(dev_sim_intensities->Size());
-		gpuErrchk(cudaMemcpy(&copied_intensities[0], dev_sim_intensities->Get(), dev_sim_intensities->Size() * sizeof(float), cudaMemcpyDeviceToHost));
-		return { fitness_, copied_intensities, descr.GetQGrid().Qx(), descr.GetQGrid().Qy(), descr.GetQGrid().Qz(),  descr.GetQGrid().Resolution(), scale};
+		std::vector<unsigned char> copied_intensities(dev_sim_intensities_uchar->Size());
+		gpuErrchk(cudaMemcpy(&copied_intensities[0], dev_sim_intensities_uchar->Get(), dev_sim_intensities_uchar->Size() * sizeof(unsigned char), cudaMemcpyDeviceToHost));
+		return { fitness_, std::vector<float>(), copied_intensities, descr.GetQGrid().Qx(), descr.GetQGrid().Qy(), descr.GetQGrid().Qz(),  descr.GetQGrid().Resolution(), scale};
 	}
-
-
-	return  { fitness_, {}, {}, {}, {}, {0,0}, scale };
+	dev_sim_intensities_prep->Unlock();
+	dev_sim_intensities_uchar->Unlock();
+	return  { fitness_, {}, std::vector<unsigned char>(), {}, {}, {}, {0,0}, scale };
 }
 
 int GpuDevice::Bind() const
@@ -229,6 +225,11 @@ void GpuDevice::UnlockAllMemory()
 	memory_provider_f2_.UnlockAll();
 	memory_provider_f3_.UnlockAll();
 	memory_provider_f4_.UnlockAll();
+
+	memory_provider_c4_.UnlockAll();
+	memory_provider_i_.UnlockAll();
+	memory_provider_s_.UnlockAll();
+	memory_provider_uchar_.UnlockAll();
 }
 
 void GpuDevice::UnlockAllEvents()
@@ -270,6 +271,7 @@ void GpuDevice::CleanUp()
 	memory_provider_c4_.FreeAllMemory();
 	memory_provider_i_.FreeAllMemory();
 	memory_provider_s_.FreeAllMemory();
+	memory_provider_uchar_.FreeAllMemory();
 
 	event_provider_.DestroyAllEvents();
 	stream_provider_.DestroyAllStreams();

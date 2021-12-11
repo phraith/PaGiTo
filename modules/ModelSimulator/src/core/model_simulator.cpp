@@ -9,6 +9,8 @@
 
 #include "vector_types.h"
 
+#include <chrono>
+
 using namespace distribution_functions;
 
 ModelSimulator::ModelSimulator()
@@ -23,8 +25,8 @@ ModelSimulator::ModelSimulator(const std::string& connector_port, const std::str
 	hw_info_(std::make_shared<HardwareInformation>()),
 	connector_port_(connector_port),
 	publisher_port_(publisher_port),
-	job_provider_("127.0.0.1:" + connector_port),
-	result_publisher_("127.0.0.1:" + publisher_port),
+	job_provider_("0.0.0.0:" + connector_port),
+	result_publisher_("0.0.0.0:" + publisher_port),
 	quit_work_(false)
 {
 }
@@ -39,10 +41,10 @@ SimData ModelSimulator::RunGISAXS(const SimJob &descr, const ImageData *real_img
 	Device &device = LockAndReturnDevice();
 	
 	SimData sim_data = device.RunGISAXS(descr, real_img, copy_intensities);
+	
 	UnlockDevice(device);
 
 	cv_.notify_one();
-
 	return sim_data;
 }
 
@@ -53,8 +55,9 @@ void ModelSimulator::Run()
 
 	while (std::shared_ptr<SimJob> job = job_provider_.TakeSimulationJob())
 	{
-		job->GetQGrid().Resolution();
+		std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 		SimData sim_data = RunGISAXS(*job, nullptr, true);
+		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 		result_publisher_.InsertSimResult(std::make_shared<SimResult>(job->Uuid(), job->IsLast(), sim_data, GetDeviceTimings()));
 		for (auto& timing : GetDeviceTimings())
 		{
@@ -68,6 +71,7 @@ void ModelSimulator::Run()
 
 		hw_info_->CleanUpDevices();
 		
+		std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;
 	}
 }
 

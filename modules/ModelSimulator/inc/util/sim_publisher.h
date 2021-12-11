@@ -21,6 +21,8 @@ private:
 	void Publish();
 	std::shared_ptr<SimResult> TakeSimResult();
 
+	std::string CreateMessageString(std::shared_ptr<SimResult> result);
+	std::vector<MyType> Normalize(std::vector<MyType> input, int xDim, int yDim);
 	const std::string ip_;
 	std::thread publication_handler_;
 

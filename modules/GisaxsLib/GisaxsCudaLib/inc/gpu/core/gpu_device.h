@@ -108,6 +108,7 @@ private:
     StreamProvider stream_provider_;
 
     GpuMemoryProvider<int> memory_provider_i_;
+    GpuMemoryProvider<unsigned char> memory_provider_uchar_;
     GpuMemoryProvider<MyType> memory_provider_f_;
     GpuMemoryProvider<MyType2> memory_provider_f2_;
     GpuMemoryProvider<MyType3> memory_provider_f3_;
@@ -128,6 +129,12 @@ template <>
 inline std::shared_ptr<GpuMemoryBlock<int>> GpuDevice::ProvideMemory(int size)
 {
     return memory_provider_i_.ProvideMemory(size);
+}
+
+template <>
+inline std::shared_ptr<GpuMemoryBlock<unsigned char>> GpuDevice::ProvideMemory(int size)
+{
+    return memory_provider_uchar_.ProvideMemory(size);
 }
 
 template <>

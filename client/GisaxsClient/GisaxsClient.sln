@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31410.357
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GisaxsClient", "GisaxsClient.csproj", "{6C592AE0-E2AF-4B81-AC81-8D5942786857}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6C592AE0-E2AF-4B81-AC81-8D5942786857}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C592AE0-E2AF-4B81-AC81-8D5942786857}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C592AE0-E2AF-4B81-AC81-8D5942786857}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C592AE0-E2AF-4B81-AC81-8D5942786857}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B9E52D4A-DFE5-414C-AEA8-DEDB6BF68965}
+	EndGlobalSection
+EndGlobal

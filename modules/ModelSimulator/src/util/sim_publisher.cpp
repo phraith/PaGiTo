@@ -1,7 +1,7 @@
 #include "util/sim_publisher.h"
 
 #include <iostream>
-
+#include <chrono>
 #include <zmq.hpp>
 
 #include <capnp/message.h>
@@ -10,7 +10,11 @@
 #include <serialized_simulation_description.capnp.h>
 #include <capnp/serialize.h>
 
+#include <nlohmann/json.hpp>
+
 SimPublisher::SimPublisher()
+	:
+	quit_work_(false)
 {
 }
 
@@ -46,44 +50,14 @@ void SimPublisher::Publish()
 
 	while (std::shared_ptr<SimResult> result = TakeSimResult())
 	{
-
-		::capnp::MallocMessageBuilder message;
-
-		SerializedSimResult::Builder sfr = message.initRoot<SerializedSimResult>();
-		sfr.setClientId(result->Uuid());
-
-		sfr.setXDim(result->Data().resolution.x);
-		sfr.setYDim(result->Data().resolution.y);
-
-		auto sim_int = sfr.initSimulatedIntensities(result->Data().intensities.size());
-		auto sim_qx = sfr.initSimulatedQx(result->Data().qx.size());
-		auto sim_qy = sfr.initSimulatedQy(result->Data().qy.size());
-		auto sim_qz = sfr.initSimulatedQz(result->Data().qz.size());
-
-		for (int i = 0; i < result->Data().intensities.size(); ++i)
-		{
-			sim_int.set(i, result->Data().intensities.at(i));
-
-			sim_qx.set(i, result->Data().qx.at(i));
-			sim_qy.set(i, result->Data().qy.at(i));
-			sim_qz.set(i, result->Data().qz.at(i));
-		}
-
-		auto device_timings = sfr.initDeviceTimingData(result->DeviceTimings().size());
-		for (int i = 0; i < result->DeviceTimings().size(); ++i)
-		{
-			auto& device_timing = result->DeviceTimings().at(i);
-			device_timings[i].setDeviceName(device_timing.device_name);
-			device_timings[i].setKernelTime(device_timing.kernel_time);
-			device_timings[i].setSimulationTime(device_timing.full_runtime);
-		}
-
-		auto result_m = capnp::messageToFlatArray(message);
-
+		std::string message_string = CreateMessageString(result);
 		try
 		{
+			std::vector<unsigned char>& f = std::vector<unsigned char>(result->Data().normalized_intensities);
 			socket.send(zmq::buffer(result->Uuid()), zmq::send_flags::sndmore);
-			socket.send(zmq::buffer(result_m.asBytes().begin(), result_m.asBytes().size()));
+			//socket.send(zmq::buffer(message_string.data(), message_string.size()));
+			socket.send(zmq::buffer(&f[0], f.size()));
+
 			std::cout << "send result" << std::endl;
 		}
 		catch (zmq::error_t& e) {
@@ -112,4 +86,14 @@ std::shared_ptr<SimResult> SimPublisher::TakeSimResult()
 		quit_work_ = true;
 
 	return sim_result;
+}
+
+std::string SimPublisher::CreateMessageString(std::shared_ptr<SimResult> result)
+{
+	nlohmann::json message;
+	std::vector<unsigned char>& f = std::vector<unsigned char>(result->Data().normalized_intensities);
+
+	message["intensities"] = f;
+	message["id"] = result->Uuid();
+	return message.dump();
 }

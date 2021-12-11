@@ -71,27 +71,27 @@ std::string QGrid::InfoStr() const
 	return info;
 }
 
-const std::vector<MyType> QGrid::Qx() const
+const std::vector<MyType> &QGrid::Qx() const
 {
 	return qx_;
 }
 
-const std::vector<MyType> QGrid::Qy() const
+const std::vector<MyType> &QGrid::Qy() const
 {
 	return qy_;
 }
 
-const std::vector<MyType> QGrid::Qz() const
+const std::vector<MyType> &QGrid::Qz() const
 {
 	return qz_;
 }
 
-const std::vector<MyType2> QGrid::QPar() const
+const std::vector<MyType2> &QGrid::QPar() const
 {
 	return qpar_;
 }
 
-const std::vector<MyType2> QGrid::Q() const
+const std::vector<MyType2> &QGrid::Q() const
 {
 	return q_;
 }

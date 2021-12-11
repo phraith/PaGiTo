@@ -17,6 +17,7 @@ FetchContent_Declare(
   GIT_TAG        v4.7.1
 )
 
+
 FetchContent_MakeAvailable(zmq)
 FetchContent_MakeAvailable(cppzmq)
 
@@ -71,8 +72,8 @@ target_link_libraries(  ModelSimulatorLib
                               CommonLib
                               SerializedGisaxsLib
                               GisaxsLib
-                            PRIVATE
                               nlohmann_json::nlohmann_json
+                            PRIVATE
                               cppzmq
                       )
 
