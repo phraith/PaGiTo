@@ -23,6 +23,13 @@
       },
       "sqlDebugging": false,
       "applicationUrl": "https://localhost:9998;http://localhost:9999"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "publishAllPorts": true,
+      "useSSL": true
     }
   }
 }

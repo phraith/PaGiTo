@@ -22,6 +22,7 @@ import Form from "../Forms/Form";
 import UnitcellForm from "../Forms/UnitcellForm";
 import InstrumentationForm from "../Forms/InstrumentationForm";
 import ColormapForm from "../Forms/ColormapForm";
+import PinchZoomPan from "./PanPinchZoom"
 
 import {
   HubConnection,
@@ -260,12 +261,23 @@ function Content() {
         alignItems="center"
         spacing={3}
       >
+        {/* <Grid item xs={8}>
+            <PinchZoomPan width={1472} height={1679}>
+              {(x: number, y : number, scale : number) => (
+                  <img onMouseMove={mouseMoveF} alt="" src={`data:image/jpeg;base64,${intensities}`} style={{
+                    pointerEvents: scale === 1 ? 'auto' : 'none',
+                    transform: `translate3d(${x}px, ${y}px, 0) scale(${scale})`,
+                    transformOrigin: '0 0',
+                  }}/>
+              )}
+            </PinchZoomPan>
+        </Grid> */}
         <Grid item xs={8}>
           <Container>
-            <div onMouseMove={mouseMoveF}>
+            <div>
             <TransformWrapper>
               <TransformComponent>
-                <img alt="" src={`data:image/jpeg;base64,${intensities}`}/>
+                <img onMouseMove={mouseMoveF} alt="" src={`data:image/jpeg;base64,${intensities}`}/>
               </TransformComponent>
             </TransformWrapper>
             </div>

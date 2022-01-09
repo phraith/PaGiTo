@@ -1,0 +1,23 @@
+#version: "2"
+#services:
+#  device:
+#    build: .
+#    ports: [ 5558:5558, 5559:5559, 5556:5556, 5557:5557 ]
+#    deploy:
+#      resources:
+#        reservations:
+#          devices:
+#            - capabilities: [ gpu ]
+#  redis_jobs:
+#    image: redislabs/rejson:latest
+#    command: --port 6379 --maxmemory 1024mb --maxmemory-policy allkeys-lru --appendonly no --save ""
+#    ports: [6379:6379]
+  # redis_clients:
+  #   image: redislabs/rejson:latest
+  #   command: --port 6380
+  #   command: [sh, -c, "rm -f /data/dump.rdb && redis-server --save ''"]
+  #   ports: [6380:6380]
+
+  #   command: bash -c "cd source && ./build.sh && ./build/apps/ModelSimulator/ModelSimulator"
+  #   volumes:
+  #       - C:/temp/source:/source
