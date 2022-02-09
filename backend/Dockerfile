@@ -19,12 +19,12 @@ RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg
 WORKDIR /opt/vcpkg
 RUN ./bootstrap-vcpkg.sh && ./vcpkg integrate install && ./vcpkg integrate bash && echo 'export PATH=$PATH:/opt/vcpkg' >>~/.bashrc
 RUN ./vcpkg install pagmo2
-RUN ./vcpkg install cppzmq
+RUN ./vcpkg install cppzmq[draft] zeromq[draft]
 RUN ./vcpkg install capnproto
 RUN ./vcpkg install gtest
 RUN ./vcpkg install nlohmann-json
 
-RUN apt-get -y htop
+RUN apt-get -y install htop
 
 WORKDIR /root
 
