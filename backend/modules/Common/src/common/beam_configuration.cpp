@@ -5,7 +5,7 @@
 
 
 
-BeamConfiguration::BeamConfiguration(double alpha_i, MyType2 beam_direction, double wavelength, double coherency_ratio)
+BeamConfiguration::BeamConfiguration(double alpha_i, MyType2I beam_direction, double wavelength, double coherency_ratio)
 	:
 	alpha_i_(alpha_i),
 	beam_direction_(beam_direction),
@@ -20,7 +20,7 @@ double BeamConfiguration::AlphaI() const
 	return alpha_i_;
 }
 
-const MyType2& BeamConfiguration::BeamDirection() const
+const MyType2I& BeamConfiguration::BeamDirection() const
 {
 	return beam_direction_;
 }
