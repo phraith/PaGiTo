@@ -10,6 +10,7 @@
 #include "standard_vector_types.h"
 #include "common/standard_constants.h"
 #include "gpu/util/cuda_numerics.h"
+#include "common/flat_unitcell.h"
 
 __constant__ DevUnitcell* dunitcell;
 
@@ -465,7 +466,7 @@ __global__ void cuda_run_gisaxs(MyType2* qpoints_xy, MyType2* qz, MyComplex4* co
 	}
 
 
-	__device__ DevUnitcell::DevUnitcell(ShapeType * shape_types, int shape_count, int rand_count, MyType3* shape_locations, int *locations_counts, MyType3I repetitions, MyType3 distances)
+	__device__ DevUnitcell::DevUnitcell(ShapeTypeV2 * shape_types, int shape_count, int rand_count, MyType3* shape_locations, int *locations_counts, MyType3I repetitions, MyType3 distances)
 		:
 		shapes_(new ShapeFF * [shape_count]),
 		shape_count_(shape_count),
@@ -478,21 +479,21 @@ __global__ void cuda_run_gisaxs(MyType2* qpoints_xy, MyType2* qz, MyComplex4* co
 		{
 			switch (shape_types[i])
 			{
-			case ShapeType::kSphere:
+			case ShapeTypeV2::sphere:
 			{
 				shapes_[i] = new SphereFF({ -1, -1 }, rand_count);
 				break;
 			}
-			case ShapeType::kCylinder:
+			case ShapeTypeV2::cylinder:
 			{
 				shapes_[i] = new CylinderFF({ -1, -1 }, { -1, -1 }, rand_count);
 				break;
 			}
-			case ShapeType::kTrapezoid:
-			{
-				shapes_[i] = new TrapezoidFF({ -1, -1 }, { -1, -1 }, { -1, -1 }, rand_count);
-				break;
-			}
+//			case ShapeType::kTrapezoid:
+//			{
+//				shapes_[i] = new TrapezoidFF({ -1, -1 }, { -1, -1 }, { -1, -1 }, rand_count);
+//				break;
+//			}
 			default:
 				break;
 			}
@@ -537,7 +538,7 @@ __global__ void cuda_run_gisaxs(MyType2* qpoints_xy, MyType2* qz, MyComplex4* co
 	}
 
 
-	__global__ void create_unitcell(DevUnitcell * *dev_unitcell, ShapeType * shape_types, int shape_count, MyType3* locations, int *locations_counts, int rand_count, MyType3I repetitions, MyType3 distances)
+	__global__ void create_unitcell(DevUnitcell * *dev_unitcell, ShapeTypeV2 * shape_types, int shape_count, MyType3* locations, int *locations_counts, int rand_count, MyType3I repetitions, MyType3 distances)
 	{
 		*dev_unitcell = new DevUnitcell(shape_types, shape_count, rand_count, locations, locations_counts, repetitions, distances);
 	}
@@ -550,7 +551,7 @@ __global__ void cuda_run_gisaxs(MyType2* qpoints_xy, MyType2* qz, MyComplex4* co
 
 	namespace Gisaxs
 	{
-		void CreateUnitcell(DevUnitcell** dev_unitcell, ShapeType* shape_types, int shape_count, MyType3 *locations, int *locations_counts, int rand_count, MyType3I repetitions, MyType3 distances, cudaStream_t work_stream)
+		void CreateUnitcell(DevUnitcell** dev_unitcell, ShapeTypeV2* shape_types, int shape_count, MyType3 *locations, int *locations_counts, int rand_count, MyType3I repetitions, MyType3 distances, cudaStream_t work_stream)
 		{
 			
 			create_unitcell << < 1, 1, 0, work_stream >> > (dev_unitcell, shape_types, shape_count, locations, locations_counts, rand_count, repetitions, distances);
