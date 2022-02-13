@@ -37,3 +37,4 @@ endif()
  
 add_subdirectory(apps/ModelSimulator)
 add_subdirectory(apps/ModelFitter)
+add_subdirectory(apps/ModelingFramework)
