@@ -1,0 +1,59 @@
+{
+  "type": "object",
+  "properties": {
+    "unitcellMeta": {
+      "type": "object",
+      "properties": {
+        "repetitions": {
+          "$ref": "#/definitions/repetions3d"
+        },
+        "translation": {
+          "$ref": "#/definitions/coordinate3d"
+        }
+      },
+      "required": [ "repetitions", "translation" ]
+    }
+  },
+  "definitions": {
+    "coordinate3d": {
+      "type": "object",
+      "default": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "properties": {
+        "x": {
+          "type": "integer"
+        },
+        "y": {
+          "type": "integer"
+        },
+        "z": {
+          "type": "integer"
+        }
+      },
+      "required": [ "x", "y", "z" ]
+    },
+    "repetions3d": {
+      "type": "object",
+      "default": {
+        "x": 1,
+        "y": 1,
+        "z": 1
+      },
+      "properties": {
+        "x": {
+          "type": "integer"
+        },
+        "y": {
+          "type": "integer"
+        },
+        "z": {
+          "type": "integer"
+        }
+      },
+      "required": [ "x", "y", "z" ]
+    }
+  }
+}

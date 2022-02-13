@@ -1,0 +1,150 @@
+{
+  "type": "object",
+  "properties": {
+    "sample": {
+      "type": "object",
+      "properties": {
+        "substrate": {
+          "type": "object",
+          "properties": {
+            "refraction": {
+              "$ref": "#/definitions/refractionIndex"
+            }
+          },
+          "required": [ "refraction" ]
+        },
+        "default":  [],
+        "layers": {
+          "type": "array",
+          
+          "items": {
+            "type": "object",
+            "properties": {
+              "default": [ { "order": 0 } ],
+              "order": {
+                "type": "integer"
+              },
+              "refraction": {
+                "$ref": "#/definitions/refractionIndex"
+              },
+              "thickness": {
+                "default": 0.2,
+                "type": "number"
+              }
+            },
+            "required": [ "order", "refraction", "thickness" ]
+          }
+
+        }
+      },
+      "required": [ "layers" ]
+    }
+  },
+  "required": [ "unitcell", "sample", "beam", "detector" ],
+  "definitions": {
+    "coordinate3d": {
+      "type": "object",
+      "default": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "properties": {
+        "x": {
+          "type": "integer"
+        },
+        "y": {
+          "type": "integer"
+        },
+        "z": {
+          "type": "integer"
+        }
+      },
+      "required": [ "x", "y", "z" ]
+    },
+    "repetions3d": {
+      "type": "object",
+      "default": {
+        "x": 1,
+        "y": 1,
+        "z": 1
+      },
+      "properties": {
+        "x": {
+          "type": "integer"
+        },
+        "y": {
+          "type": "integer"
+        },
+        "z": {
+          "type": "integer"
+        }
+      },
+      "required": [ "x", "y", "z" ]
+    },
+    "coordinate2d": {
+      "type": "object",
+      "default": {
+        "x": 0,
+        "y": 0
+      },
+      "properties": {
+        "x": {
+          "type": "integer"
+        },
+        "y": {
+          "type": "integer"
+        }
+      },
+      "required": [ "x", "y" ]
+    },
+    "resolution": {
+      "type": "object",
+      "default": {
+        "width": 1475,
+        "height": 1679
+      },
+      "properties": {
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        }
+      },
+      "required": [ "width", "height" ]
+    },
+    "distribution": {
+      "type": "object",
+      "default": {
+        "mean": 5,
+        "stddev": 0
+      },
+      "properties": {
+        "mean": {
+          "type": "integer"
+        },
+        "stddev": {
+          "type": "integer"
+        }
+      },
+      "required": [ "mean", "stddev" ]
+    },
+    "refractionIndex": {
+      "type": "object",
+      "default": {
+        "delta": 0.001,
+        "beta": 1e-5
+      },
+      "properties": {
+        "delta": {
+          "type": "number"
+        },
+        "beta": {
+          "type": "number"
+        }
+      },
+      "required": [ "delta", "beta" ]
+    }
+  }
+}

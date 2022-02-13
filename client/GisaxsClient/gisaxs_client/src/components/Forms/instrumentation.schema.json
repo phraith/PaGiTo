@@ -1,0 +1,157 @@
+{
+  "type": "object",
+  "title": "Instrumentation",
+  "properties": {
+    "beam": {
+
+      "type": "object",
+      "properties": {
+        "alphai": {
+          "default": 0.2,
+          "type": "number"
+        },
+        "photonEv": {
+          "default": 12398.4,
+          "type": "number"
+        }
+      },
+      "required": [ "alphai", "photonEv" ]
+    },
+    "detector": {
+      "type": "object",
+      "properties": {
+        "pixelsize": {
+          "default": 57.3e-3,
+          "type": "number"
+        },
+        "resolution": {
+          "$ref": "#/definitions/resolution"
+        },
+        "sampleDistance": {
+          "default": 1000,
+          "type": "integer"
+        },
+        "beamImpact": {
+          "$ref": "#/definitions/coordinate2d"
+        }
+      },
+      "required": [ "pixelsize", "resolution", "sampleDistance", "beamImpact" ]
+    }
+  },
+  "required": [ "beam", "detector" ],
+  "definitions": {
+    "coordinate3d": {
+      "type": "object",
+      "default": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "properties": {
+        "x": {
+          "type": "integer"
+        },
+        "y": {
+          "type": "integer"
+        },
+        "z": {
+          "type": "integer"
+        }
+      },
+      "required": [ "x", "y", "z" ]
+    },
+    "repetions3d": {
+      "type": "object",
+      "default": {
+        "x": 1,
+        "y": 1,
+        "z": 1
+      },
+      "properties": {
+        "x": {
+          "type": "integer"
+        },
+        "y": {
+          "type": "integer"
+        },
+        "z": {
+          "type": "integer"
+        }
+      },
+      "required": [ "x", "y", "z" ]
+    },
+    "coordinate2d": {
+      "type": "object",
+
+      "default": {
+        "x": 0,
+        "y": 0
+      },
+      "properties": {
+        "x": {
+          "minimum": 0,
+          "maximum": 2000,
+          "type": "integer"
+        },
+        "y": {
+          "minimum": 0,
+          "maximum": 2000,
+          "type": "integer"
+        }
+      },
+      "required": [ "x", "y" ]
+    },
+    "resolution": {
+      "type": "object",
+      "default": {
+        "width": 1475,
+        "height": 1679
+      },
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2000
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2000
+        }
+      },
+      "required": [ "width", "height" ]
+    },
+    "distribution": {
+      "type": "object",
+      "default": {
+        "mean": 5,
+        "stddev": 0
+      },
+      "properties": {
+        "mean": {
+          "type": "integer"
+        },
+        "stddev": {
+          "type": "integer"
+        }
+      },
+      "required": [ "mean", "stddev" ]
+    },
+    "refractionIndex": {
+      "type": "object",
+      "default": {
+        "delta": 0.001,
+        "beta": 1e-5
+      },
+      "properties": {
+        "delta": {
+          "type": "number"
+        },
+        "beta": {
+          "type": "number"
+        }
+      },
+      "required": [ "delta", "beta" ]
+    }
+  }
+}
