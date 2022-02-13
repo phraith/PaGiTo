@@ -5,7 +5,6 @@
 #include "curand.h"
 #include "curand_kernel.h"
 #include "gpu/core/gisaxs_functions.h"
-#include "common/unitcell.h"
 
 #include "gpu/core/gpu_memory_provider.h"
 #include "gpu/core/event_provider.h"
@@ -49,7 +48,7 @@ public:
     SimData RunGISAXS(const SimJob& descr, const ImageData *real_img, bool copy_intensities);
 
     void SetStatus(WorkStatus status) const;
-    const WorkStatus Status() const;
+    WorkStatus Status() const;
     void CleanUp();
     void ResetTimers();
 
@@ -69,12 +68,6 @@ private:
     
     int DeviceID() const;
 
-    template <typename T>
-    std::shared_ptr<GpuMemoryBlock<T>> ProvideMemory(int size);
-
-    template <typename T>
-    std::shared_ptr<const GpuMemoryBlock<T>> ProvideConstantMemory(std::string uuid, const std::vector<T> initial_values);
-
     void GenerateRandoms(float* rands, int size, float mean, float stddev) const;
 
     std::shared_ptr<Stream> ProvideStream();
@@ -82,8 +75,6 @@ private:
     void UnlockAllMemory();
     void UnlockAllEvents();
     void UnlockAllStreams();
-
-    
 
     gpu_info_t info_;
     int device_id_;
@@ -107,16 +98,6 @@ private:
     EventProvider event_provider_;
     StreamProvider stream_provider_;
 
-    GpuMemoryProvider<int> memory_provider_i_;
-    GpuMemoryProvider<unsigned char> memory_provider_uchar_;
-    GpuMemoryProvider<MyType> memory_provider_f_;
-    GpuMemoryProvider<MyType2> memory_provider_f2_;
-    GpuMemoryProvider<MyType3> memory_provider_f3_;
-    GpuMemoryProvider<MyType4> memory_provider_f4_;
-    GpuMemoryProvider<MyComplex4> memory_provider_c4_;
-
-    GpuMemoryProvider<ShapeType> memory_provider_s_;
-
     mutable int runs_;
     mutable double complete_runtime_;
     mutable double kernel_runtime_;
@@ -124,77 +105,5 @@ private:
     Timer kernel_timer_;
     Timer complete_timer_;
 };
-
-template <>
-inline std::shared_ptr<GpuMemoryBlock<int>> GpuDevice::ProvideMemory(int size)
-{
-    return memory_provider_i_.ProvideMemory(size);
-}
-
-template <>
-inline std::shared_ptr<GpuMemoryBlock<unsigned char>> GpuDevice::ProvideMemory(int size)
-{
-    return memory_provider_uchar_.ProvideMemory(size);
-}
-
-template <>
-inline std::shared_ptr<GpuMemoryBlock<float>> GpuDevice::ProvideMemory(int size)
-{
-    return memory_provider_f_.ProvideMemory(size);
-}
-
-template <>
-inline std::shared_ptr<GpuMemoryBlock<MyType2>> GpuDevice::ProvideMemory(int size)
-{
-    return memory_provider_f2_.ProvideMemory(size);
-}
-
-template <>
-inline std::shared_ptr<GpuMemoryBlock<float3>> GpuDevice::ProvideMemory(int size)
-{
-    return memory_provider_f3_.ProvideMemory(size);
-}
-
-template <>
-inline std::shared_ptr<GpuMemoryBlock<float4>> GpuDevice::ProvideMemory(int size)
-{
-    return memory_provider_f4_.ProvideMemory(size);
-}
-
-template <>
-inline std::shared_ptr<GpuMemoryBlock<ShapeType>> GpuDevice::ProvideMemory(int size)
-{
-    return memory_provider_s_.ProvideMemory(size);
-}
-
-template <>
-inline std::shared_ptr<const GpuMemoryBlock<float>> GpuDevice::ProvideConstantMemory(std::string uuid, const std::vector<float> initial_values)
-{
-    return memory_provider_f_.ProvideConstantMemory(uuid, initial_values);
-}
-
-template <>
-inline std::shared_ptr<const GpuMemoryBlock<MyType2>> GpuDevice::ProvideConstantMemory(std::string uuid, const std::vector<MyType2> initial_values)
-{
-    return memory_provider_f2_.ProvideConstantMemory(uuid, initial_values);
-}
-
-template <>
-inline std::shared_ptr<const GpuMemoryBlock<float4>> GpuDevice::ProvideConstantMemory(std::string uuid, const std::vector<float4> initial_values)
-{
-    return memory_provider_f4_.ProvideConstantMemory(uuid, initial_values);
-}
-
-template <>
-inline std::shared_ptr<const GpuMemoryBlock<MyComplex4>> GpuDevice::ProvideConstantMemory(std::string uuid, const std::vector<MyComplex4> initial_values)
-{
-    return memory_provider_c4_.ProvideConstantMemory(uuid, initial_values);
-}
-
-template <>
-inline std::shared_ptr<const GpuMemoryBlock<int>> GpuDevice::ProvideConstantMemory(std::string uuid, const std::vector<int> initial_values)
-{
-    return memory_provider_i_.ProvideConstantMemory(uuid, initial_values);
-}
 
 #endif

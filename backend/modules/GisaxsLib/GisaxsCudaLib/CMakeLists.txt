@@ -32,8 +32,9 @@ target_sources( GisaxsCudaLib
                         src/gpu/core/event_provider.cpp
                         src/gpu/core/gpu_information.cpp
                         src/gpu/core/gpu_device.cpp
-                        
 
+						src/gpu/core/gpu_memory_provider_v2.cpp
+						inc/gpu/core/gpu_memory_provider_v2.h
                         inc/gpu/core/gisaxs_functions.h
                         inc/gpu/ff/sphere.h
                         inc/gpu/ff/cylinder.h
