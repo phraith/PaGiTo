@@ -9,7 +9,6 @@ message(STATUS "cppzmq dir: ${CPPZMQ_INCLUDE_DIR}")
 
 add_library(
         ModelSimulatorLib STATIC
-        src/core/model_simulator.cpp
         src/core/model_simulator_v2.cpp
         src/core/simulation_interval.cpp
         src/util/distribution_functions.cpp
@@ -17,7 +16,6 @@ add_library(
         src/util/utility.cpp
         src/util/sim_result.cpp
         # Header for IDE support###
-        inc/core/model_simulator.h
         inc/core/model_simulator_v2.h
         inc/core/simulation_interval.h
         inc/util/cpu_information

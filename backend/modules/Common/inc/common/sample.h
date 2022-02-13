@@ -6,6 +6,9 @@
 
 #include "common/layer.h"
 #include "standard_vector_types.h"
+#include "parameter_definitions/detector_setup.h"
+#include "common/beam_configuration.h"
+
 struct TransRef
 {
 	std::complex<MyType> T;
@@ -21,11 +24,11 @@ public:
 	void InsertLayer(MyType delta, MyType beta, int order, MyType thickness);
 	TransRef ParratsRecursion(MyType alpha, MyType k0, int order) const;
 	std::vector<MyComplex4> PropagationCoeffs(MyType alpha_i, const std::vector<MyType>& alpha_fs, MyType k0, MyType order) const;
-	std::vector<MyComplex> PropagationCoeffsTopBuried(MyType alpha_i, const std::vector<MyType>& alpha_fs, MyType k0) const;
+	std::vector<MyComplex> PropagationCoeffsTopBuried(const DetectorSetup &detector, const BeamConfiguration &beam_config) const;
 
-	const std::complex<MyType> TopMostN2();
-	const std::complex<MyType> N2M1OfLevel(int level);
-	const std::complex<MyType> SubstrateN2M1();
+	std::complex<MyType> TopMostN2();
+	std::complex<MyType> N2M1OfLevel(int level);
+	std::complex<MyType> SubstrateN2M1();
 private:
 	std::deque<Layer> layers_;
 };

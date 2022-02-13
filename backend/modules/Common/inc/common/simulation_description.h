@@ -20,14 +20,14 @@ public:
     ~SimJob();
 
     const UnitcellV2& HUnitcell() const;
-    const QGrid& GetQGrid() const;
     const std::vector<MyComplex> &GetPropagationCoefficients() const;
 
     const std::string& Uuid() const;
     bool IsLast() const;
+    std::shared_ptr<ExperimentalModel> model_;
+
 private:
     std::shared_ptr<UnitcellV2> h_unitcell_;
-    std::shared_ptr<ExperimentalModel> model_;
 
     std::string uuid_;
     bool is_last_;

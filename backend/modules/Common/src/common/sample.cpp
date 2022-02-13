@@ -1,9 +1,7 @@
 #include "common/sample.h"
 
 #include <algorithm>
-
 #include "common/standard_constants.h"
-#include <iostream>
 #include <cassert>
 
 Sample::Sample(Layer substrate, std::vector<Layer> layers)
@@ -103,22 +101,30 @@ std::vector<MyComplex4> Sample::PropagationCoeffs(MyType alpha_i, const std::vec
 	return trans_refs;
 }
 
-std::vector<MyComplex> Sample::PropagationCoeffsTopBuried(MyType alpha_i, const std::vector<MyType>& alpha_fs, MyType k0) const
+std::vector<MyComplex> Sample::PropagationCoeffsTopBuried(const DetectorSetup &detector, const BeamConfiguration &beam_config) const
 {
-	std::vector<MyComplex> trans_refs(4 * alpha_fs.size());
+    int qcount = detector.Resolution().x * detector.Resolution().y;
+
+	std::vector<MyComplex> trans_refs(4 * qcount);
 	auto& substrate = layers_.at(layers_.size() - 1);
 	const auto &ns2m1 = substrate.N2MinusOne();
 
-	MyType sin_ai = std::sin(alpha_i);
-	MyType kzi = -1 * k0 * sin_ai;
+	MyType sin_ai = std::sin(beam_config.AlphaI());
+	MyType kzi = -1 * beam_config.K0() * sin_ai;
 	std::complex<MyType> tmp = std::sqrt(sin_ai * sin_ai - ns2m1);
 	std::complex<MyType> rki = (sin_ai - tmp) / (sin_ai + tmp);
-	int qcount = alpha_fs.size();
+
+    MyType quad_dist_x = std::sqrt(detector.SampleDistance() * detector.SampleDistance() + detector.Pixelsize() * detector.Pixelsize());
+
 	for (int i = 0; i < qcount; ++i)
 	{
-		const auto& alpha_f = alpha_fs[i];
+        int y = (i / detector.Resolution().x) + 1;
 
-		MyType qz = k0 * (std::sin(alpha_f) + std::sin(alpha_i));
+        MyType pixel_dist_y = detector.Pixelsize() * (y - beam_config.BeamDirection().y);
+
+        const auto alpha_f = std::atan2(pixel_dist_y, quad_dist_x);
+
+		MyType qz = beam_config.K0() * (std::sin(alpha_f) + std::sin(beam_config.AlphaI()));
 		MyType kzf = qz + kzi;
 
 		if (kzf < 0)
@@ -130,7 +136,7 @@ std::vector<MyComplex> Sample::PropagationCoeffsTopBuried(MyType alpha_i, const 
 		}
 		else
 		{
-			MyType sin_af = kzf / k0;
+			MyType sin_af = kzf / beam_config.K0();
 			tmp = std::sqrt(sin_af * sin_af - ns2m1);
 			std::complex<MyType> rkf = (sin_af - tmp) / (sin_af + tmp);
 
@@ -140,20 +146,18 @@ std::vector<MyComplex> Sample::PropagationCoeffsTopBuried(MyType alpha_i, const 
 			trans_refs[qcount + i] = { rkf.real(), rkf.imag() };
 			trans_refs[2 * qcount + i] = { rki.real(), rki.imag() };
 			trans_refs[3 * qcount + i] = { t4.real(), t4.imag() };
-
-			//trans_refs.emplace_back(MyComplex4{ {1,0}, {rkf.real(), rkf.imag()}, {rki.real(), rki.imag()}, {t4.real(), t4.imag()} });
 		}
 	}
 
 	return trans_refs;
 }
 
-const std::complex<MyType> Sample::TopMostN2()
+std::complex<MyType> Sample::TopMostN2()
 {
 	return layers_.at(0).N2MinusOne();
 }
 
-const std::complex<MyType> Sample::N2M1OfLevel(int level)
+std::complex<MyType> Sample::N2M1OfLevel(int level)
 {
 	if (level >= layers_.size())
 		return { 0,0 };
@@ -161,9 +165,8 @@ const std::complex<MyType> Sample::N2M1OfLevel(int level)
 	return layers_.at(level).N2MinusOne();
 }
 
-const std::complex<MyType> Sample::SubstrateN2M1()
+std::complex<MyType> Sample::SubstrateN2M1()
 {
-	assert(layers_.size() > 0);
-
+	assert(!layers_.empty());
 	return layers_.at(layers_.size() - 1).N2MinusOne();
 }

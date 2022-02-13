@@ -17,32 +17,20 @@
 
 class ExperimentalModel {
 public:
-    //ExperimentalModel(ExperimentalSetup setup);
-
     ExperimentalModel(DetectorSetup detector, std::vector<int> position_offsets, BeamConfiguration beam_config,
                       Sample sample, double sample_detector_dist, int level);
 
-    const QGrid &GetQGrid() const;
+    [[nodiscard]] const std::vector<MyComplex> &GetPropagationCoefficients() const;
 
-    const std::vector<MyComplex> &GetPropagationCoefficients() const;
-
-    void PrintInfo() const;
-
-private:
-
-    std::string DwbaInfo(int idx) const;
-
-
-    //ExperimentalSetup experimental_setup_;
     DetectorSetup detector_;
     const std::vector<int> position_offsets_;
     BeamConfiguration beam_config_;
     Sample sample_;
     double sample_detector_dist_;
 
-    QGrid qgrid_;
     const std::vector<MyComplex> prop_coeffs_;
     int level_;
+private:
 };
 
 #endif

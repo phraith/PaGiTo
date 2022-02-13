@@ -21,9 +21,6 @@ ModelSimulatorV2::~ModelSimulatorV2() {
 
 
 std::string ModelSimulatorV2::HandleRequest(const std::string &request) const {
-
-    //return request;
-
     json data = json::parse(request);
 
     json detector = data.at("config").at("detector");

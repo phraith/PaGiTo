@@ -16,20 +16,20 @@ public:
     bool operator== (const DetectorSetup& detector_setup);
 
 public:
-    MyType Pixelsize() const;
+    [[nodiscard]] MyType Pixelsize() const;
 
-    MyType SampleDistance() const;
+    [[nodiscard]] MyType SampleDistance() const;
 
-    const MyType2I &Directbeam() const;
+    [[nodiscard]] const MyType2I &Directbeam() const;
 
-    const MyType2I &Resolution() const;
+    [[nodiscard]] const MyType2I &Resolution() const;
 
-    std::string InfoStr() const;
+    [[nodiscard]] std::string InfoStr() const;
 private:
-    MyType sample_distance_{};
-    MyType2I directbeam_{};
-    MyType2I resolution_{};
-    MyType pixelsize_{};
+    MyType sample_distance_;
+    MyType2I directbeam_;
+    MyType2I resolution_;
+    MyType pixelsize_;
 };
 
 

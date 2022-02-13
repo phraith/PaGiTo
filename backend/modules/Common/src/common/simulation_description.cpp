@@ -20,11 +20,6 @@ const UnitcellV2& SimJob::HUnitcell() const
     return *h_unitcell_;
 }
 
-const QGrid& SimJob::GetQGrid() const
-{
-    return model_->GetQGrid();
-}
-
 const std::vector<MyComplex> &SimJob::GetPropagationCoefficients() const
 {
     return model_->GetPropagationCoefficients();

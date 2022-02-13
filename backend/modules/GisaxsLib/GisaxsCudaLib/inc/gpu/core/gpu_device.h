@@ -5,6 +5,7 @@
 #include "curand.h"
 #include "curand_kernel.h"
 #include "gpu/core/gisaxs_functions.h"
+#include "gpu/core/gpu_qgrid.h"
 
 #include "gpu/core/gpu_memory_provider.h"
 #include "gpu/core/event_provider.h"

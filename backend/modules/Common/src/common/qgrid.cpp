@@ -107,33 +107,33 @@ void QGrid::InitializeQGrid()
 {
 
 
-	if (!position_offsets_.empty())
-	{
-		for (int i = 0; i < position_offsets_.size(); ++i)
-		{
-			int position_offset = position_offsets_.at(i);
-
-			int pixel_y = position_offset / resolution_.x;
-			int pixel_x = position_offset % resolution_.x;
-
-			RealSpaceToQ(pixel_x, pixel_y, i);
-		}
-	}
-	else
-	{
-        Timer t;
-        t.Start();
-		for (int i = 0; i < resolution_.y; ++i)
-		{
-			for (int j = 0; j < resolution_.x; ++j)
-			{
-				int idx = i * resolution_.x + j;
-				RealSpaceToQ(j, i, idx);
-			}
-		}
-        t.End();
-        std::cout << "QGrid: " << t.Duration() << " s" << std::endl;
-	}
+//	if (!position_offsets_.empty())
+//	{
+//		for (int i = 0; i < position_offsets_.size(); ++i)
+//		{
+//			int position_offset = position_offsets_.at(i);
+//
+//			int pixel_y = position_offset / resolution_.x;
+//			int pixel_x = position_offset % resolution_.x;
+//
+//			RealSpaceToQ(pixel_x, pixel_y, i);
+//		}
+//	}
+//	else
+//	{
+//        Timer t;
+//        t.Start();
+//		for (int i = 0; i < resolution_.y; ++i)
+//		{
+//			for (int j = 0; j < resolution_.x; ++j)
+//			{
+//				int idx = i * resolution_.x + j;
+//				RealSpaceToQ(j, i, idx);
+//			}
+//		}
+//        t.End();
+//        std::cout << "QGrid: " << t.Duration() << " s" << std::endl;
+//	}
 }
 
 void QGrid::RealSpaceToQ(int x, int y, int i)
