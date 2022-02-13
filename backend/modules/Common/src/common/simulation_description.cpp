@@ -3,7 +3,7 @@
 #include <iostream>
 #include "assert.h"
 
-SimJob::SimJob(const std::string& uuid, std::shared_ptr<Unitcell> unitcell, std::shared_ptr<ExperimentalModel> model, bool is_last)
+SimJob::SimJob(const std::string& uuid, std::shared_ptr<UnitcellV2> unitcell, std::shared_ptr<ExperimentalModel> model, bool is_last)
     :
     uuid_(uuid),
     h_unitcell_(unitcell),
@@ -14,7 +14,7 @@ SimJob::SimJob(const std::string& uuid, std::shared_ptr<Unitcell> unitcell, std:
 SimJob::~SimJob()
 {}
 
-const Unitcell& SimJob::HUnitcell() const
+const UnitcellV2& SimJob::HUnitcell() const
 {
     assert(h_unitcell_ != nullptr);
     return *h_unitcell_;

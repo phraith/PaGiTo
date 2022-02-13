@@ -13,29 +13,36 @@
 #include <common/image_data.h>
 #include <common/qgrid.h>
 #include "standard_vector_types.h"
+#include "parameter_definitions/experimental_setup.h"
 
-class ExperimentalModel
-{
+class ExperimentalModel {
 public:
-	ExperimentalModel(Detector detector, const std::vector<int> position_offsets, BeamConfiguration beam_config, Sample sample, double sample_detector_dist, int level);
+    //ExperimentalModel(ExperimentalSetup setup);
 
-	const QGrid& GetQGrid() const;
-	const std::vector<MyComplex> &GetPropagationCoefficients() const;
+    ExperimentalModel(DetectorSetup detector, std::vector<int> position_offsets, BeamConfiguration beam_config,
+                      Sample sample, double sample_detector_dist, int level);
 
-	void PrintInfo() const;
+    const QGrid &GetQGrid() const;
+
+    const std::vector<MyComplex> &GetPropagationCoefficients() const;
+
+    void PrintInfo() const;
+
 private:
 
-	std::string DwbaInfo(int idx) const;
+    std::string DwbaInfo(int idx) const;
 
-	Detector detector_;
-	const std::vector<int> position_offsets_;
-	BeamConfiguration beam_config_;
-	Sample sample_;
-	double sample_detector_dist_;
 
-	QGrid qgrid_;
-	const std::vector<MyComplex> prop_coeffs_;
-	int level_;
+    //ExperimentalSetup experimental_setup_;
+    DetectorSetup detector_;
+    const std::vector<int> position_offsets_;
+    BeamConfiguration beam_config_;
+    Sample sample_;
+    double sample_detector_dist_;
+
+    QGrid qgrid_;
+    const std::vector<MyComplex> prop_coeffs_;
+    int level_;
 };
 
 #endif

@@ -13,7 +13,7 @@ public:
 
 	virtual SimData RunGISAXS(const SimJob& descr, const ImageData *real_img, bool copy_intensities) = 0;
 	virtual void SetStatus(WorkStatus status) const = 0;
-	virtual const WorkStatus Status() const = 0;
+	virtual WorkStatus Status() const = 0;
 
 	virtual void CleanUp() = 0;
 	virtual void ResetTimers() = 0;

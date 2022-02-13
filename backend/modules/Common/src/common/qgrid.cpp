@@ -6,12 +6,13 @@
 
 #include "standard_vector_types.h"
 #include "common/standard_defs.h"
+#include "common/timer.h"
 
-QGrid::QGrid(const Detector& detector, const std::vector<int>& position_offsets, const BeamConfiguration& beam_config, MyType sample_detector_dist, std::complex<MyType> refractive_index)
+QGrid::QGrid(const DetectorSetup& detector, const std::vector<int>& position_offsets, const BeamConfiguration& beam_config, MyType sample_detector_dist, std::complex<MyType> refractive_index)
 	:
 	resolution_(detector.Resolution()),
-	direct_beam_location_(detector.DirectBeamLocation()),
-	pixel_size_(detector.PixelSize()),
+	direct_beam_location_(detector.Directbeam()),
+	pixel_size_(detector.Pixelsize()),
 	position_offsets_(position_offsets),
 	qcount_(position_offsets_.size() != 0 ? position_offsets_.size() : resolution_.x * resolution_.y),
 	alpha_i_(beam_config.AlphaI()),
@@ -30,6 +31,7 @@ QGrid::QGrid(const Detector& detector, const std::vector<int>& position_offsets,
 {
 	InitializeQGrid();
 }
+
 
 const std::vector<MyType2>& QGrid::QPointsXY() const
 {
@@ -103,7 +105,9 @@ MyType2I QGrid::Resolution() const
 
 void QGrid::InitializeQGrid()
 {
-	if (position_offsets_.size() > 0)
+
+
+	if (!position_offsets_.empty())
 	{
 		for (int i = 0; i < position_offsets_.size(); ++i)
 		{
@@ -117,6 +121,8 @@ void QGrid::InitializeQGrid()
 	}
 	else
 	{
+        Timer t;
+        t.Start();
 		for (int i = 0; i < resolution_.y; ++i)
 		{
 			for (int j = 0; j < resolution_.x; ++j)
@@ -125,6 +131,8 @@ void QGrid::InitializeQGrid()
 				RealSpaceToQ(j, i, idx);
 			}
 		}
+        t.End();
+        std::cout << "QGrid: " << t.Duration() << " s" << std::endl;
 	}
 }
 
@@ -163,7 +171,6 @@ void QGrid::RealSpaceToQ(int x, int y, int i)
 	refm1 = 0;
 	//std::complex<MyType> refm1 = 2.f * std::complex<MyType>{ 6e-06,  2e-08 };
 	//std::complex<MyType> refm1 = 2.f * std::complex<MyType>{ 0.001, 1e-05 };
-
 	std::complex<MyType> kz_af = k0_ * std::sqrt(std::sin(alpha_f) * std::sin(alpha_f) + refm1);
 	std::complex<MyType> kz_ai = -k0_ * std::sqrt(std::sin(alpha_i_) * std::sin(alpha_i_) + refm1);
 

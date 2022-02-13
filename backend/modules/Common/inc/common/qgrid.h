@@ -9,11 +9,13 @@
 #include <common/detector.h>
 
 #include "vector_types.h"
+#include "parameter_definitions/detector_setup.h"
+#include "parameter_definitions/experimental_setup.h"
 
 class QGrid
 {
 public:
-	QGrid(const Detector& detector, const std::vector<int>& position_offsets, const BeamConfiguration& beam_config, MyType sample_detector_dist, std::complex<MyType> refractive_index);
+	QGrid(const DetectorSetup& detector, const std::vector<int>& position_offsets, const BeamConfiguration& beam_config, MyType sample_detector_dist, std::complex<MyType> refractive_index);
 
 	const std::vector<MyType2> &QPointsXY() const;
 	const std::vector<MyType2> &QPointsZCoeffs() const;
@@ -39,16 +41,16 @@ private:
 	void RealSpaceToQ(int x, int y, int i);
 
 	const MyType2I &resolution_;
-	const MyType2&direct_beam_location_;
+	const MyType2I&direct_beam_location_;
 
-	MyType pixel_size_;
+	MyType pixel_size_{};
 	const std::vector<int>& position_offsets_;
 
 	int qcount_;
-	MyType alpha_i_;
-	MyType k0_;
+	MyType alpha_i_{};
+	MyType k0_{};
 
-	MyType sample_detector_dist_;
+	MyType sample_detector_dist_{};
 	std::complex<MyType> refractive_index_;
 
 	std::vector<MyType> alpha_fs_;

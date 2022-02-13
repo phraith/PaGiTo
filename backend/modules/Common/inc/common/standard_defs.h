@@ -7,7 +7,9 @@
 #include "standard_vector_types.h"
 
 enum class ShapeType { kSphere = 0, kCylinder = 1, kTrapezoid = 2};
-
+enum class ShapeTypeV2 {
+    sphere=0, cylinder=1
+};
 static std::string ShapeTypeToString(ShapeType type)
 {
     switch (type)
@@ -23,6 +25,13 @@ static std::string ShapeTypeToString(ShapeType type)
     }
 }
 
+enum class ConstantMemoryId {
+    QGRID_XY = 0,
+    QGRID_Z = 1,
+    QGRID_QPAR = 2,
+    QGRID_Q = 3,
+    QGRID_COEFFS= 4
+};
 
 typedef struct MyComplex4
 {
