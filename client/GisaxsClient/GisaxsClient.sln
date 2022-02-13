@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31410.357
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GisaxsClient", "GisaxsClient.csproj", "{6C592AE0-E2AF-4B81-AC81-8D5942786857}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConnectioniUtility", "..\..\optimization\ConnectioniUtility\ConnectioniUtility.csproj", "{38F29DE4-CA36-4644-A2BF-0FA7CEECB642}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{6C592AE0-E2AF-4B81-AC81-8D5942786857}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C592AE0-E2AF-4B81-AC81-8D5942786857}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C592AE0-E2AF-4B81-AC81-8D5942786857}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38F29DE4-CA36-4644-A2BF-0FA7CEECB642}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38F29DE4-CA36-4644-A2BF-0FA7CEECB642}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38F29DE4-CA36-4644-A2BF-0FA7CEECB642}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38F29DE4-CA36-4644-A2BF-0FA7CEECB642}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

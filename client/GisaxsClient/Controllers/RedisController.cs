@@ -47,7 +47,8 @@ namespace RedisTest.Controllers
             RedisValue data = await db.StringGetAsync(hash);
             var dataString = data.ToString();
             var dataEntry = JsonSerializer.Deserialize<DataEntry>(dataString, options);
-            string modifiedData = AppearenceModifier.ApplyColorMap(dataEntry.Data, dataEntry.Width, dataEntry.Height, colormapName);
+            //string modifiedData = AppearenceModifier.ApplyColorMap(dataEntry.Intensities, dataEntry.Width, dataEntry.Height, colormapName);
+            string modifiedData = AppearenceModifier.ApplyColorMap(dataEntry.Intensities.ToArray(), dataEntry.Width, dataEntry.Height, colormapName);
 
             return Ok(JsonSerializer.Serialize(new FinalResult() { data = modifiedData }));
 
@@ -62,9 +63,10 @@ namespace RedisTest.Controllers
 
     public class DataEntry
     {
-        public byte[] Data { get; set; }
+        public List<byte> Intensities { get; set; }
         public int Height { get; set; }
         public int Width { get; set; }
+        public string Id { get; set; }
     }
 
     public class GisaxsConfigWithMetaInformation

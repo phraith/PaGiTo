@@ -3,86 +3,37 @@ import type { JSONSchema7 } from "json-schema";
 import type { UiSchema } from "@rjsf/core";
 import CustomObjectFieldTemplate from "./CustomObjectFieldTemplate"
 
+import unitcellMeta from "./unitcell_meta.schema.json"
+
 const uiSchema: UiSchema = {
-    unitcell: {
+    unitcellMeta: {
         "ui:ObjectFieldTemplate": CustomObjectFieldTemplate,
         repetitions: {
-            repetitionsInX: {
+            x: {
                 "ui:widget": "range",
             },
-            repetitionsInY: {
+            y: {
                 "ui:widget": "range",
             },
-            repetitionsInZ: {
+            z: {
                 "ui:widget": "range",
             },
         },
-        distances: {
-            distOnX: {
+        translation: {
+            x: {
                 "ui:widget": "range",
             },
-            distOnY: {
+            y: {
                 "ui:widget": "range",
             },
-            distOnZ: {
+            z: {
                 "ui:widget": "range",
             },
         }
     }
 };
 
-const schema2: JSONSchema7 = {
-    type: "object",
-    properties: {
-        unitcell: {
-            $ref: "#/definitions/unitcell",
-        }
-    },
-    definitions: {
-        unitcell: {
-            title: "General unitcell configuration",
-            type: "object",
-            properties: {
-                repetitions: {
-                    title: "Repetitions",
-                    type: "object",
-                    properties: {
-                        repetitionsInX: {
-                            type: "integer",
-                            default: 1
-                        },
-                        repetitionsInY: {
-                            type: "integer",
-                            default: 1
-                        },
-                        repetitionsInZ: {
-                            type: "integer",
-                            default: 1
-                        },
-                    },
-                },
-                distances: {
-                    title: "Distances",
-                    type: "object",
-                    properties: {
-                        distOnX: {
-                            type: "integer",
-                            default: 0
-                        },
-                        distOnY: {
-                            type: "integer",
-                            default: 0
-                        },
-                        distOnZ: {
-                            type: "integer",
-                            default: 0
-                        },
-                    },
-                },
-            },
-        },
-    },
-};
+const schema: any = unitcellMeta
 
 
 function UnitcellForm(props: { callback: Function, formData: any }) {
@@ -93,7 +44,7 @@ function UnitcellForm(props: { callback: Function, formData: any }) {
     return (
             <JSONForm
                 children={true}
-                schema={schema2}
+                schema={schema}
                 formData={props.formData}
                 uiSchema={uiSchema}
                 onChange={(value) => { changeHandler(value) }}
