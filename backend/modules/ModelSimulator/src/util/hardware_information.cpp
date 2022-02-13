@@ -7,7 +7,7 @@
 #include "gpu/core/gpu_information.h"
 using namespace gpu_info;
 
-#endif CUDA_GPUS_AVAILABLE
+#endif //CUDA_GPUS_AVAILABLE
 
 using namespace cpu_info;
 
@@ -22,12 +22,10 @@ HardwareInformation::HardwareInformation()
 	{
 		devices_.emplace_back(gpu);
 	}
-#endif CUDA_GPUS_AVAILABLE
+#endif //CUDA_GPUS_AVAILABLE
 }
 
-HardwareInformation::~HardwareInformation()
-{
-}
+HardwareInformation::~HardwareInformation() = default;
 
 Device* HardwareInformation::FindFreeDevice()
 {

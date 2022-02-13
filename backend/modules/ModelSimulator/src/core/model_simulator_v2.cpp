@@ -11,14 +11,12 @@ using namespace distribution_functions;
 using json = nlohmann::json;
 
 ModelSimulatorV2::ModelSimulatorV2()
-	:
-	hw_info_(std::make_shared<HardwareInformation>())
-{
+        :
+        hw_info_(std::make_shared<HardwareInformation>()) {
 }
 
-ModelSimulatorV2::~ModelSimulatorV2()
-{
-	hw_info_->CleanUpDevices();
+ModelSimulatorV2::~ModelSimulatorV2() {
+    hw_info_->CleanUpDevices();
 }
 
 
@@ -42,17 +40,25 @@ std::string ModelSimulatorV2::HandleRequest(const std::string &request) const {
     auto beamContainer = beam.get<BeamContainer>();
     auto unitcellMetaContainer = unitcellMeta.get<UnitcellMetaContainer>();
 
-    std::shared_ptr<UnitcellV2> unitcell =  std::make_shared<UnitcellV2>(std::move(shapesContainer.shapes), unitcellMetaContainer.repetitions,unitcellMetaContainer.translation );
-    DetectorSetup detectorSetup(detectorSetupContainer.pixelsize, detectorSetupContainer.sampleDistance, detectorSetupContainer.beamImpact, detectorSetupContainer.resolution);
+    std::shared_ptr<UnitcellV2> unitcell = std::make_shared<UnitcellV2>(std::move(shapesContainer.shapes),
+                                                                        unitcellMetaContainer.repetitions,
+                                                                        unitcellMetaContainer.translation);
+    DetectorSetup detectorSetup(detectorSetupContainer.pixelsize, detectorSetupContainer.sampleDistance,
+                                detectorSetupContainer.beamImpact, detectorSetupContainer.resolution);
 
-    MyType wavelength = (MyType)1239.84 / beamContainer.photonEv;
-    MyType alphaiInRad =  (MyType)beamContainer.alphai * (MyType)0.017453;
+    MyType wavelength = (MyType) 1239.84 / beamContainer.photonEv;
+    MyType alphaiInRad = (MyType) beamContainer.alphai * (MyType) 0.017453;
     BeamConfiguration beamConfig(alphaiInRad, detectorSetup.Directbeam(), wavelength, 0.1);
-    Sample sampleConfig(Layer(sampleContainer.substrate_delta, sampleContainer.substrate_beta, -1, 0), sampleContainer.layers);
+    Sample sampleConfig(Layer(sampleContainer.substrate_delta, sampleContainer.substrate_beta, -1, 0),
+                        sampleContainer.layers);
 
     Timer t;
     t.Start();
-    std::shared_ptr<ExperimentalModel> experimentalModel = std::make_shared<ExperimentalModel>(detectorSetup, std::vector<int> {}, beamConfig, sampleConfig, detectorSetup.SampleDistance(), 0);
+    std::shared_ptr<ExperimentalModel> experimentalModel = std::make_shared<ExperimentalModel>(detectorSetup,
+                                                                                               std::vector<int>{},
+                                                                                               beamConfig, sampleConfig,
+                                                                                               detectorSetup.SampleDistance(),
+                                                                                               0);
     t.End();
 
     std::cout << t.Duration() << " s" << std::endl;
@@ -78,50 +84,46 @@ std::string ModelSimulatorV2::HandleRequest(const std::string &request) const {
     return final_message;
 }
 
-SimData ModelSimulatorV2::RunGISAXS(const SimJob &descr, const ImageData *real_img, bool copy_intensities) const
-{
-	Device &device = LockAndReturnDevice();
-	
-	SimData sim_data = device.RunGISAXS(descr, real_img, copy_intensities);
-	
-	UnlockDevice(device);
+SimData ModelSimulatorV2::RunGISAXS(const SimJob &descr, const ImageData *real_img, bool copy_intensities) const {
+    Device &device = LockAndReturnDevice();
 
-	cv_.notify_one();
-	return sim_data;
+    SimData sim_data = device.RunGISAXS(descr, real_img, copy_intensities);
+
+    UnlockDevice(device);
+
+    cv_.notify_one();
+    return sim_data;
 }
 
-Device& ModelSimulatorV2::LockAndReturnDevice() const
-{
-	auto lk = std::unique_lock<std::mutex>(mutex_);
+Device &ModelSimulatorV2::LockAndReturnDevice() const {
+    auto lk = std::unique_lock<std::mutex>(mutex_);
 
-	Device* device = nullptr;
+    Device *device = nullptr;
 
-	cv_.wait(lk, [&]
-		{
-			device = hw_info_->FindFreeDevice();
-			return device != nullptr;
-		});
+    cv_.wait(lk, [&] {
+        device = hw_info_->FindFreeDevice();
+        return device != nullptr;
+    });
 
-	device->SetStatus(WorkStatus::kWorking);
+    device->SetStatus(WorkStatus::kWorking);
 
-	return *device;
+    return *device;
 }
 
-void ModelSimulatorV2::UnlockDevice(Device& device) const
-{
-	auto lk = std::unique_lock<std::mutex>(mutex_);
-	device.SetStatus(WorkStatus::kIdle);
+void ModelSimulatorV2::UnlockDevice(Device &device) const {
+    auto lk = std::unique_lock<std::mutex>(mutex_);
+    device.SetStatus(WorkStatus::kIdle);
 }
 
-std::vector<TimeMeasurement> ModelSimulatorV2::GetDeviceTimings() const
-{
-	std::vector<TimeMeasurement> timings;
-	for (const auto& device : hw_info_->DeviceInfo())
-	{
-		if (device->KernelTime() != 0 && device->FullTime() != 0)
-			timings.emplace_back(TimeMeasurement{device->Name(), device->KernelTime() / 1000.f, device->FullTime(), device->AverageKernelTime() / 1000.f, device->AverageFullTime(), device->Runs() } );
-	}
-	return timings;
+std::vector<TimeMeasurement> ModelSimulatorV2::GetDeviceTimings() const {
+    std::vector<TimeMeasurement> timings;
+    for (const auto &device: hw_info_->DeviceInfo()) {
+        if (device->KernelTime() != 0 && device->FullTime() != 0)
+            timings.emplace_back(TimeMeasurement{device->Name(), device->KernelTime() / 1000.f, device->FullTime(),
+                                                 device->AverageKernelTime() / 1000.f, device->AverageFullTime(),
+                                                 device->Runs()});
+    }
+    return timings;
 }
 
 std::string ModelSimulatorV2::ServiceName() const {

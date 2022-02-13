@@ -13,8 +13,6 @@
 #include "common/image_data.h"
 #include "common/device.h"
 #include "service.h"
-#include <util/sim_connector.h>
-#include <util/sim_publisher.h>
 
 class ModelSimulatorV2 : public Service
 {
