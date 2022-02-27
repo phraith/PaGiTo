@@ -10,7 +10,7 @@ __device__ TrapezoidFF::TrapezoidFF(MyType2 beta, MyType2 L, MyType2 h, int rand
 	rand_betas_(new MyType[BetaCount() * rand_count]),
 	rand_Ls_(new MyType[rand_count_]),
 	rand_hs_(new MyType[rand_count_]),
-	type_(ShapeType::kTrapezoid)
+	type_(ShapeTypeV2::cylinder)
 {
 }
 
@@ -86,7 +86,7 @@ __device__ MyComplex TrapezoidFF::Evaluate2(MyComplex qpar, MyComplex q, MyCompl
 	return { 0,0 };
 }
 
-__device__ ShapeType TrapezoidFF::Type()
+__device__ ShapeTypeV2 TrapezoidFF::Type()
 {
 	return type_;
 }

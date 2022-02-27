@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 
-#include "core/model_simulator.h"
 #include "common/standard_defs.h"
 
 class FittingResult

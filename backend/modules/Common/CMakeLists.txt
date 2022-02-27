@@ -57,8 +57,7 @@ target_include_directories(CommonLib PUBLIC inc)
 if (CMAKE_CUDA_COMPILER)
     enable_language(CUDA)
 
-    target_link_libraries(CommonLib PRIVATE CUDA::cudart CUDA::cuda_driver nlohmann_json
-            nlohmann_json::nlohmann_json)
+    target_link_libraries(CommonLib PUBLIC nlohmann_json nlohmann_json::nlohmann_json PRIVATE CUDA::cudart CUDA::cuda_driver)
 
     target_include_directories(CommonLib PUBLIC inc/cuda_types
             ${CUDAToolkit_INCLUDE_DIRS})

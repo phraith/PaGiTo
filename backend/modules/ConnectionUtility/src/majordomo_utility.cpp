@@ -59,7 +59,7 @@ namespace majordomo {
         while(!interrupted)
         {
             ms_time_t  timeout = ms_time_t::zero();
-            if (heartbeat_at > now) { timeout = heartbeat_at - now; }
+            //if (heartbeat_at > now) { timeout = heartbeat_at - now; }
 
             std::vector<zmq::poller_event<>> events(2);
             int events_count = poller.wait_all(events, timeout);
@@ -70,9 +70,9 @@ namespace majordomo {
                 }
             }
 
-            broker.ProcessHeartbeat(heartbeat_at);
-            heartbeat_at += heartbeat_interval;
-            now = majordomo::ms_now();
+            //broker.ProcessHeartbeat(heartbeat_at);
+            //heartbeat_at += heartbeat_interval;
+            //now = majordomo::ms_now();
         }
     }
 

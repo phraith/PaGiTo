@@ -34,7 +34,6 @@ add_subdirectory(modules/GisaxsLib)
 if (CMAKE_CUDA_COMPILER)
     add_subdirectory(tests)
 endif()
- 
-add_subdirectory(apps/ModelSimulator)
-add_subdirectory(apps/ModelFitter)
+
+#add_subdirectory(apps/ModelFitter)
 add_subdirectory(apps/ModelingFramework)

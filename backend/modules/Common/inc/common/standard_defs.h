@@ -6,24 +6,24 @@
 
 #include "standard_vector_types.h"
 
-enum class ShapeType { kSphere = 0, kCylinder = 1, kTrapezoid = 2};
+//enum class ShapeType { kSphere = 0, kCylinder = 1, kTrapezoid = 2};
 enum class ShapeTypeV2 {
     sphere=0, cylinder=1
 };
-static std::string ShapeTypeToString(ShapeType type)
-{
-    switch (type)
-    {
-    case ShapeType::kSphere:
-        return "sphere";
-    case ShapeType::kCylinder:
-        return "cylinder";
-    case ShapeType::kTrapezoid:
-        return "trapezoid";
-    default:
-        return "";
-    }
-}
+//static std::string ShapeTypeToString(ShapeType type)
+//{
+//    switch (type)
+//    {
+//    case ShapeType::kSphere:
+//        return "sphere";
+//    case ShapeType::kCylinder:
+//        return "cylinder";
+//    case ShapeType::kTrapezoid:
+//        return "trapezoid";
+//    default:
+//        return "";
+//    }
+//}
 
 enum class ConstantMemoryId {
     QGRID_XY = 0,
@@ -82,7 +82,7 @@ public:
     virtual __device__ MyComplex Evaluate(MyComplex qx, MyComplex qy, MyComplex qz, int rand_idx) = 0;
     virtual __device__ MyComplex Evaluate2(MyComplex qpar, MyComplex q, MyComplex qz, int rand_idx) = 0;
 
-    virtual __device__ ShapeType Type() = 0;
+    virtual __device__ ShapeTypeV2 Type() = 0;
     virtual __device__ int ParamCount() = 0;
 private:
 };

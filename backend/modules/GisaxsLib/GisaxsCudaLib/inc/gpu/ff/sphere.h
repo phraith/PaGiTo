@@ -11,7 +11,7 @@ public:
 	__device__ ~SphereFF();
 	__device__ MyComplex Evaluate(MyComplex qx, MyComplex qy, MyComplex qz, int rand_idx);
 	__device__ MyComplex Evaluate2(MyComplex qpar, MyComplex q, MyComplex qz, int rand_idx);
-	__device__ ShapeType Type();
+	__device__ ShapeTypeV2 Type();
 	__device__ int ParamCount();
 	__device__ MyType* RandRads();
 	__device__ MyType2 Radius();
@@ -21,7 +21,7 @@ private:
 	MyType2 radius_;
 	int rand_count_;
 	MyType* rand_rad_;
-	ShapeType type_;
+	ShapeTypeV2 type_;
 };
 
 #endif

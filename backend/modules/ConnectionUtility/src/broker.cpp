@@ -8,8 +8,8 @@
 #include <iostream>
 
 void majordomo::Broker::Start() {
-    ms_time_t now = ms_now();
-    ms_time_t heartbeat_at = now + heartbeat_interval_;
+    //ms_time_t now = ms_now();
+    //ms_time_t heartbeat_at = now + heartbeat_interval_;
 
     zmq::poller_t poller;
     poller.add(socket_, zmq::event_flags::pollin);
@@ -20,7 +20,8 @@ majordomo::Broker::Broker(const std::string &ip)
         ip_(ip),
         socket_(context_, zmq::socket_type::router),
         heartbeat_expiry_(HEARTBEAT_EXPIRY),
-        heartbeat_interval_(HEARTBEAT_INTERVAL) {
+        heartbeat_interval_(HEARTBEAT_INTERVAL)
+        {
     socket_.bind(ip);
 }
 
@@ -52,7 +53,9 @@ void majordomo::Broker::RemoveDeadWorker() {
     ms_time_t now = ms_now();
     std::vector<std::shared_ptr<WorkerInformation>> dead;
     for (auto &worker: waiting_workers_) {
+        std::cout << "updating worker expiry from " << worker->Expiry().count() << " to " << now.count() << " | diff: " << worker->Expiry().count() - now.count() <<std::endl;
         if (worker->Expiry() <= now) {
+            std::cout << "Kill worker" << std::endl;
             dead.push_back(worker);
         }
     }
@@ -71,7 +74,7 @@ std::shared_ptr<ServiceInformation> majordomo::Broker::GetService(const std::str
 }
 
 void majordomo::Broker::ServiceDispatch(const std::shared_ptr<ServiceInformation> &service) {
-    RemoveDeadWorker();
+    //RemoveDeadWorker();
     while (!service->WaitingWorkers().empty() and !service->Requests().empty()) {
         auto worker_it = service->WaitingWorkers().begin();
         auto next = worker_it;
@@ -89,29 +92,6 @@ void majordomo::Broker::ServiceDispatch(const std::shared_ptr<ServiceInformation
         service->WaitingWorkers().erase(worker_it);
     }
 }
-
-//void majordomo::Broker::ServiceDispatch(const std::shared_ptr<ServiceInformation> &Service) {
-//    RemoveDeadWorker();
-//
-//    auto waiting_service_workers = Service->WaitingWorkers();
-//
-//    while (!waiting_service_workers.empty() and !Service->Requests().empty()) {
-//        std::shared_ptr<WorkerInformation> &current_worker = waiting_service_workers[0];
-//        for (const auto &worker: waiting_service_workers) {
-//            if (worker->Expiry() > current_worker->Expiry()) {
-//                current_worker = worker;
-//            }
-//        }
-//
-//        zmq::multipart_t &multipart_msg = Service->Requests().front();
-//        SendToRouter(socket_, multipart_msg, current_worker->Identity());
-//        Service->Requests().pop_front();
-//        waiting_workers_.erase(current_worker);
-//        waiting_service_workers.erase(
-//                std::remove(waiting_service_workers.begin(), waiting_service_workers.end(), current_worker),
-//                waiting_service_workers.end());
-//    }
-//}
 
 void majordomo::Broker::ServiceInternal(const majordomo::remote_id_t &rid, const std::string &name,
                                         zmq::multipart_t &multipart_msg) {
@@ -191,7 +171,7 @@ majordomo::Broker::ProcessRequestFromWorker(const majordomo::remote_id_t &origin
             DeleteWorker(worker, false);
             return;
         }
-
+        std::cout << "Heartbeat: " << majordomo::ms_now().count() << " " << heartbeat_expiry_.count() << std::endl;
         worker->Expiry(majordomo::ms_now() + heartbeat_expiry_);
         return;
     }
@@ -205,6 +185,7 @@ majordomo::Broker::ProcessRequestFromWorker(const majordomo::remote_id_t &origin
 void majordomo::Broker::MakeAvailable(const std::shared_ptr<WorkerInformation> &worker) {
     waiting_workers_.insert(worker);
     worker->AssignedService()->WaitingWorkers().push_back(worker);
+    std::cout << "Make available" << std::endl;
     worker->Expiry(majordomo::ms_now() + heartbeat_expiry_);
     ServiceDispatch(worker->AssignedService());
 }

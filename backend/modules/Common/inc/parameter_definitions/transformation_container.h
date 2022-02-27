@@ -59,8 +59,8 @@ void from_json(const json &j, ShapeContainer &shapes) {
                 BoundedDistribution radius(radiusMean, Bounds(radiusMean, radiusMean), radiusStddev,
                                            Bounds(radiusStddev, radiusStddev));
 
-                auto heightMean = shape.at("radius").at("mean");
-                auto heightStddev = shape.at("radius").at("stddev");
+                auto heightMean = shape.at("height").at("mean");
+                auto heightStddev = shape.at("height").at("stddev");
                 BoundedDistribution height(heightMean, Bounds(heightMean, heightMean), heightStddev,
                                            Bounds(heightStddev, heightStddev));
 

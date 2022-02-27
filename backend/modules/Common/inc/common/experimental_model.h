@@ -18,7 +18,7 @@
 class ExperimentalModel {
 public:
     ExperimentalModel(DetectorSetup detector, std::vector<int> position_offsets, BeamConfiguration beam_config,
-                      Sample sample, double sample_detector_dist, int level);
+                      Sample sample);
 
     [[nodiscard]] const std::vector<MyComplex> &GetPropagationCoefficients() const;
 
@@ -27,10 +27,9 @@ public:
     BeamConfiguration beam_config_;
     Sample sample_;
     double sample_detector_dist_;
-
-    const std::vector<MyComplex> prop_coeffs_;
-    int level_;
 private:
+    const std::vector<MyComplex> prop_coeffs_;
+
 };
 
 #endif

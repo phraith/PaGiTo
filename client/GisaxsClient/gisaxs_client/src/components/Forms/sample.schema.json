@@ -133,8 +133,8 @@
     "refractionIndex": {
       "type": "object",
       "default": {
-        "delta": 0.001,
-        "beta": 1e-5
+        "delta": 6e-6,
+        "beta": 2e-8
       },
       "properties": {
         "delta": {

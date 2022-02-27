@@ -13,7 +13,7 @@ __device__ CylinderFF::CylinderFF(MyType2 radius, MyType2 height, int rand_count
     rand_count_(rand_count),
     rand_rads_(new MyType[rand_count_]),
     rand_heights_(new MyType[rand_count_]),
-    type_(ShapeType::kCylinder)
+    type_(ShapeTypeV2::cylinder)
 {
 }
 
@@ -66,7 +66,7 @@ __device__ MyComplex CylinderFF::Evaluate2(MyComplex qpar, MyComplex q, MyComple
 }
 
 
-__device__ ShapeType CylinderFF::Type()
+__device__ ShapeTypeV2 CylinderFF::Type()
 {
     return type_;
 }

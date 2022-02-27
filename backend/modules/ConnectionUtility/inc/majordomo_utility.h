@@ -30,7 +30,7 @@ namespace majordomo {
     using ms_time_t = std::chrono::milliseconds;
     using remote_id_t = std::string;
 
-    const int HEARTBEAT_LIVENESS = 3;
+    const int HEARTBEAT_LIVENESS = 6;
     const ms_time_t HEARTBEAT_INTERVAL{2500};
     const ms_time_t HEARTBEAT_EXPIRY{HEARTBEAT_INTERVAL * HEARTBEAT_LIVENESS};
 

@@ -13,7 +13,7 @@ target_link_libraries(ModelingFramework
             ModelSimulatorLib)
 
 # Provide installation instructions
-install(TARGETS ModelFitter
+install(TARGETS ModelingFramework
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin

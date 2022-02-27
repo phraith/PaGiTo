@@ -23,11 +23,8 @@ void Worker::Start() {
     bool interrupted = false;
     zmq::multipart_t reply;
     while (!interrupted) {
-        ms_time_t timeout = ms_time_t::zero();
-        if (heartbeat_at > now) {
-            timeout = heartbeat_at - now;
             std::vector<zmq::poller_event<>> events(2);
-            int events_count = poller.wait_all(events, timeout);
+            int events_count = poller.wait_all(events, ms_time_t {500});
             for (int i = 0; i < events_count; ++i) {
                 if (events[i].socket == worker.Socket()) {
                     zmq::multipart_t request;
@@ -46,7 +43,6 @@ void Worker::Start() {
             }
         }
     }
-}
 
 Worker::Worker(std::unique_ptr<Service> &service, const std::string &worker_address, const std::string &broker_address)
         :

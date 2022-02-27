@@ -67,7 +67,7 @@ public:
 
     void InitializeHtD(const std::vector<T> &input) const;
 
-    [[maybe_unused]] std::vector<T>  CopyToHost() const;
+    [[maybe_unused]] std::vector<T> CopyToHost() const;
 
     void InitializeDtD(T *dev_array, int size) const;
 
@@ -111,7 +111,7 @@ MemoryBlock<T>::MemoryBlock(void *ptr, size_t size_in_bytes)
 }
 
 template<typename T>
-[[maybe_unused]] std::vector<T> MemoryBlock<T>::CopyToHost() const {
+std::vector<T> MemoryBlock<T>::CopyToHost() const {
     std::vector<T> target(count_);
     gpuErrchk(cudaMemcpy(&target[0], ptr_, count_ * sizeof(T), cudaMemcpyDeviceToHost));
     return target;

@@ -63,7 +63,7 @@ MyType Bounds::Lower() const {
     return lower_;
 }
 
-const std::vector<std::unique_ptr<Shape>> &UnitcellV2::Shapes() {
+const std::vector<std::unique_ptr<Shape>> &UnitcellV2::Shapes() const{
     return shapes_;
 }
 

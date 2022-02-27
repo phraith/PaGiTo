@@ -14,7 +14,7 @@ public:
     WorkerInformation(std::shared_ptr<ServiceInformation> service, majordomo::remote_id_t worker_id, majordomo::ms_time_t expiry);
 
     [[nodiscard]] const majordomo::remote_id_t &Identity() const;
-    [[nodiscard]] const majordomo::ms_time_t &Expiry() const;
+    [[nodiscard]] majordomo::ms_time_t Expiry() const;
     void Expiry(majordomo::ms_time_t expiry);
     [[nodiscard]] bool HasService() const;
     [[nodiscard]] const std::shared_ptr<ServiceInformation> &AssignedService() const;

@@ -10,7 +10,7 @@ __device__ SphereFF::SphereFF(MyType2 radius, int rand_count)
     radius_(radius),
     rand_count_(rand_count),
     rand_rad_(new MyType [rand_count_]),
-    type_(ShapeType::kSphere)
+    type_(ShapeTypeV2::sphere)
 {
 }
 
@@ -56,7 +56,7 @@ __device__ MyComplex SphereFF::Evaluate2(MyComplex qpar, MyComplex q, MyComplex 
     return ff;
 }
 
-__device__ ShapeType SphereFF::Type()
+__device__ ShapeTypeV2 SphereFF::Type()
 {
     return type_;
 }

@@ -24,31 +24,31 @@ __global__ void update_unitcell(MyType* params, int shape_count)
 		
 		switch (shape->Type())
 		{
-		case ShapeType::kCylinder:
+		case ShapeTypeV2::cylinder:
 		{
 			CylinderFF* cylinder = (CylinderFF*)shape;
 			cylinder->Update({ params[rvs_idx], params[rvs_idx + 1] }, { params[rvs_idx + 2], params[rvs_idx + 3] });
 			break;
 		}
-		case ShapeType::kSphere:
+            case ShapeTypeV2::sphere:
 		{
 			SphereFF* sphere = (SphereFF*)shape;
 			sphere->Update({ params[rvs_idx], params[rvs_idx + 1] });
 			break;
 		}
-		case ShapeType::kTrapezoid:
-		{
-			TrapezoidFF* trapezoid = (TrapezoidFF*)shape;
-
-			for (int i = 0; i < trapezoid->BetaCount(); ++i)
-			{
-				trapezoid->UpdateBeta({ params[rvs_idx + 2 * i], params[rvs_idx + 2 * i + 1] }, i);
-			}
-			int next_idx = rvs_idx + 2 * trapezoid->BetaCount();
-
-			trapezoid->Update({ params[next_idx], params[next_idx + 1] }, { params[next_idx + 2], params[next_idx + 3] });
-			break;
-		}
+//		case ShapeType::kTrapezoid:
+//		{
+//			TrapezoidFF* trapezoid = (TrapezoidFF*)shape;
+//
+//			for (int i = 0; i < trapezoid->BetaCount(); ++i)
+//			{
+//				trapezoid->UpdateBeta({ params[rvs_idx + 2 * i], params[rvs_idx + 2 * i + 1] }, i);
+//			}
+//			int next_idx = rvs_idx + 2 * trapezoid->BetaCount();
+//
+//			trapezoid->Update({ params[next_idx], params[next_idx + 1] }, { params[next_idx + 2], params[next_idx + 3] });
+//			break;
+//		}
 		default:
 			break;
 		}
@@ -78,7 +78,7 @@ __global__ void update_shapes(MyType* rands, int rand_count, int shape_count)
 
 	switch (shape->Type())
 	{
-	case ShapeType::kSphere:
+	case ShapeTypeV2::sphere:
 	{
 		SphereFF* sphere = (SphereFF*)shape;
 
@@ -87,7 +87,7 @@ __global__ void update_shapes(MyType* rands, int rand_count, int shape_count)
 		sphere->RandRads()[local_rand_id] = rands[first_rand_idx + local_rand_id] * radius.y + radius.x;
 		break;
 	}
-	case ShapeType::kCylinder:
+	case ShapeTypeV2::cylinder:
 	{
 		CylinderFF* cylinder = (CylinderFF*)shape;
 
@@ -98,24 +98,24 @@ __global__ void update_shapes(MyType* rands, int rand_count, int shape_count)
 		cylinder->RandHeights()[local_rand_id] = rands[first_rand_idx + rand_count + local_rand_id] * height.y + height.x;
 		break;
 	}
-	case ShapeType::kTrapezoid:
-	{
-		TrapezoidFF* trapezoid = (TrapezoidFF*)shape;
-		MyType2 *beta = trapezoid->Beta();
-		MyType2 L = trapezoid->L();
-		MyType2 h = trapezoid->H();
-
-		for (int i = 0; i < trapezoid->BetaCount(); ++i)
-		{
-			trapezoid->RandBetas()[i * rand_count + local_rand_id] = rands[first_rand_idx + i * rand_count + local_rand_id] * beta[i].y + beta[i].x;
-		}
-
-		int next_idx = first_rand_idx + trapezoid->BetaCount() * rand_count;
-
-		trapezoid->RandLs()[local_rand_id] = rands[next_idx + local_rand_id] * L.y + L.x;
-		trapezoid->RandHs()[local_rand_id] = rands[next_idx + rand_count + local_rand_id] * h.y + h.x;
-		break;
-	}
+//	case ShapeTypeV2::kTrapezoid:
+//	{
+//		TrapezoidFF* trapezoid = (TrapezoidFF*)shape;
+//		MyType2 *beta = trapezoid->Beta();
+//		MyType2 L = trapezoid->L();
+//		MyType2 h = trapezoid->H();
+//
+//		for (int i = 0; i < trapezoid->BetaCount(); ++i)
+//		{
+//			trapezoid->RandBetas()[i * rand_count + local_rand_id] = rands[first_rand_idx + i * rand_count + local_rand_id] * beta[i].y + beta[i].x;
+//		}
+//
+//		int next_idx = first_rand_idx + trapezoid->BetaCount() * rand_count;
+//
+//		trapezoid->RandLs()[local_rand_id] = rands[next_idx + local_rand_id] * L.y + L.x;
+//		trapezoid->RandHs()[local_rand_id] = rands[next_idx + rand_count + local_rand_id] * h.y + h.x;
+//		break;
+//	}
 	default:
 		break;
 	}
@@ -258,7 +258,9 @@ __global__ void cuda_run_gisaxs(MyType2* qpoints_xy, MyType2* qz, MyComplex4* co
 		MyComplex scattering = { 0,0 };
 		int cur_loc_idx = 0;
 		for (int k = 0; k < shape_count; ++k)
+
 		{
+
 			int loc_count = location_counts[k];
 			ShapeFF* shape = dunitcell->GetShape(k);
 

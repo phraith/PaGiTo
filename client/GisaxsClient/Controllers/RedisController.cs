@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -33,7 +31,6 @@ namespace RedisTest.Controllers
             public char[] intensities { get; set; }
         }
 
-        //[HttpGet("{id}")]
         [HttpGet]
         public async Task<IActionResult> GetData(string hash, string colormapName)
         {
@@ -47,12 +44,8 @@ namespace RedisTest.Controllers
             RedisValue data = await db.StringGetAsync(hash);
             var dataString = data.ToString();
             var dataEntry = JsonSerializer.Deserialize<DataEntry>(dataString, options);
-            //string modifiedData = AppearenceModifier.ApplyColorMap(dataEntry.Intensities, dataEntry.Width, dataEntry.Height, colormapName);
             string modifiedData = AppearenceModifier.ApplyColorMap(dataEntry.Intensities.ToArray(), dataEntry.Width, dataEntry.Height, colormapName);
-
             return Ok(JsonSerializer.Serialize(new FinalResult() { data = modifiedData }));
-
-            //return Ok($"{{data : \"{modifiedData}\"}}");
         }
     }
 
@@ -69,44 +62,10 @@ namespace RedisTest.Controllers
         public string Id { get; set; }
     }
 
-    public class GisaxsConfigWithMetaInformation
-    {
-        public FormDataGisaxsConfig Config { get; set; }
-
-        public MetaInformation Info { get; set; }
-    }
-
     public class MetaInformation
     {
         public long ClientId { get; set; }
         public long JobId { get; set; }
         public string  ColormapName { get; set; }
-    }
-
-    public class GisaxsConfig
-    {
-        public string name { get; set; }
-        public IReadOnlyCollection<ShapeConfig> shapes { get; set; }
-        public UnitcellConfig unitcell { get; set; }
-        public SubstrateConfig substrate { get; set; }
-    }
-
-    public class SubstrateConfig
-    {
-        public int order { get; set; }
-        public RefractionIndex refindex { get; set; }
-    }
-
-    public class UnitcellConfig
-    {
-        public IReadOnlyCollection<ComponentConfig> components { get; set; }
-        public IReadOnlyCollection<int> repetitions { get; set; }
-        public IReadOnlyCollection<double> distances { get; set; }
-    }
-
-    public class ComponentConfig
-    {
-        public string shape { get; set; }
-        public IReadOnlyCollection<IReadOnlyCollection<int>> locations { get; set; }
     }
 }

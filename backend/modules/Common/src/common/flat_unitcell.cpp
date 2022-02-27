@@ -21,38 +21,38 @@ FlatUnitcellV2::FlatUnitcellV2(std::vector<MyType2> parameters, std::vector<int>
         translation_(translation) {
 }
 
-const std::vector<MyType2> &FlatUnitcellV2::LowerBounds() {
+const std::vector<MyType2> &FlatUnitcellV2::LowerBounds() const{
     return lower_bounds_;
 }
 
-const std::vector<ShapeTypeV2> &FlatUnitcellV2::ShapeTypes() {
+const std::vector<ShapeTypeV2> &FlatUnitcellV2::ShapeTypes() const{
     return shape_types_;
 }
 
-const std::vector<MyType2> &FlatUnitcellV2::UpperBounds() {
+const std::vector<MyType2> &FlatUnitcellV2::UpperBounds() const{
     return upper_bounds_;
 }
 
-const std::vector<int> &FlatUnitcellV2::ParameterIndices() {
+const std::vector<int> &FlatUnitcellV2::ParameterIndices() const{
     return parameter_indices_;
 }
 
-const std::vector<MyType2> &FlatUnitcellV2::Parameters() {
+const std::vector<MyType2> &FlatUnitcellV2::Parameters() const{
     return parameters_;
 }
 
-const std::vector<MyType3> &FlatUnitcellV2::Positions() {
+const std::vector<MyType3> &FlatUnitcellV2::Positions() const{
     return positions_;
 }
 
-const std::vector<int> &FlatUnitcellV2::PositionIndices() {
+const std::vector<int> &FlatUnitcellV2::PositionIndices() const{
     return position_indices_;
 }
 
-const MyType3I &FlatUnitcellV2::Repetitons() {
+const MyType3I &FlatUnitcellV2::Repetitons() const{
     return repetitons_;
 }
 
-const MyType3 &FlatUnitcellV2::Translation() {
+const MyType3 &FlatUnitcellV2::Translation() const{
     return translation_;
 }

@@ -15,10 +15,10 @@
 class QGrid
 {
 public:
-	QGrid(const DetectorSetup& detector, const std::vector<int>& position_offsets, const BeamConfiguration& beam_config, MyType sample_detector_dist, std::complex<MyType> refractive_index);
+	QGrid(const DetectorSetup& detector, const std::vector<int>& position_offsets, const BeamConfiguration& beam_config, std::complex<MyType> refractive_index);
 
-	const std::vector<MyType2> &QPointsXY() const;
-	const std::vector<MyType2> &QPointsZCoeffs() const;
+	const std::vector<std::complex<MyType>> &QPointsXY() const;
+	const std::vector<std::complex<MyType>> &QPointsZCoeffs() const;
 	const std::vector<MyType>& AlphaFs() const;
 	const std::vector<MyType>& ThetaFs() const;
 
@@ -30,8 +30,8 @@ public:
 	const std::vector<MyType> &Qy() const;
 	const std::vector<MyType> &Qz() const;
 
-	const std::vector<MyType2> &QPar() const;
-	const std::vector<MyType2> &Q() const;
+	const std::vector<std::complex<MyType>> &QPar() const;
+	const std::vector<std::complex<MyType>> &Q() const;
 
 	MyType2I Resolution() const;
 
@@ -56,10 +56,10 @@ private:
 	std::vector<MyType> alpha_fs_;
 	std::vector<MyType> theta_fs_;
 
-	std::vector<MyComplex> qpoints_xy_;
-	std::vector<MyComplex> qpoints_z_coeffs_;
-	std::vector<MyComplex> qpar_;
-	std::vector<MyComplex> q_;
+	std::vector<std::complex<MyType>> qpoints_xy_;
+	std::vector<std::complex<MyType>> qpoints_z_coeffs_;
+	std::vector<std::complex<MyType>> qpar_;
+	std::vector<std::complex<MyType>> q_;
 
 	std::vector<MyType> qx_;
 	std::vector<MyType> qy_;

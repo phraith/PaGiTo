@@ -100,7 +100,7 @@ void Publisher::Publish()
 		{
 			socket.send(zmq::buffer(result->Uuid()), zmq::send_flags::sndmore);
 			socket.send(zmq::buffer(result_m.asBytes().begin(), result_m.asBytes().size()));
-			std::cout << "send result" << std::endl;
+			std::cout << "Send result" << std::endl;
 		}
 		catch (zmq::error_t & e) {
 			std::cout << e.what() << std::endl;

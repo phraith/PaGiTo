@@ -8,7 +8,7 @@
 #include "common/standard_defs.h"
 #include "common/timer.h"
 
-QGrid::QGrid(const DetectorSetup& detector, const std::vector<int>& position_offsets, const BeamConfiguration& beam_config, MyType sample_detector_dist, std::complex<MyType> refractive_index)
+QGrid::QGrid(const DetectorSetup& detector, const std::vector<int>& position_offsets, const BeamConfiguration& beam_config, std::complex<MyType> refractive_index)
 	:
 	resolution_(detector.Resolution()),
 	direct_beam_location_(detector.Directbeam()),
@@ -17,7 +17,7 @@ QGrid::QGrid(const DetectorSetup& detector, const std::vector<int>& position_off
 	qcount_(position_offsets_.size() != 0 ? position_offsets_.size() : resolution_.x * resolution_.y),
 	alpha_i_(beam_config.AlphaI()),
 	k0_(beam_config.K0()),
-	sample_detector_dist_(sample_detector_dist),
+	sample_detector_dist_(detector.SampleDistance()),
 	refractive_index_(refractive_index),
 	alpha_fs_(qcount_),
 	theta_fs_(qcount_),
@@ -33,12 +33,12 @@ QGrid::QGrid(const DetectorSetup& detector, const std::vector<int>& position_off
 }
 
 
-const std::vector<MyType2>& QGrid::QPointsXY() const
+const std::vector<std::complex<MyType>>& QGrid::QPointsXY() const
 {
 	return qpoints_xy_;
 }
 
-const std::vector<MyType2>& QGrid::QPointsZCoeffs() const
+const std::vector<std::complex<MyType>>& QGrid::QPointsZCoeffs() const
 {
 	return qpoints_z_coeffs_;
 }
@@ -88,12 +88,12 @@ const std::vector<MyType> &QGrid::Qz() const
 	return qz_;
 }
 
-const std::vector<MyType2> &QGrid::QPar() const
+const std::vector<std::complex<MyType>> &QGrid::QPar() const
 {
 	return qpar_;
 }
 
-const std::vector<MyType2> &QGrid::Q() const
+const std::vector<std::complex<MyType>> &QGrid::Q() const
 {
 	return q_;
 }
@@ -105,35 +105,33 @@ MyType2I QGrid::Resolution() const
 
 void QGrid::InitializeQGrid()
 {
+	if (!position_offsets_.empty())
+	{
+		for (int i = 0; i < position_offsets_.size(); ++i)
+		{
+			int position_offset = position_offsets_.at(i);
 
+			int pixel_y = position_offset / resolution_.x;
+			int pixel_x = position_offset % resolution_.x;
 
-//	if (!position_offsets_.empty())
-//	{
-//		for (int i = 0; i < position_offsets_.size(); ++i)
-//		{
-//			int position_offset = position_offsets_.at(i);
-//
-//			int pixel_y = position_offset / resolution_.x;
-//			int pixel_x = position_offset % resolution_.x;
-//
-//			RealSpaceToQ(pixel_x, pixel_y, i);
-//		}
-//	}
-//	else
-//	{
-//        Timer t;
-//        t.Start();
-//		for (int i = 0; i < resolution_.y; ++i)
-//		{
-//			for (int j = 0; j < resolution_.x; ++j)
-//			{
-//				int idx = i * resolution_.x + j;
-//				RealSpaceToQ(j, i, idx);
-//			}
-//		}
-//        t.End();
-//        std::cout << "QGrid: " << t.Duration() << " s" << std::endl;
-//	}
+			RealSpaceToQ(pixel_x, pixel_y, i);
+		}
+	}
+	else
+	{
+        Timer t;
+        t.Start();
+		for (int i = 0; i < resolution_.y; ++i)
+		{
+			for (int j = 0; j < resolution_.x; ++j)
+			{
+				int idx = i * resolution_.x + j;
+				RealSpaceToQ(j, i, idx);
+			}
+		}
+        t.End();
+        std::cout << "QGrid: " << t.Duration() << " s" << std::endl;
+	}
 }
 
 void QGrid::RealSpaceToQ(int x, int y, int i)

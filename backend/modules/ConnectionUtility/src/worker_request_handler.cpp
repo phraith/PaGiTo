@@ -26,7 +26,7 @@ void WorkerRequestHandler::Receive(zmq::multipart_t &request) {
     poller.add(socket_, zmq::event_flags::pollin);
 
     std::vector<zmq::poller_event<>> events(1);
-    int rc = poller.wait_all(events, heartbeat_at_);
+    int rc = poller.wait_all(events, majordomo::HEARTBEAT_INTERVAL);
     if (rc > 0) {
         zmq::multipart_t multipart_msg;
         majordomo::ReceiveFromDealer(socket_, multipart_msg);
@@ -101,7 +101,7 @@ void WorkerRequestHandler::ConnectToBroker(bool reconnect) {
     auto result = majordomo::SendToDealer(socket_, multipart_msg);
 
     liveness_ = majordomo::HEARTBEAT_LIVENESS;
-    heartbeat_at_ = majordomo::ms_now() + heartbeat_at_;
+    heartbeat_at_ = majordomo::ms_now() + majordomo::HEARTBEAT_INTERVAL;
 
 }
 

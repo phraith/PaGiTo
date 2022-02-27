@@ -102,7 +102,7 @@ class UnitcellV2 {
 public:
     explicit UnitcellV2(std::vector<std::unique_ptr<Shape>> shapes, MyType3I repetitions, MyType3 translation);
 
-    const std::vector<std::unique_ptr<Shape>> &Shapes();
+    const std::vector<std::unique_ptr<Shape>> &Shapes() const;
     const MyType3 &Translation() const;
     const MyType3I &Repetitions() const;
 

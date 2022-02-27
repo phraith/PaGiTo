@@ -1,275 +1,267 @@
 {
-    "type": "object",
-    "properties": {
-        "unitcell": {
+  "type": "object",
+  "properties": {
+    "unitcell": {
+      "type": "object",
+      "properties": {
+        "shapes": {
+          "type": "array",
+          "items": {
             "type": "object",
-            "properties": {
-                "shapes": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "oneOf": [
-                            {
-                                "title": "cylinder",
-                                "type": "object",
-                                "properties": {
-                                    "type": {
-                                        "readOnly": true,
-                                        "type": "string",
-                                        "default": "cylinder"
-                                    },
-                                    "height": {
-                                        "type": "object",
-                                        "properties": {
-                                            "mean": {
-                                                "type": "integer"
-                                            },
-                                            "stddev": {
-                                                "type": "integer"
-                                            }
-                                        },
-                                        "required": [ "mean", "stddev" ]
-                                    },
-                                    "radius": {
-                                        "type": "object",
-                                        "properties": {
-                                            "mean": {
-                                                "type": "integer"
-                                            },
-                                            "stddev": {
-                                                "type": "integer"
-                                            }
-                                        },
-                                        "required": [ "mean", "stddev" ]
-                                    },
-                                    "refraction": {
-                                        "type": "object",
-                                        "properties": {
-                                            "delta": {
-                                                "type": "number"
-                                            },
-                                            "beta": {
-                                                "type": "number"
-                                            }
-                                        },
-                                        "required": [ "delta", "beta" ]
-                                    },
-                                    "locations": {
-                                        "type": "array",
-                                        "default": [
-                                            {
-                                                "x": 0,
-                                                "y": 0,
-                                                "z": 0
-                                            }
-                                        ],
-                                        "items": {
-                                            "type": "object",
-                                            "properties": {
-                                                "x": {
-                                                    "default": 0,
-                                                    "type": "integer"
-                                                },
-                                                "y": {
-                                                    "default": 0,
-                                                    "type": "integer"
-                                                },
-                                                "z": {
-                                                    "default": 0,
-                                                    "type": "integer"
-                                                }
-                                            },
-                                            "required": [ "x", "y", "z" ]
-                                        }
-
-                                    }
-                                },
-                                "required": [
-                                    "height",
-                                    "radius",
-                                    "refraction",
-                                    "locations"
-                                ]
-                            },
-                            {
-                                "title": "sphere",
-                                "type": "object",
-                                "properties": {
-                                    "type": {
-                                        "readOnly": true,
-                                        "type": "string",
-                                        "default": "sphere"
-                                    },
-                                    "radius": {
-                                        "type": "object",
-                                        "properties": {
-                                            "mean": {
-                                                "type": "integer"
-                                            },
-                                            "stddev": {
-                                                "type": "integer"
-                                            }
-                                        },
-                                        "required": [ "mean", "stddev" ]
-                                    },
-                                    "refraction": {
-                                        "type": "object",
-                                        "properties": {
-                                            "delta": {
-                                                "type": "number"
-                                            },
-                                            "beta": {
-                                                "type": "number"
-                                            }
-                                        },
-                                        "required": [ "delta", "beta" ]
-                                    },
-                                    "locations": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "object",
-                                            "properties": {
-                                                "x": {
-                                                    "type": "integer"
-                                                },
-                                                "y": {
-                                                    "type": "integer"
-                                                },
-                                                "z": {
-                                                    "type": "integer"
-                                                }
-                                            },
-                                            "required": [ "x", "y", "z" ]
-                                        }
-
-                                    }
-                                },
-                                "required": [
-                                    "type",
-                                    "height",
-                                    "radius",
-                                    "refraction",
-                                    "locations"
-                                ]
-                            }
-                        ]
-                    }
-                },
-                "repetitions": {
+            "oneOf": [
+              {
+                "title": "cylinder",
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "readOnly": true,
+                    "type": "string",
+                    "default": "cylinder"
+                  },
+                  "height": {
                     "type": "object",
                     "properties": {
+                      "mean": {
+                        "type": "integer"
+                      },
+                      "stddev": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": ["mean", "stddev"]
+                  },
+                  "radius": {
+                    "type": "object",
+                    "properties": {
+                      "mean": {
+                        "type": "integer"
+                      },
+                      "stddev": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": ["mean", "stddev"]
+                  },
+                  "refraction": {
+                    "type": "object",
+                    "properties": {
+                      "delta": {
+                        "type": "number"
+                      },
+                      "beta": {
+                        "type": "number"
+                      }
+                    },
+                    "required": ["delta", "beta"]
+                  },
+                  "locations": {
+                    "type": "array",
+                    "default": [
+                      {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      }
+                    ],
+                    "items": {
+                      "type": "object",
+                      "properties": {
                         "x": {
-                            "type": "integer"
+                          "default": 0,
+                          "type": "integer"
                         },
                         "y": {
-                            "type": "integer"
+                          "default": 0,
+                          "type": "integer"
                         },
                         "z": {
-                            "type": "integer"
+                          "default": 0,
+                          "type": "integer"
                         }
-                    },
-                    "required": [ "x", "y", "z" ]
+                      },
+                      "required": ["x", "y", "z"]
+                    }
+                  }
                 },
-                "translation": {
+                "required": ["height", "radius", "refraction", "locations"]
+              },
+              {
+                "title": "sphere",
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "readOnly": true,
+                    "type": "string",
+                    "default": "sphere"
+                  },
+                  "radius": {
                     "type": "object",
                     "properties": {
-                        "x": {
-                            "type": "integer"
-                        },
-                        "y": {
-                            "type": "integer"
-                        },
-                        "z": {
-                            "type": "integer"
-                        }
+                      "mean": {
+                        "type": "integer"
+                      },
+                      "stddev": {
+                        "type": "integer"
+                      }
                     },
-                    "required": [ "x", "y", "z" ]
-                }
-            },
-            "required": [ "shapes", "repetitions", "translation" ]
-        },
-        "sample": {
-            "type": "object",
-            "properties": {
-                "layers": {
+                    "required": ["mean", "stddev"]
+                  },
+                  "refraction": {
+                    "type": "object",
+                    "properties": {
+                      "delta": {
+                        "type": "number"
+                      },
+                      "beta": {
+                        "type": "number"
+                      }
+                    },
+                    "required": ["delta", "beta"]
+                  },
+                  "locations": {
                     "type": "array",
                     "items": {
-                        "type": "object",
-                        "properties": {
-                            "order": {
-                                "type": "integer"
-                            },
-                            "refraction": {
-                                "type": "object",
-                                "properties": {
-                                    "delta": {
-                                        "type": "number"
-                                    },
-                                    "beta": {
-                                        "type": "number"
-                                    }
-                                },
-                                "required": [ "delta", "beta" ]
-                            },
-                            "thickness": {
-                                "type": "integer"
-                            }
+                      "type": "object",
+                      "properties": {
+                        "x": {
+                          "type": "integer"
                         },
-                        "required": [ "order", "refraction", "thickness" ]
+                        "y": {
+                          "type": "integer"
+                        },
+                        "z": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": ["x", "y", "z"]
                     }
-
-                }
-            },
-            "required": [ "layers" ]
+                  }
+                },
+                "required": [
+                  "type",
+                  "height",
+                  "radius",
+                  "refraction",
+                  "locations"
+                ]
+              }
+            ]
+          }
         },
-        "beam": {
-            "type": "object",
-            "properties": {
-                "alphai": {
-                    "type": "number"
-                },
-                "photonEv": {
-                    "type": "number"
-                }
+        "repetitions": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "integer"
             },
-            "required": [ "alphai", "photonEv" ]
+            "y": {
+              "type": "integer"
+            },
+            "z": {
+              "type": "integer"
+            }
+          },
+          "required": ["x", "y", "z"]
         },
-        "detector": {
-            "type": "object",
-            "properties": {
-                "pixelsize": {
-                    "type": "number"
-                },
-                "resolution": {
-                    "type": "object",
-                    "properties": {
-                        "x": {
-                            "type": "integer"
-                        },
-                        "y": {
-                            "type": "integer"
-                        }
-                    },
-                    "required": [ "x", "y" ]
-                },
-                "sampleDistance": {
-                    "type": "integer"
-                },
-                "beamImpact": {
-                    "type": "object",
-                    "properties": {
-                        "x": {
-                            "type": "integer"
-                        },
-                        "y": {
-                            "type": "integer"
-                        }
-                    },
-                    "required": [ "x", "y" ]
-                }
+        "translation": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "integer"
             },
-            "required": [ "pixelsize", "resolution", "sampleDistance", "beamImpact" ]
+            "y": {
+              "type": "integer"
+            },
+            "z": {
+              "type": "integer"
+            }
+          },
+          "required": ["x", "y", "z"]
         }
+      },
+      "required": ["shapes", "repetitions", "translation"]
     },
-    "required": [ "unitcell", "sample", "beam", "detector" ]
+    "sample": {
+      "type": "object",
+      "properties": {
+        "layers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "order": {
+                "type": "integer"
+              },
+              "refraction": {
+                "type": "object",
+                "properties": {
+                  "delta": {
+                    "type": "number"
+                  },
+                  "beta": {
+                    "type": "number"
+                  }
+                },
+                "required": ["delta", "beta"]
+              },
+              "thickness": {
+                "type": "integer"
+              }
+            },
+            "required": ["order", "refraction", "thickness"]
+          }
+        }
+      },
+      "required": ["layers"]
+    },
+    "beam": {
+      "type": "object",
+      "properties": {
+        "alphai": {
+          "type": "number"
+        },
+        "photonEv": {
+          "type": "number"
+        }
+      },
+      "required": ["alphai", "photonEv"]
+    },
+    "detector": {
+      "type": "object",
+      "properties": {
+        "pixelsize": {
+          "type": "number"
+        },
+        "resolution": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "integer"
+            },
+            "y": {
+              "type": "integer"
+            }
+          },
+          "required": ["x", "y"]
+        },
+        "sampleDistance": {
+          "type": "integer"
+        },
+        "beamImpact": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "integer"
+            },
+            "y": {
+              "type": "integer"
+            }
+          },
+          "required": ["x", "y"]
+        }
+      },
+      "required": ["pixelsize", "resolution", "sampleDistance", "beamImpact"]
+    }
+  },
+  "required": ["unitcell", "sample", "beam", "detector"]
 }

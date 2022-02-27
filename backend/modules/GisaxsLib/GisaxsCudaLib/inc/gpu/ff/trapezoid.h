@@ -12,7 +12,7 @@ public:
 	__device__ MyComplex Evaluate(MyComplex qx, MyComplex qy, MyComplex qz, int rand_idx);
 	__device__ MyComplex Evaluate2(MyComplex qpar, MyComplex q, MyComplex qz, int rand_idx);
 	__device__ MyComplex FF(MyComplex qx, MyComplex qy, MyComplex qz, int rand_idx);
-	__device__ ShapeType Type();
+	__device__ ShapeTypeV2 Type();
 	__device__ int ParamCount();
 	__device__ int BetaCount();
 	__device__ MyType* RandBetas();
@@ -32,7 +32,7 @@ private:
 	MyType* rand_betas_;
 	MyType* rand_Ls_;
 	MyType* rand_hs_;
-	ShapeType type_;
+	ShapeTypeV2 type_;
 };
 
 #endif

@@ -9,3 +9,6 @@ if (CMAKE_CUDA_COMPILER)
     target_link_libraries ( GisaxsLib PUBLIC GisaxsCudaLib)
     target_compile_definitions(GisaxsCudaLib PUBLIC CUDA_GPUS_AVAILABLE=1)
 endif()
+
+add_subdirectory(GisaxsCpuLib)
+target_link_libraries ( GisaxsLib PUBLIC GisaxsCpuLib)
