@@ -14,7 +14,7 @@
 
 __constant__ DevUnitcell* dunitcell;
 
-__global__ void update_unitcell(MyType* params, int shape_count)
+__global__ void update_unitcell(MyType2* params, int shape_count)
 {
 	int rvs_idx = 0;
 
@@ -27,13 +27,13 @@ __global__ void update_unitcell(MyType* params, int shape_count)
 		case ShapeTypeV2::cylinder:
 		{
 			CylinderFF* cylinder = (CylinderFF*)shape;
-			cylinder->Update({ params[rvs_idx], params[rvs_idx + 1] }, { params[rvs_idx + 2], params[rvs_idx + 3] });
+			cylinder->Update( params[rvs_idx], params[rvs_idx + 1]);
 			break;
 		}
             case ShapeTypeV2::sphere:
 		{
 			SphereFF* sphere = (SphereFF*)shape;
-			sphere->Update({ params[rvs_idx], params[rvs_idx + 1] });
+			sphere->Update(params[rvs_idx]);
 			break;
 		}
 //		case ShapeType::kTrapezoid:
@@ -565,7 +565,7 @@ __global__ void cuda_run_gisaxs(MyType2* qpoints_xy, MyType2* qz, MyComplex4* co
 			destroy_unitcell << < 1, 1, 0, work_stream >> > ();
 		}
 		
-		void Update(MyType* rands, int qcount, MyType* params, int shape_count, cudaStream_t work_stream)
+		void Update(MyType* rands, int qcount, MyType2* params, int shape_count, cudaStream_t work_stream)
 		{
 			int m = COHERENCY_DRAW_RATIO.x;
 			int n = COHERENCY_DRAW_RATIO.y;

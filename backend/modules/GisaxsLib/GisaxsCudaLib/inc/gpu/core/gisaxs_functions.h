@@ -37,6 +37,6 @@ namespace Gisaxs
 	void CreateUnitcell(DevUnitcell** dev_unitcell, ShapeTypeV2* shape_types, int shape_count, MyType3* locations, int *locations_counts, int rand_count, MyType3I repetitions, MyType3 distances, cudaStream_t work_stream);
 	void DestroyUnitcell(cudaStream_t work_stream);
 	void RunSim(MyComplex* qpar, MyComplex* q, MyComplex* qpoints_xy, MyComplex* qpoints_z_coeffs, int qcount, MyComplex* coefficients, MyType* intensities, int shape_count, MyComplex *sfs, cudaStream_t work_stream);
-	void Update(MyType* rands, int qcount, MyType* params, int shape_count, cudaStream_t work_stream);
+	void Update(MyType* rands, int qcount, MyType2* params, int shape_count, cudaStream_t work_stream);
 }
 #endif

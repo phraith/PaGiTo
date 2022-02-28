@@ -56,3 +56,15 @@ const MyType3I &FlatUnitcellV2::Repetitons() const{
 const MyType3 &FlatUnitcellV2::Translation() const{
     return translation_;
 }
+
+std::vector<int> FlatUnitcellV2::LocationCounts() const {
+    std::vector<int> location_counts;
+    for (int j = 0; j < ShapeTypes().size(); ++j) {
+        int loc_start_idx = PositionIndices().at(j);
+        int loc_end_idx = (j + 1 < PositionIndices().size())
+                          ? PositionIndices().at(
+                        j + 1) : Positions().size();
+        location_counts.emplace_back(loc_end_idx - loc_start_idx);
+    }
+    return location_counts;
+}

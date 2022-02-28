@@ -6,7 +6,6 @@
 #include <string>
 
 #include <common/beam_configuration.h>
-#include <common/detector.h>
 
 #include "vector_types.h"
 #include "parameter_definitions/detector_setup.h"
@@ -15,7 +14,7 @@
 class QGrid
 {
 public:
-	QGrid(const DetectorSetup& detector, const std::vector<int>& position_offsets, const BeamConfiguration& beam_config, std::complex<MyType> refractive_index);
+	QGrid(const DetectorConfiguration& detector, const std::vector<int>& position_offsets, const BeamConfiguration& beam_config, std::complex<MyType> refractive_index);
 
 	const std::vector<std::complex<MyType>> &QPointsXY() const;
 	const std::vector<std::complex<MyType>> &QPointsZCoeffs() const;

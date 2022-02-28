@@ -35,6 +35,8 @@ public:
 
     const MyType3I &Repetitons() const;
 
+    std::vector<int> LocationCounts() const;
+
 private:
     const std::vector<MyType2> parameters_;
     const std::vector<int> parameter_indices_;

@@ -13,12 +13,12 @@
 
 class ExperimentalSetup {
 public:
-    ExperimentalSetup(const DetectorSetup &detector_setup, ScatteringSetup scattering_setup, SubstrateSetup substrate_setup);
+    ExperimentalSetup(const DetectorConfiguration &detector_setup, ScatteringSetup scattering_setup, SubstrateSetup substrate_setup);
 
 private:
-    const DetectorSetup detector_setup_;
+    const DetectorConfiguration detector_setup_;
 public:
-    const DetectorSetup &DetectorParameters();
+    const DetectorConfiguration &DetectorParameters();
 
     const ScatteringSetup &ScatteringParameters();
 

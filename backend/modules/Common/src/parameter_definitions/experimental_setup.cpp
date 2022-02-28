@@ -4,7 +4,7 @@
 
 #include "parameter_definitions/experimental_setup.h"
 
-ExperimentalSetup::ExperimentalSetup(const DetectorSetup &detector_setup, ScatteringSetup scattering_setup,
+ExperimentalSetup::ExperimentalSetup(const DetectorConfiguration &detector_setup, ScatteringSetup scattering_setup,
                                      SubstrateSetup substrate_setup)
         :
         detector_setup_(detector_setup),
@@ -12,7 +12,7 @@ ExperimentalSetup::ExperimentalSetup(const DetectorSetup &detector_setup, Scatte
         substrate_setup_(substrate_setup)
         {}
 
-const DetectorSetup &ExperimentalSetup::DetectorParameters()  {
+const DetectorConfiguration &ExperimentalSetup::DetectorParameters()  {
     return detector_setup_;
 }
 

@@ -8,7 +8,7 @@
 #include "common/standard_defs.h"
 #include "common/timer.h"
 
-QGrid::QGrid(const DetectorSetup& detector, const std::vector<int>& position_offsets, const BeamConfiguration& beam_config, std::complex<MyType> refractive_index)
+QGrid::QGrid(const DetectorConfiguration& detector, const std::vector<int>& position_offsets, const BeamConfiguration& beam_config, std::complex<MyType> refractive_index)
 	:
 	resolution_(detector.Resolution()),
 	direct_beam_location_(detector.Directbeam()),

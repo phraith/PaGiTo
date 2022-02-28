@@ -114,10 +114,10 @@
 //    MyType3 distances = { unitcell.at("distances")[0], unitcell.at("distances")[1], unitcell.at("distances")[2] };
 //
 //    std::shared_ptr<ExperimentalModel> experimental_model = std::make_shared<ExperimentalModel>(
-//        DetectorSetup(pixelsize, sdd, directbeam, resolution),
+//        DetectorConfiguration(pixelsize, sdd, directbeam, resolution),
 //        offsets,
 //        BeamConfiguration{ alphai * 0.017453, {1,1}, wavelength, 0.1 },
-//        Sample{ Layer {sub_delta, sub_beta, -1, 0} , std::vector<Layer>{} }, sdd, 0);
+//        SampleConfiguration{ Layer {sub_delta, sub_beta, -1, 0} , std::vector<Layer>{} }, sdd, 0);
 //
 //    //experimental_model->PrintInfo();
 //

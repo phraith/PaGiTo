@@ -9,11 +9,11 @@
 #include <string>
 #include "standard_vector_types.h"
 
-class DetectorSetup {
+class DetectorConfiguration {
 public:
-    DetectorSetup();
-    DetectorSetup(MyType pixelsize, MyType sampleDistance, MyType2I beamImpact, MyType2I resolution);
-    bool operator== (const DetectorSetup& detector_setup);
+    DetectorConfiguration();
+    DetectorConfiguration(MyType pixelsize, MyType sampleDistance, MyType2I beamImpact, MyType2I resolution);
+    bool operator== (const DetectorConfiguration& detector_setup);
 
 public:
     [[nodiscard]] MyType Pixelsize() const;
@@ -23,6 +23,8 @@ public:
     [[nodiscard]] const MyType2I &Directbeam() const;
 
     [[nodiscard]] const MyType2I &Resolution() const;
+
+    [[nodiscard]] int PixelCount() const;
 
     [[nodiscard]] std::string InfoStr() const;
 private:
