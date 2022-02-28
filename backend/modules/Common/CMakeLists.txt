@@ -12,7 +12,6 @@ target_sources(
         CommonLib
         PRIVATE src/common/uuid_generator.cpp
         src/common/beam_configuration.cpp
-        src/common/experimental_model.cpp
         src/common/fitting_parameter.cpp
         src/common/layer.cpp
         src/common/device.cpp
@@ -20,7 +19,6 @@ target_sources(
         src/common/image_data.cpp
         src/common/simulation_description.cpp
         src/common/sample.cpp
-        src/parameter_definitions/experimental_setup.cpp
         src/parameter_definitions/experimental_setup.cpp
         src/parameter_definitions/detector_setup.cpp
         src/parameter_definitions/scattering_setup.cpp
@@ -40,7 +38,6 @@ target_sources(
         inc/parameter_definitions/detector_setup.h
         inc/parameter_definitions/experimental_setup.h
         inc/common/beam_configuration.h
-        inc/common/experimental_model.h
         inc/common/fitting_parameter.h
         inc/common/layer.h
         inc/common/sample.h
