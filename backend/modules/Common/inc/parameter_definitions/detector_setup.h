@@ -2,18 +2,18 @@
 // Created by Phil on 09.01.2022.
 //
 
-#ifndef GISAXSMODELINGFRAMEWORK_DETECTOR_SETUP_H
-#define GISAXSMODELINGFRAMEWORK_DETECTOR_SETUP_H
+#ifndef GISAXSMODELINGFRAMEWORK_DETECTOR_CONFIGURATION_H
+#define GISAXSMODELINGFRAMEWORK_DETECTOR_CONFIGURATION_H
 
 
 #include <string>
 #include "standard_vector_types.h"
+#include "transformation_container.h"
 
 class DetectorConfiguration {
 public:
-    DetectorConfiguration();
-    DetectorConfiguration(MyType pixelsize, MyType sampleDistance, MyType2I beamImpact, MyType2I resolution);
-    bool operator== (const DetectorConfiguration& detector_setup);
+    explicit DetectorConfiguration(GisaxsTransformationContainer::DetectorContainer detector_container);
+    bool operator== (const DetectorConfiguration& detector_setup) const;
 
 public:
     [[nodiscard]] MyType Pixelsize() const;

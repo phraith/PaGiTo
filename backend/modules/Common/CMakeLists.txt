@@ -28,6 +28,8 @@ target_sources(
         src/common/unitcell_utility.cpp
         src/common/job_meta_information.cpp
         src/common/experimental_data.cpp
+        src/parameter_definitions/transformation_container.cpp
+        inc/parameter_definitions/transformation_container.h
         inc/common/job_meta_information.h
         inc/common/experimental_data.h
         inc/common/unitcell_utility.h

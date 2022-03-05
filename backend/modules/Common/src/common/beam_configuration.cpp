@@ -5,13 +5,13 @@
 
 
 
-BeamConfiguration::BeamConfiguration(double alpha_i, MyType2I beam_direction, double wavelength, double coherency_ratio)
+BeamConfiguration::BeamConfiguration(double deg_alpha_i, MyType2I beam_direction, double photon_ev, double coherency_ratio)
 	:
-	alpha_i_(alpha_i),
+	alpha_i_(deg_alpha_i * 0.017453),
 	beam_direction_(beam_direction),
-	wavelength_(wavelength),
+	wavelength_(1239.84 / photon_ev),
 	coherency_ratio_(coherency_ratio),
-	k0_(2 * M_PI / wavelength)
+	k0_(2 * M_PI / wavelength_)
 {
 }
 

@@ -8,11 +8,11 @@
 class BeamConfiguration
 {
 public:
-	BeamConfiguration(double alpha_i, MyType2I beam_direction, double wavelength, double coherency_ratio);
+	BeamConfiguration(double deg_alpha_i, MyType2I beam_direction, double photon_ev, double coherency_ratio);
 
-	double AlphaI() const;
-	const MyType2I& BeamDirection() const;
-	double K0() const;
+	[[nodiscard]] double AlphaI() const;
+	[[nodiscard]] const MyType2I& BeamDirection() const;
+	[[nodiscard]] double K0() const;
 
 	std::string InfoStr() const;
 private:

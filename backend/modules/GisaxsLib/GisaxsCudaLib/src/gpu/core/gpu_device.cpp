@@ -144,8 +144,9 @@ SimData GpuDevice::RunGISAXS(const SimJob &descr, const ImageData *real_img, boo
                    dev_coefficients.Get(), dev_sim_intensities.Get(), unitcell.ShapeTypes().size(), dev_sfs.Get(),
                    work_stream->Get());
 
-    max(dev_sim_intensities.Get(), dev_sim_intensities.Size(), dev_partial_sums.Get(), dev_max.Get(),
-        work_stream->Get());
+    CalculateMaximumIntensity(dev_sim_intensities.Get(), dev_sim_intensities.Size(), dev_partial_sums.Get(),
+                              dev_max.Get(),
+                              work_stream->Get());
 
     Preprocess(dev_sim_intensities.Get(), dev_sim_intensities.Size(), dev_sim_intensities_prep.Get(), dev_max.Get(),
                work_stream->Get());
@@ -283,5 +284,5 @@ int GpuDevice::Runs() const {
 }
 
 std::string GpuDevice::Name() const {
-    return std::string(info_.name);
+    return info_.name;
 }

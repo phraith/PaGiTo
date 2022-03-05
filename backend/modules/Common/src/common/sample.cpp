@@ -4,7 +4,7 @@
 #include "common/standard_constants.h"
 #include <cassert>
 
-SampleConfiguration::SampleConfiguration(Layer substrate, std::vector<Layer> layers)
+SampleConfiguration::SampleConfiguration(Layer substrate, const std::vector<Layer>& layers)
 	:
 	layers_({ Layer {0, 0, 0 , 0} })
 {

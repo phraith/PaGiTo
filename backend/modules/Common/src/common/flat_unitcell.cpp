@@ -5,55 +5,53 @@
 #include <utility>
 #include "common/flat_unitcell.h"
 
-FlatUnitcellV2::FlatUnitcellV2(std::vector<MyType2> parameters, std::vector<int> parameter_indices,
-                               std::vector<MyType2> upper_bounds, std::vector<MyType2> lower_bounds,
-                               std::vector<ShapeTypeV2> shape_types, std::vector<MyType3> positions,
-                               std::vector<int> postion_indices, MyType3I repetitons, MyType3 translation)
+FlatUnitcellV2::FlatUnitcellV2(GisaxsTransformationContainer::FlatShapeContainer shape_container, MyType3I repetitions,
+                               MyType3 translation)
         :
-        parameters_(std::move(parameters)),
-        parameter_indices_(std::move(parameter_indices)),
-        upper_bounds_(std::move(upper_bounds)),
-        lower_bounds_(std::move(lower_bounds)),
-        shape_types_(std::move(shape_types)),
-        positions_(std::move(positions)),
-        position_indices_(std::move(postion_indices)),
-        repetitons_(repetitons),
+        parameters_(std::move(shape_container.parameters)),
+        parameter_indices_(std::move(shape_container.parameter_indices)),
+        upper_bounds_(std::move(shape_container.upper_bounds)),
+        lower_bounds_(std::move(shape_container.lower_bounds)),
+        shape_types_(std::move(shape_container.shape_types)),
+        positions_(std::move(shape_container.positions)),
+        position_indices_(std::move(shape_container.position_indices)),
+        repetitons_(repetitions),
         translation_(translation) {
 }
 
-const std::vector<MyType2> &FlatUnitcellV2::LowerBounds() const{
+const std::vector<MyType2> &FlatUnitcellV2::LowerBounds() const {
     return lower_bounds_;
 }
 
-const std::vector<ShapeTypeV2> &FlatUnitcellV2::ShapeTypes() const{
+const std::vector<ShapeTypeV2> &FlatUnitcellV2::ShapeTypes() const {
     return shape_types_;
 }
 
-const std::vector<MyType2> &FlatUnitcellV2::UpperBounds() const{
+const std::vector<MyType2> &FlatUnitcellV2::UpperBounds() const {
     return upper_bounds_;
 }
 
-const std::vector<int> &FlatUnitcellV2::ParameterIndices() const{
+const std::vector<int> &FlatUnitcellV2::ParameterIndices() const {
     return parameter_indices_;
 }
 
-const std::vector<MyType2> &FlatUnitcellV2::Parameters() const{
+const std::vector<MyType2> &FlatUnitcellV2::Parameters() const {
     return parameters_;
 }
 
-const std::vector<MyType3> &FlatUnitcellV2::Positions() const{
+const std::vector<MyType3> &FlatUnitcellV2::Positions() const {
     return positions_;
 }
 
-const std::vector<int> &FlatUnitcellV2::PositionIndices() const{
+const std::vector<int> &FlatUnitcellV2::PositionIndices() const {
     return position_indices_;
 }
 
-const MyType3I &FlatUnitcellV2::Repetitons() const{
+const MyType3I &FlatUnitcellV2::Repetitons() const {
     return repetitons_;
 }
 
-const MyType3 &FlatUnitcellV2::Translation() const{
+const MyType3 &FlatUnitcellV2::Translation() const {
     return translation_;
 }
 

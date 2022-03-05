@@ -15,11 +15,12 @@ endif (MSVC)
 #creating library
 add_library(GisaxsCudaLib
         STATIC
-        )
+        src/gpu/core/gpu_device_v2.cpp inc/gpu/core/gpu_device_v2.h)
 
 target_sources(GisaxsCudaLib
         PRIVATE
         src/gpu/core/gisaxs_functions.cu
+        src/gpu/core/gisaxs_functions_v2.cu
         src/gpu/core/gpu_qgrid.cu
         src/gpu/ff/cylinder.cu
         src/gpu/ff/sphere.cu
@@ -38,6 +39,7 @@ target_sources(GisaxsCudaLib
         inc/gpu/core/gpu_qgrid.h
         inc/gpu/core/gpu_memory_provider_v2.h
         inc/gpu/core/gisaxs_functions.h
+        inc/gpu/core/gisaxs_functions_v2.h
         inc/gpu/ff/sphere.h
         inc/gpu/ff/cylinder.h
         inc/gpu/ff/trapezoid.h
@@ -56,7 +58,7 @@ target_sources(GisaxsCudaLib
 
 target_compile_options(GisaxsCudaLib PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
         --use_fast_math
-        --ptxas-options=-v
+        #--ptxas-options=-v
         --generate-line-info
         >)
 

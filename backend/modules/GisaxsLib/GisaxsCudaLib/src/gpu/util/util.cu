@@ -3,8 +3,6 @@
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
-#include "stdio.h"
-
 __global__ void reduce_sum(float* in, float* sum, int n) {
     extern __shared__ float sdata[];
 
@@ -65,7 +63,6 @@ __global__ void reduce_scaled_diff(float* in_real, float* in_sim, float* sum, fl
 
 
     float local_sum = 0;
-    float epsilon = 0.00000001;
     for (int i = blockDim.x * blockIdx.x + tid; i < n; i += blockDim.x * gridDim.x)
     {
 
@@ -129,9 +126,6 @@ __global__ void reorder(float* in, float* out, int size, int width, int height, 
     int tid = threadIdx.x;
 
     int blockMaxX = width / blocksize;
-    int blockMaxY = height / blocksize;
-
-    int blockCount = blockMaxX * blockMaxY;
 
     int blockCells = blocksize * blocksize;
     for (int i = blockDim.x * blockIdx.x + tid; i < size ; i += blockDim.x * gridDim.x)
@@ -183,7 +177,7 @@ __global__ void reduce_max(float* in, float* sum, int n) {
     }
 }
 
-void max(float* data, int size, float* partial_sums, float* res, cudaStream_t work_stream)
+void CalculateMaximumIntensity(float* data, int size, float* partial_sums, float* res, cudaStream_t work_stream)
 {
     int num_threads = 256;
     int num_blocks = 256;

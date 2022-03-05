@@ -105,7 +105,7 @@
 //
 //
 //		std::cout << "champion_fitness..." << std::endl;
-//		double current_min = std::numeric_limits<MyType>::max();
+//		double current_min = std::numeric_limits<MyType>::CalculateMaximumIntensity();
 //		int min_index = -1;
 //
 //

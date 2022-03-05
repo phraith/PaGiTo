@@ -10,10 +10,10 @@ class Layer
 {
 public:
 	Layer(MyType delta, MyType beta, int order, MyType thickness);
-	const std::complex<MyType>& N2MinusOne() const;
-	MyType Z() const;
+	[[nodiscard]] const std::complex<MyType>& N2MinusOne() const;
+	[[nodiscard]] MyType Z() const;
 	void SetZ(MyType new_z);
-	MyType Thickness() const;
+	[[nodiscard]] MyType Thickness() const;
 
 private:
 	int order_;

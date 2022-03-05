@@ -2,10 +2,6 @@
 
 #include "gpu/util/cuda_numerics.h"
 
-#include "common/standard_constants.h"
-
-#include "stdio.h"
-
 __device__ CylinderFF::CylinderFF(MyType2 radius, MyType2 height, int rand_count)
     :
     radius_(radius),
@@ -51,7 +47,7 @@ __device__ MyComplex CylinderFF::Evaluate2(MyComplex qpar, MyComplex q, MyComple
 {
     MyType radius = rand_rads_[rand_idx];
     MyType height = rand_heights_[rand_idx];
-    
+
     MyType     temp1 = 2 * PI_ * radius * radius * height;
     MyComplex temp2 = { 0,0 };
 

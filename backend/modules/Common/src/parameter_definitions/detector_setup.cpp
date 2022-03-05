@@ -3,13 +3,17 @@
 //
 
 #include "parameter_definitions/detector_setup.h"
+#include "parameter_definitions/transformation_container.h"
 
-DetectorConfiguration::DetectorConfiguration(MyType pixelsize, MyType sampleDistance, MyType2I beamImpact, MyType2I resolution)
-        : pixelsize_(pixelsize), sample_distance_(sampleDistance), directbeam_(beamImpact), resolution_(resolution) {
+using namespace GisaxsTransformationContainer;
+
+DetectorConfiguration::DetectorConfiguration(DetectorContainer detector_container)
+        : pixelsize_(detector_container.pixelsize), sample_distance_(detector_container.sampleDistance),
+          directbeam_(detector_container.beamImpact), resolution_(detector_container.resolution) {
 
 }
 
-bool DetectorConfiguration::operator==(const DetectorConfiguration &detector_setup) {
+bool DetectorConfiguration::operator==(const DetectorConfiguration &detector_setup) const {
     return
             pixelsize_ == detector_setup.pixelsize_ &&
             sample_distance_ == detector_setup.sample_distance_ &&
@@ -35,18 +39,14 @@ const MyType2I &DetectorConfiguration::Resolution() const {
     return resolution_;
 }
 
-std::string DetectorConfiguration::InfoStr() const
-{
-    std::string info = "";
+std::string DetectorConfiguration::InfoStr() const {
+    std::string info;
     info += "DetectorConfiguration info:\n";
     info += "	-pixel_size in mm: " + std::to_string(pixelsize_) + "\n";
     info += "	-resolution (x, y): " + std::to_string(resolution_.x) + ", " + std::to_string(resolution_.y) + "\n";
-    info += "	-direct beam location in mm (x, y): " + std::to_string(directbeam_.x * pixelsize_) + ", " + std::to_string(directbeam_.y * pixelsize_) + "\n";
+    info += "	-direct beam location in mm (x, y): " + std::to_string(directbeam_.x * pixelsize_) + ", " +
+            std::to_string(directbeam_.y * pixelsize_) + "\n";
     return info;
-}
-
-DetectorConfiguration::DetectorConfiguration() {
-
 }
 
 int DetectorConfiguration::PixelCount() const {

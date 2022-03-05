@@ -12,6 +12,7 @@
 #include "gpu/util/cuda_numerics.h"
 #include "common/flat_unitcell.h"
 
+
 __constant__ DevUnitcell* dunitcell;
 
 __global__ void update_unitcell(MyType2* params, int shape_count)
@@ -21,7 +22,7 @@ __global__ void update_unitcell(MyType2* params, int shape_count)
 	for (int i = 0; i < shape_count; ++i)
 	{
 		ShapeFF* shape = dunitcell->GetShape(i);
-		
+
 		switch (shape->Type())
 		{
 		case ShapeTypeV2::cylinder:
@@ -555,7 +556,7 @@ __global__ void cuda_run_gisaxs(MyType2* qpoints_xy, MyType2* qz, MyComplex4* co
 	{
 		void CreateUnitcell(DevUnitcell** dev_unitcell, ShapeTypeV2* shape_types, int shape_count, MyType3 *locations, int *locations_counts, int rand_count, MyType3I repetitions, MyType3 distances, cudaStream_t work_stream)
 		{
-			
+
 			create_unitcell << < 1, 1, 0, work_stream >> > (dev_unitcell, shape_types, shape_count, locations, locations_counts, rand_count, repetitions, distances);
 			cudaMemcpyToSymbol(dunitcell, &(*dev_unitcell), sizeof(DevUnitcell *), 0, cudaMemcpyDeviceToDevice);
 		}
@@ -564,7 +565,7 @@ __global__ void cuda_run_gisaxs(MyType2* qpoints_xy, MyType2* qz, MyComplex4* co
 		{
 			destroy_unitcell << < 1, 1, 0, work_stream >> > ();
 		}
-		
+
 		void Update(MyType* rands, int qcount, MyType2* params, int shape_count, cudaStream_t work_stream)
 		{
 			int m = COHERENCY_DRAW_RATIO.x;
@@ -576,11 +577,8 @@ __global__ void cuda_run_gisaxs(MyType2* qpoints_xy, MyType2* qz, MyComplex4* co
 
 		void RunSim(MyComplex* qpar, MyComplex* q, MyComplex* qpoints_xy, MyComplex* qpoints_z_coeffs, int qcount, MyComplex* coefficients, MyType* intensities, int shape_count, MyComplex *sfs, cudaStream_t work_stream)
 		{
-			int m = COHERENCY_DRAW_RATIO.x;
-			int n = COHERENCY_DRAW_RATIO.y;
-
 			int threads = 128;
-			int calculations = qcount * n;
+			int calculations = qcount * COHERENCY_DRAW_RATIO.y;
 			int blocks = calculations / threads + 1;
 			//int blocks = 1024;
 

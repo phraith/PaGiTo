@@ -58,6 +58,11 @@ __device__ void real_space_to_q(MyType alpha_i, MyType k0, MyType pixelsize, MyT
     MyComplex q2 = cuCsqrt(cuCaddf(prefactor3, qz12));
     MyComplex q3 = cuCsqrt(cuCaddf(prefactor3, qz22));
     MyComplex q4 = cuCsqrt(cuCaddf(prefactor3, qz32));
+
+    qgrid_container.dev_q[q_idx] = q1;
+    qgrid_container.dev_q[q_idx + qcount] = q2;
+    qgrid_container.dev_q[q_idx + 2 * qcount] = q3;
+    qgrid_container.dev_q[q_idx + 3 * qcount] = q4;
 }
 
 __global__ void

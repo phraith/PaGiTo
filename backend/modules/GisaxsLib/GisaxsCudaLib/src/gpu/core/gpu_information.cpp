@@ -7,6 +7,7 @@
 #include <cuda.h>
 
 #include "gpu/core/gpu_helper.h"
+#include "gpu/core/gpu_device_v2.h"
 
 namespace gpu_info
 {
@@ -42,15 +43,15 @@ namespace gpu_info
 
 
 
-	std::vector<std::shared_ptr<GpuDevice>> GetGpuInfo()
+	std::vector<std::shared_ptr<Device>> GetGpuInfo()
 	{
 		int deviceCount = 0;
 		gpuErrchk(cudaGetDeviceCount(&deviceCount));
 
-		std::vector<std::shared_ptr<GpuDevice>> deviceProperties;
+		std::vector<std::shared_ptr<Device>> deviceProperties;
 		for (int i = 0; i < deviceCount; ++i)
 		{
-			gpu_info_t info;
+            gpu_info_t info;
 			
 			cuDeviceGetName(info.name, 256, i);
 
@@ -61,7 +62,7 @@ namespace gpu_info
 			for (auto it = attrib_map.begin(); it != attrib_map.end(); ++it)
 				gpuErrchk(cudaDeviceGetAttribute(&it->second, it->first, i));
 
-			deviceProperties.emplace_back(std::make_shared<GpuDevice>( info, i ));
+			deviceProperties.emplace_back(std::make_shared<GpuDeviceV2::GpuDeviceV2>( info, i ));
 		}
 
 		return deviceProperties;

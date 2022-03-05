@@ -18,14 +18,11 @@ struct TransRef
 class SampleConfiguration
 {
 public:
-	SampleConfiguration(Layer substrate, std::vector<Layer> layers);
+	SampleConfiguration(Layer substrate, const std::vector<Layer>& layers);
 	SampleConfiguration(const SampleConfiguration &sample);
 
 	void InsertLayer(MyType delta, MyType beta, int order, MyType thickness);
-//	TransRef ParratsRecursion(MyType alpha, MyType k0, int order) const;
-//	std::vector<MyComplex4> PropagationCoeffs(MyType alpha_i, const std::vector<MyType>& alpha_fs, MyType k0, MyType order) const;
-//	std::vector<MyComplex> PropagationCoeffsTopBuried(const DetectorConfiguration &detector, const BeamConfiguration &beam_config) const;
-    const std::deque<Layer> &Layers() const;
+    [[nodiscard]] const std::deque<Layer> &Layers() const;
 	std::complex<MyType> TopMostN2();
 	std::complex<MyType> N2M1OfLevel(int level);
 	std::complex<MyType> SubstrateN2M1();

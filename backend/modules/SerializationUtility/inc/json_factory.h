@@ -1,0 +1,17 @@
+//
+// Created by Phil on 09.01.2022.
+//
+
+#ifndef GISAXSMODELINGFRAMEWORK_JSON_FACTORY_H
+#define GISAXSMODELINGFRAMEWORK_JSON_FACTORY_H
+
+
+class JsonFactory {
+public:
+
+private:
+
+};
+
+
+#endif //GISAXSMODELINGFRAMEWORK_JSON_FACTORY_H

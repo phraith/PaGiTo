@@ -6,7 +6,7 @@ Layer::Layer(MyType delta, MyType beta, int order, MyType thickness)
 	:
 	order_(order),
 	thickness_(thickness),
-	n2_minus_one_(std::complex(MYTYPE_2 * delta, MYTYPE_2 * beta)),
+	n2_minus_one_(MYTYPE_2 * delta, MYTYPE_2 * beta),
 	zval_(0)
 {
 }

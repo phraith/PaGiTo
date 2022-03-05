@@ -11,11 +11,11 @@
 
 namespace GisaxsModeling
 {
-    UnitcellV2 CreateFromJson(nlohmann::json unitcell);
-    UnitcellV2 Convert(FlatUnitcellV2 flat_unitcell);
+//    UnitcellV2 CreateFromJson(nlohmann::json unitcell);
+//    UnitcellV2 Convert(FlatUnitcellV2 flat_unitcell);
     FlatUnitcellV2 Convert(const UnitcellV2 &unitcell);
 
-    std::unique_ptr<Shape> CreateShape(ShapeTypeV2 shape_type, const nlohmann::json &json);
+    //std::unique_ptr<Shape> CreateShape(ShapeTypeV2 shape_type, const nlohmann::json &json);
 }
 
 #endif //GISAXSMODELINGFRAMEWORK_UNITCELL_UTILITY_H

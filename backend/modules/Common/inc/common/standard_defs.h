@@ -3,13 +3,19 @@
 
 #include <vector>
 #include <string>
-
+#include "nlohmann/json.hpp"
 #include "standard_vector_types.h"
 
 //enum class ShapeType { kSphere = 0, kCylinder = 1, kTrapezoid = 2};
 enum class ShapeTypeV2 {
     sphere=0, cylinder=1
 };
+
+NLOHMANN_JSON_SERIALIZE_ENUM(ShapeTypeV2, {
+{ ShapeTypeV2::sphere, "sphere" },
+{ ShapeTypeV2::cylinder, "cylinder" }
+})
+
 //static std::string ShapeTypeToString(ShapeType type)
 //{
 //    switch (type)

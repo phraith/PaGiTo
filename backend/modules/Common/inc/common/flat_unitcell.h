@@ -8,14 +8,12 @@
 #include <vector>
 #include "standard_vector_types.h"
 #include "standard_defs.h"
+#include "parameter_definitions/transformation_container.h"
 
 
 class FlatUnitcellV2 {
 public:
-    FlatUnitcellV2(std::vector<MyType2> parameters, std::vector<int> parameter_indices,
-                   std::vector<MyType2> upper_bounds, std::vector<MyType2> lower_bounds,
-                   std::vector<ShapeTypeV2> shape_types, std::vector<MyType3> positions,
-                   std::vector<int> postion_indices, MyType3I repetitons, MyType3 translation);
+    FlatUnitcellV2(GisaxsTransformationContainer::FlatShapeContainer shape_container, MyType3I repetitions, MyType3 translation);
 
     const std::vector<MyType2> &Parameters() const;
 
