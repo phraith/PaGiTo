@@ -26,7 +26,6 @@ target_sources(ModelFitterLib
 target_link_libraries(  ModelFitterLib 
                             PUBLIC
                               ModelSimulatorLib
-                              SerializedGisaxsLib
                               CommonLib
                             PRIVATE
                               Pagmo::pagmo

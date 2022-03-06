@@ -23,7 +23,7 @@ endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-add_subdirectory(extern/serialization)
+#add_subdirectory(extern/serialization)
 
 add_subdirectory(modules/Common)
 add_subdirectory(modules/ConnectionUtility)

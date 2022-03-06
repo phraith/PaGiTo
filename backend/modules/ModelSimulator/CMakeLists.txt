@@ -35,7 +35,7 @@ endif ()
 
 target_link_libraries(
         ModelSimulatorLib
-        PUBLIC CommonLib SerializedGisaxsLib GisaxsLib ConnectionUtility nlohmann_json
+        PUBLIC CommonLib GisaxsLib ConnectionUtility nlohmann_json
         nlohmann_json::nlohmann_json
         PRIVATE cppzmq)
 

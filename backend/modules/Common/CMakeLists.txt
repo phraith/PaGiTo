@@ -56,4 +56,3 @@ target_sources(
 target_include_directories(CommonLib PUBLIC inc)
 
 target_link_libraries(CommonLib PUBLIC nlohmann_json nlohmann_json::nlohmann_json)
-target_include_directories(CommonLib PUBLIC inc/host_types)

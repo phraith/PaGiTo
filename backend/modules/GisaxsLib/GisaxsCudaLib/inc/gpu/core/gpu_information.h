@@ -5,7 +5,7 @@
 #include <memory>
 #include "common/device.h"
 
-namespace gpu_info
+namespace GpuInfo
 {
     std::vector<std::shared_ptr<Device>> GetGpuInfo();
 }

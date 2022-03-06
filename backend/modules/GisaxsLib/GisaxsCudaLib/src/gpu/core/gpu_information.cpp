@@ -9,7 +9,7 @@
 #include "gpu/core/gpu_helper.h"
 #include "gpu/core/gpu_device_v2.h"
 
-namespace gpu_info
+namespace GpuInfo
 {
 	std::map<cudaDeviceAttr, int&> GetAttribMapForGpuInfo(gpu_info_t& info)
 	{
