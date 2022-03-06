@@ -1,6 +1,5 @@
 #include "util/hardware_information.h"
-
-#include <iostream>
+#include "util/cpu_information.h"
 
 #ifdef CUDA_GPUS_AVAILABLE
 
@@ -11,12 +10,10 @@ using namespace GpuInfo;
 
 #endif //CUDA_GPUS_AVAILABLE
 
-using namespace CpuInfo;
-
 
 HardwareInformation::HardwareInformation()
 	:
-	cpu_info_(GetCpuInfo())
+	cpu_info_(CpuInfo::GetCpuInfo())
 {
     devices_.emplace_back(std::make_shared<CpuDevice>());
 #ifdef CUDA_GPUS_AVAILABLE
@@ -40,7 +37,7 @@ Device* HardwareInformation::FindFreeDevice()
 	return nullptr;
 }
 
-const std::vector<cpu_info_t>& HardwareInformation::CpuInfo() const
+const std::vector<CpuInfo::cpu_info_t>& HardwareInformation::CpuInfo() const
 {
 	return cpu_info_;
 }

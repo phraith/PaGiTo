@@ -7,7 +7,7 @@
 
 #include <Windows.h>
 
-namespace cpu_info
+namespace CpuInfo
 {
     static PCSTR szCacheType[] = {
         "Unified",

@@ -25,12 +25,11 @@ add_library(
         inc/util/sim_result.h)
 
 if (UNIX)
-
     target_sources(ModelSimulatorLib
-            PRIVATE src/util/linux/linux_cpu_information.cpp)
+            PRIVATE src/util/linux/cpu_information.cpp)
 elseif (WIN32)
     target_sources(ModelSimulatorLib
-            PRIVATE src/util/windows/win_cpu_information.cpp)
+            PRIVATE src/util/windows/cpu_information.cpp)
 endif ()
 
 target_link_libraries(
