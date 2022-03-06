@@ -5,7 +5,7 @@
 
 #include <complex>
 #include <map>
-#include "../inc/gisaxs_cpu_core.h"
+#include "gisaxs_cpu_core.h"
 #include "common/standard_constants.h"
 
 typedef std::complex<MyType> (*formfactor)(std::complex<MyType> qpar, std::complex<MyType> q, std::complex<MyType> qz,
@@ -50,33 +50,33 @@ GisaxsCpuCore::CalculateStructureFactors(const std::vector<std::complex<MyType>>
                 GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz1, dz, repetitions
                         .z);
         structure_factors[i + qcount] =
-                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz1, dx, repetitions
+                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz2, dx, repetitions
                         .x)
                 *
-                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz1, dy, repetitions
+                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz2, dy, repetitions
                         .y)
                 *
-                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz1, dz, repetitions
+                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz2, dz, repetitions
                         .z);
 
         structure_factors[i + 2 * qcount] =
-                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz1, dx, repetitions
+                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz3, dx, repetitions
                         .x)
                 *
-                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz1, dy, repetitions
+                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz3, dy, repetitions
                         .y)
                 *
-                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz1, dz, repetitions
+                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz3, dz, repetitions
                         .z);
 
         structure_factors[i + 3 * qcount] =
-                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz1, dx, repetitions
+                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz4, dx, repetitions
                         .x)
                 *
-                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz1, dy, repetitions
+                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz4, dy, repetitions
                         .y)
                 *
-                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz1, dz, repetitions
+                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz4, dz, repetitions
                         .z);
     }
 
@@ -106,7 +106,7 @@ GisaxsCpuCore::CalculateSphereFF(std::complex<MyType> qpar, std::complex<MyType>
     MyType radius = (random_number * radius_base.y) + radius_base.x;
 
     std::complex<MyType> qr = q * radius;
-    if (abs(radius) < 1.0e-13) {
+    if (std::abs(radius) < 1.0e-13) {
         return 0;
     }
 
