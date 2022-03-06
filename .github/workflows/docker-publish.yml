@@ -16,3 +16,4 @@ jobs:
     - uses: actions/checkout@v2
     - run: chmod +x backend/build.sh
     - run:  ./backend/build.sh
+    - run: ./backend/build/tests/GisaxsTests
