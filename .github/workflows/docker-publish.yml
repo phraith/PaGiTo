@@ -13,4 +13,5 @@ jobs:
       volumes:
         - ${{ github.workspace }}/backend:/github/home/source
     steps:
-    - run:  cd /github/home/source/ && ls
+    - uses: actions/checkout@v2
+    - run:  ./backend/build.sh
