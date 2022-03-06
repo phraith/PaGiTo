@@ -6,25 +6,24 @@
 #define GISAXSMODELINGFRAMEWORK_TRANSFORMATION_CONTAINER_H
 
 #include <nlohmann/json.hpp>
-#include "standard_vector_types.h"
 #include "common/layer.h"
 
 using json = nlohmann::json;
 
 namespace GisaxsTransformationContainer {
     struct DetectorContainer {
-        MyType2I beamImpact;
-        MyType2I resolution;
+        Vector2<int> beamImpact;
+        Vector2<int> resolution;
         MyType pixelsize;
         MyType sampleDistance;
     };
 
     struct FlatShapeContainer {
-        std::vector<MyType2> parameters;
+        std::vector<Vector2<MyType>> parameters;
         std::vector<int> parameter_indices;
-        std::vector<MyType2> upper_bounds;
-        std::vector<MyType2> lower_bounds;
-        std::vector<MyType3> positions;
+        std::vector<Vector2<MyType>> upper_bounds;
+        std::vector<Vector2<MyType>> lower_bounds;
+        std::vector<Vector3<MyType>> positions;
         std::vector<int> position_indices;
         std::vector<ShapeTypeV2> shape_types;
     };
@@ -42,8 +41,8 @@ namespace GisaxsTransformationContainer {
     };
 
     struct UnitcellMetaContainer {
-        MyType3I repetitions;
-        MyType3 translation;
+        Vector3<int> repetitions;
+        Vector3<MyType> translation;
     };
 
     FlatShapeContainer ConvertToFlatShapes(const json &json);

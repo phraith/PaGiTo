@@ -1,8 +1,9 @@
 #ifndef GISAXS_LIB_GPU_FF_CYLINDER_CUH
 #define GISAXS_LIB_GPU_FF_CYLINDER_CUH
 
-#include "standard_vector_types.h"
 #include "common/standard_defs.h"
+#include "gpu/util/util.h"
+#include "shape.h"
 
 class CylinderFF : public ShapeFF
 {

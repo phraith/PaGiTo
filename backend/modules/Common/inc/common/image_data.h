@@ -4,8 +4,6 @@
 #include <vector>
 #include <string>
 
-#include "vector_types.h"
-
 #include "uuid_generator.h"
 
 class ImageData
@@ -14,12 +12,12 @@ public:
     ImageData(std::vector<float> intensities, std::vector<int> offsets);
     ~ImageData();
 
-    const std::vector<float> &Intensities() const;
-    const std::vector<int>& Offsets() const;
-    const std::string& Id() const ;
+    [[nodiscard]] const std::vector<float> &Intensities() const;
+    [[nodiscard]] const std::vector<int>& Offsets() const;
+    [[nodiscard]] const std::string& Id() const ;
 
-    int Size() const;
-    float MaxIntensity() const;
+    [[nodiscard]] int Size() const;
+    [[nodiscard]] float MaxIntensity() const;
 private:
     std::vector<float> intensities_;
     float max_intensity_;

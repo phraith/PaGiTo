@@ -6,13 +6,13 @@
 #include "common/propagation_coefficients.h"
 #include "common/sample.h"
 
-std::vector<MyComplex>
-GisaxsPropagationCoefficients::PropagationCoeffsTopBuried(const SampleConfiguration &sample_config,
-                                                          const DetectorConfiguration &detector,
-                                                          const BeamConfiguration &beam_config) {
+std::vector<std::complex<MyType>>
+PropagationCoefficientsCpu::PropagationCoeffsTopBuried(const SampleConfiguration &sample_config,
+                                                       const DetectorConfiguration &detector,
+                                                       const BeamConfiguration &beam_config) {
     int qcount = detector.Resolution().x * detector.Resolution().y;
 
-    std::vector<MyComplex> trans_refs(4 * qcount);
+    std::vector<std::complex<MyType>> trans_refs(4 * qcount);
     auto &substrate = sample_config.Layers().at(sample_config.Layers().size() - 1);
     const auto &ns2m1 = substrate.N2MinusOne();
 

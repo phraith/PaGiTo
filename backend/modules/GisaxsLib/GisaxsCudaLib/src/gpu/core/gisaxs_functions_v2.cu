@@ -2,8 +2,6 @@
 #include "device_launch_parameters.h"
 
 #include <cstdio>
-
-#include "standard_vector_types.h"
 #include "common/standard_constants.h"
 #include "gpu/util/cuda_numerics.h"
 #include "common/flat_unitcell.h"

@@ -5,8 +5,7 @@
 #ifndef GISAXSMODELINGFRAMEWORK_SUBSTRATE_SETUP_H
 #define GISAXSMODELINGFRAMEWORK_SUBSTRATE_SETUP_H
 
-
-#include "standard_vector_types.h"
+#include "common/standard_defs.h"
 
 class SubstrateSetup {
 public:

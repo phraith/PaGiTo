@@ -8,7 +8,6 @@
 #include "curand_kernel.h"
 
 #include "common/standard_defs.h"
-#include "standard_vector_types.h"
 
 
 namespace GpuQGrid {

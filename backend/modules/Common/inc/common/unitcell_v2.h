@@ -6,7 +6,6 @@
 #define GISAXSMODELINGFRAMEWORK_UNITCELL_V2_H
 
 #include <vector>
-#include "standard_vector_types.h"
 #include "flat_unitcell.h"
 #include <common/standard_defs.h>
 #include <memory>
@@ -14,29 +13,29 @@
 
 class Shape {
 public:
-    Shape(std::vector<MyType3> positions);
+    Shape(std::vector<Vector3<MyType>> positions);
 
-    const std::vector<MyType3> &Positions() const;
+    const std::vector<Vector3<MyType>> &Positions() const;
 
     virtual ~Shape() = default;
 
-    virtual std::vector<MyType2> PackParameters() const = 0;
+    virtual std::vector<Vector2<MyType>> PackParameters() const = 0;
 
-    virtual std::vector<MyType2> PackUpperBounds() const = 0;
+    virtual std::vector<Vector2<MyType>> PackUpperBounds() const = 0;
 
-    virtual std::vector<MyType2> PackLowerBounds() const = 0;
+    virtual std::vector<Vector2<MyType>> PackLowerBounds() const = 0;
 
     virtual ShapeTypeV2 Type() const = 0;
 
 private:
-    const std::vector<MyType3> positions_;
+    const std::vector<Vector3<MyType>> positions_;
 };
 
 class Bounds {
 public:
     Bounds(MyType lower, MyType upper);
 
-    MyType2 Pack();
+    Vector2<MyType> Pack();
 
     [[nodiscard]] MyType Upper() const;
 
@@ -52,11 +51,11 @@ class BoundedDistribution {
 public:
     BoundedDistribution(MyType mean, Bounds mean_bounds, MyType stddev, Bounds stddev_bounds);
 
-    MyType2 PackDistribution() const;
+    Vector2<MyType> PackDistribution() const;
 
-    MyType2 PackUpperBounds() const;
+    Vector2<MyType> PackUpperBounds() const;
 
-    MyType2 PackLowerBounds() const;
+    Vector2<MyType> PackLowerBounds() const;
 
 private:
     MyType mean_;
@@ -67,13 +66,13 @@ private:
 
 class Sphere : public Shape {
 public:
-    explicit Sphere(const BoundedDistribution &radius, std::vector<MyType3> positions);
+    explicit Sphere(const BoundedDistribution &radius, std::vector<Vector3<MyType>> positions);
 
-    std::vector<MyType2> PackParameters() const override;
+    std::vector<Vector2<MyType>> PackParameters() const override;
 
-    std::vector<MyType2> PackUpperBounds() const override;
+    std::vector<Vector2<MyType>> PackUpperBounds() const override;
 
-    std::vector<MyType2> PackLowerBounds() const override;
+    std::vector<Vector2<MyType>> PackLowerBounds() const override;
 
     ShapeTypeV2 Type() const override;
 
@@ -83,13 +82,13 @@ private:
 
 class Cylinder : public Shape {
 public:
-    explicit Cylinder(const BoundedDistribution &radius, const BoundedDistribution &height, std::vector<MyType3> positions);
+    explicit Cylinder(const BoundedDistribution &radius, const BoundedDistribution &height, std::vector<Vector3<MyType>> positions);
 
-    std::vector<MyType2> PackParameters() const override;
+    std::vector<Vector2<MyType>> PackParameters() const override;
 
-    std::vector<MyType2> PackUpperBounds() const override;
+    std::vector<Vector2<MyType>> PackUpperBounds() const override;
 
-    std::vector<MyType2> PackLowerBounds() const override;
+    std::vector<Vector2<MyType>> PackLowerBounds() const override;
 
     ShapeTypeV2 Type() const override;
 
@@ -100,11 +99,11 @@ private:
 
 class UnitcellV2 {
 public:
-    explicit UnitcellV2(std::vector<std::unique_ptr<Shape>> shapes, MyType3I repetitions, MyType3 translation);
+    explicit UnitcellV2(std::vector<std::unique_ptr<Shape>> shapes, Vector3<int> repetitions, Vector3<MyType> translation);
 
     const std::vector<std::unique_ptr<Shape>> &Shapes() const;
-    const MyType3 &Translation() const;
-    const MyType3I &Repetitions() const;
+    const Vector3<MyType> &Translation() const;
+    const Vector3<int> &Repetitions() const;
 
     std::vector<MyType> CurrentParams() const;
 
@@ -114,14 +113,14 @@ public:
 
     std::vector<ShapeTypeV2> Types() const;
 
-    std::vector<MyType3> Locations() const;
+    std::vector<Vector3<MyType>> Locations() const;
 
     std::vector<int> LocationCounts() const;
 
 private:
     const std::vector<std::unique_ptr<Shape>> shapes_;
-    MyType3 translation_;
-    MyType3I repetitions_;
+    Vector3<MyType> translation_;
+    Vector3<int> repetitions_;
 };
 
 

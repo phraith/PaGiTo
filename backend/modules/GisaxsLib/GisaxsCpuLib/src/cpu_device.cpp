@@ -27,9 +27,9 @@ SimData CpuDevice::RunGISAXS(const SimJob &description, const ImageData *real_im
     std::vector<std::complex<MyType>> sfs = GisaxsCpuCore::CalculateStructureFactors(qgrid.QPointsXY(),
                                                                                      qgrid.QPointsZCoeffs(),
                                                                                      flat_unitcell.Translation(),
-                                                                                     flat_unitcell.Repetitons());
+                                                                                     flat_unitcell.Repetitions());
 
-    auto prop_coefficients = GisaxsPropagationCoefficients::PropagationCoeffsTopBuried(
+    auto prop_coefficients = PropagationCoefficientsCpu::PropagationCoeffsTopBuried(
             description.ExperimentInfo().SampleConfig(), description.ExperimentInfo().DetectorConfig(),
             description.ExperimentInfo().BeamConfig());
     auto intensities = GisaxsCpuCore::CalculateIntensities(qgrid.QPar(), qgrid.Q(), qgrid.QPointsXY(),

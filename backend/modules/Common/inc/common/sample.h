@@ -2,10 +2,8 @@
 #define MODEL_FITTER_CORE_SAMPLE_H
 
 #include <queue>
-#include "vector_types.h"
 
 #include "common/layer.h"
-#include "standard_vector_types.h"
 #include "parameter_definitions/detector_setup.h"
 #include "common/beam_configuration.h"
 

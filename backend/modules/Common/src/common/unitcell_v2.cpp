@@ -13,33 +13,33 @@ BoundedDistribution::BoundedDistribution(MyType mean, Bounds mean_bounds, MyType
         stddev_(stddev),
         stddev_bounds_(stddev_bounds) {}
 
-MyType2 BoundedDistribution::PackDistribution() const {
-    return MyType2{mean_, stddev_};
+Vector2<MyType> BoundedDistribution::PackDistribution() const {
+    return Vector2<MyType>{mean_, stddev_};
 }
 
-MyType2 BoundedDistribution::PackUpperBounds() const {
-    return MyType2{mean_bounds_.Upper(), stddev_bounds_.Upper()};
+Vector2<MyType> BoundedDistribution::PackUpperBounds() const {
+    return Vector2<MyType>{mean_bounds_.Upper(), stddev_bounds_.Upper()};
 }
 
-MyType2 BoundedDistribution::PackLowerBounds() const {
-    return MyType2{mean_bounds_.Lower(), stddev_bounds_.Upper()};
+Vector2<MyType> BoundedDistribution::PackLowerBounds() const {
+    return Vector2<MyType>{mean_bounds_.Lower(), stddev_bounds_.Upper()};
 }
 
-Sphere::Sphere(const BoundedDistribution &radius, std::vector<MyType3> positions)
+Sphere::Sphere(const BoundedDistribution &radius, std::vector<Vector3<MyType>> positions)
         :
         Shape(std::move(positions)),
         radius_(radius) {}
 
-std::vector<MyType2> Sphere::PackParameters() const {
-    return std::vector<MyType2>{radius_.PackDistribution()};
+std::vector<Vector2<MyType>> Sphere::PackParameters() const {
+    return std::vector<Vector2<MyType>>{radius_.PackDistribution()};
 }
 
-std::vector<MyType2> Sphere::PackUpperBounds() const {
-    return std::vector<MyType2>{radius_.PackUpperBounds()};
+std::vector<Vector2<MyType>> Sphere::PackUpperBounds() const {
+    return std::vector<Vector2<MyType>>{radius_.PackUpperBounds()};
 }
 
-std::vector<MyType2> Sphere::PackLowerBounds() const {
-    return std::vector<MyType2>{radius_.PackLowerBounds()};
+std::vector<Vector2<MyType>> Sphere::PackLowerBounds() const {
+    return std::vector<Vector2<MyType>>{radius_.PackLowerBounds()};
 }
 
 ShapeTypeV2 Sphere::Type() const {
@@ -51,8 +51,8 @@ Bounds::Bounds(MyType lower, MyType upper)
         lower_(lower),
         upper_(upper) {}
 
-MyType2 Bounds::Pack() {
-    return MyType2{lower_, upper_};
+Vector2<MyType> Bounds::Pack() {
+    return Vector2<MyType>{lower_, upper_};
 }
 
 MyType Bounds::Upper() const {
@@ -68,7 +68,7 @@ const std::vector<std::unique_ptr<Shape>> &UnitcellV2::Shapes() const{
 }
 
 
-UnitcellV2::UnitcellV2(std::vector<std::unique_ptr<Shape>> shapes, MyType3I repetitions, MyType3 translation)
+UnitcellV2::UnitcellV2(std::vector<std::unique_ptr<Shape>> shapes, Vector3<int> repetitions, Vector3<MyType> translation)
         :
         shapes_(std::move(shapes)),
         repetitions_(repetitions),
@@ -76,11 +76,11 @@ UnitcellV2::UnitcellV2(std::vector<std::unique_ptr<Shape>> shapes, MyType3I repe
 
 }
 
-const MyType3 &UnitcellV2::Translation() const{
+const Vector3<MyType> &UnitcellV2::Translation() const{
     return translation_;
 }
 
-const MyType3I &UnitcellV2::Repetitions() const{
+const Vector3<int> &UnitcellV2::Repetitions() const{
     return repetitions_;
 }
 
@@ -116,8 +116,8 @@ std::vector<ShapeTypeV2> UnitcellV2::Types() const{
     return types;
 }
 
-std::vector<MyType3> UnitcellV2::Locations() const{
-    std::vector<MyType3> locations;
+std::vector<Vector3<MyType>> UnitcellV2::Locations() const{
+    std::vector<Vector3<MyType>> locations;
     for (auto &shape: shapes_) {
         for (const auto &position : shape->Positions()) {
             locations.emplace_back(position);
@@ -134,14 +134,14 @@ std::vector<int> UnitcellV2::LocationCounts() const{
     return out;
 }
 
-Shape::Shape(std::vector<MyType3> positions)
+Shape::Shape(std::vector<Vector3<MyType>> positions)
         :
         positions_(std::move(positions)) {
 
 
 }
 
-const std::vector<MyType3> &Shape::Positions() const {
+const std::vector<Vector3<MyType>> &Shape::Positions() const {
     return positions_;
 }
 
@@ -149,16 +149,16 @@ ShapeTypeV2 Cylinder::Type() const {
     return ShapeTypeV2::cylinder;
 }
 
-std::vector<MyType2> Cylinder::PackLowerBounds() const {
-    return std::vector<MyType2>{radius_.PackLowerBounds(), height_.PackLowerBounds()};
+std::vector<Vector2<MyType>> Cylinder::PackLowerBounds() const {
+    return std::vector<Vector2<MyType>>{radius_.PackLowerBounds(), height_.PackLowerBounds()};
 }
 
-std::vector<MyType2> Cylinder::PackUpperBounds() const {
-    return std::vector<MyType2>{radius_.PackUpperBounds(), height_.PackUpperBounds()};
+std::vector<Vector2<MyType>> Cylinder::PackUpperBounds() const {
+    return std::vector<Vector2<MyType>>{radius_.PackUpperBounds(), height_.PackUpperBounds()};
 }
 
 Cylinder::Cylinder(const BoundedDistribution &radius, const BoundedDistribution &height,
-                   std::vector<MyType3> positions)
+                   std::vector<Vector3<MyType>> positions)
         :
         Shape(std::move(positions)),
         radius_(radius),
@@ -166,6 +166,6 @@ Cylinder::Cylinder(const BoundedDistribution &radius, const BoundedDistribution 
 
 }
 
-std::vector<MyType2> Cylinder::PackParameters() const {
-    return std::vector<MyType2>{radius_.PackDistribution(), height_.PackDistribution()};
+std::vector<Vector2<MyType>> Cylinder::PackParameters() const {
+    return std::vector<Vector2<MyType>>{radius_.PackDistribution(), height_.PackDistribution()};
 }

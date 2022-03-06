@@ -1,20 +1,21 @@
 #include "common/fitting_parameter.h"
 #include <stdexcept>
+#include <utility>
 
-FittingParameter::FittingParameter(std::string name, MyType2 mean_bounds, MyType2 stddev_bounds)
+FittingParameter::FittingParameter(std::string name, Vector2<MyType> mean_bounds, Vector2<MyType> stddev_bounds)
     :
-    name_(name),
+    name_(std::move(name)),
     mean_bounds_(mean_bounds),
     stddev_bounds_(stddev_bounds)
 {
 }
 
-MyType2 FittingParameter::MeanBounds() const
+Vector2<MyType> FittingParameter::MeanBounds() const
 {
     return mean_bounds_;
 }
 
-MyType2 FittingParameter::StddevBounds() const
+Vector2<MyType> FittingParameter::StddevBounds() const
 {
     return stddev_bounds_;
 }

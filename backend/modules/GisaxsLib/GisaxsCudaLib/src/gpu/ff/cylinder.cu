@@ -1,5 +1,4 @@
 #include "gpu/ff/cylinder.h"
-
 #include "gpu/util/cuda_numerics.h"
 
 __device__ CylinderFF::CylinderFF(MyType2 radius, MyType2 height, int rand_count)

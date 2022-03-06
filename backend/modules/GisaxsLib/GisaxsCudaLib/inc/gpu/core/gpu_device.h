@@ -1,9 +1,6 @@
 #ifndef MODEL_SIMULATOR_UTIL_GPU_DEVICE_H
 #define MODEL_SIMULATOR_UTIL_GPU_DEVICE_H
 
-#include <cuda_runtime.h>
-#include "curand.h"
-#include "curand_kernel.h"
 #include "gpu/core/gisaxs_functions.h"
 #include "gpu/core/gpu_qgrid.h"
 
@@ -14,7 +11,7 @@
 #include "common/timer.h"
 
 #include "common/standard_defs.h"
-#include "standard_vector_types.h"
+#include "random_generator.h"
 
 class GpuDevice : public Device
 {
@@ -45,8 +42,6 @@ private:
     
     int DeviceID() const;
 
-    void GenerateRandoms(float* rands, int size, float mean, float stddev) const;
-
     std::shared_ptr<Stream> ProvideStream();
 
     void UnlockAllMemory();
@@ -70,10 +65,9 @@ private:
     MyType scale_denom_;
     MyType* dev_scale_denom_;
 
-    curandGenerator_t gen_;
-
     EventProvider event_provider_;
     StreamProvider stream_provider_;
+    RandomGenerator random_generator_;
 
     mutable int runs_;
     mutable double complete_runtime_;

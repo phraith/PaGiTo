@@ -6,7 +6,6 @@
 #define GISAXSMODELINGFRAMEWORK_EXPERIMENTAL_SETUP_H
 
 
-#include "cuda_types/standard_vector_types.h"
 #include "detector_setup.h"
 #include "scattering_setup.h"
 #include "substrate_setup.h"

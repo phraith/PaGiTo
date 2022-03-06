@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <iostream>
 
-#include "standard_vector_types.h"
 #include "common/standard_defs.h"
 #include "common/timer.h"
 
@@ -98,7 +97,7 @@ const std::vector<std::complex<MyType>> &QGrid::Q() const
 	return q_;
 }
 
-MyType2I QGrid::Resolution() const
+Vector2<int> QGrid::Resolution() const
 {
 	return resolution_;
 }

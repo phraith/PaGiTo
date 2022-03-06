@@ -7,40 +7,39 @@
 
 #include <common/beam_configuration.h>
 
-#include "vector_types.h"
 #include "parameter_definitions/detector_setup.h"
 #include "parameter_definitions/experimental_setup.h"
-
+#include "standard_defs.h"
 class QGrid
 {
 public:
 	QGrid(const DetectorConfiguration& detector, const std::vector<int>& position_offsets, const BeamConfiguration& beam_config, std::complex<MyType> refractive_index);
 
-	const std::vector<std::complex<MyType>> &QPointsXY() const;
-	const std::vector<std::complex<MyType>> &QPointsZCoeffs() const;
-	const std::vector<MyType>& AlphaFs() const;
-	const std::vector<MyType>& ThetaFs() const;
+	[[nodiscard]] const std::vector<std::complex<MyType>> &QPointsXY() const;
+	[[nodiscard]] const std::vector<std::complex<MyType>> &QPointsZCoeffs() const;
+	[[nodiscard]] const std::vector<MyType>& AlphaFs() const;
+	[[nodiscard]] const std::vector<MyType>& ThetaFs() const;
 
-	int QCount() const;
+	[[nodiscard]] int QCount() const;
 
-	std::string InfoStr() const;
+	[[nodiscard]] std::string InfoStr() const;
 
-	const std::vector<MyType> &Qx() const;
-	const std::vector<MyType> &Qy() const;
-	const std::vector<MyType> &Qz() const;
+	[[nodiscard]] const std::vector<MyType> &Qx() const;
+	[[nodiscard]] const std::vector<MyType> &Qy() const;
+	[[nodiscard]] const std::vector<MyType> &Qz() const;
 
-	const std::vector<std::complex<MyType>> &QPar() const;
-	const std::vector<std::complex<MyType>> &Q() const;
+	[[nodiscard]] const std::vector<std::complex<MyType>> &QPar() const;
+	[[nodiscard]] const std::vector<std::complex<MyType>> &Q() const;
 
-	MyType2I Resolution() const;
+	[[nodiscard]] Vector2<int> Resolution() const;
 
 private:
 	void InitializeQGrid();
 	
 	void RealSpaceToQ(int x, int y, int i);
 
-	const MyType2I &resolution_;
-	const MyType2I&direct_beam_location_;
+	const Vector2<int> &resolution_;
+	const Vector2<int>&direct_beam_location_;
 
 	MyType pixel_size_{};
 	const std::vector<int>& position_offsets_;

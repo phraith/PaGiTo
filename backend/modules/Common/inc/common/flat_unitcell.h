@@ -6,47 +6,46 @@
 #define GISAXSMODELINGFRAMEWORK_FLAT_UNITCELL_H
 
 #include <vector>
-#include "standard_vector_types.h"
 #include "standard_defs.h"
 #include "parameter_definitions/transformation_container.h"
 
 
 class FlatUnitcellV2 {
 public:
-    FlatUnitcellV2(GisaxsTransformationContainer::FlatShapeContainer shape_container, MyType3I repetitions, MyType3 translation);
+    FlatUnitcellV2(GisaxsTransformationContainer::FlatShapeContainer shape_container, Vector3<int> repetitions, Vector3<MyType> translation);
 
-    const std::vector<MyType2> &Parameters() const;
+    [[nodiscard]] const std::vector<Vector2<MyType>> &Parameters() const;
 
-    const std::vector<int> &ParameterIndices() const;
+    [[nodiscard]] const std::vector<int> &ParameterIndices() const;
 
-    const std::vector<MyType2> &UpperBounds() const;
+    [[nodiscard]] const std::vector<Vector2<MyType>> &UpperBounds() const;
 
-    const std::vector<MyType2> &LowerBounds() const;
+    [[nodiscard]] const std::vector<Vector2<MyType>> &LowerBounds() const;
 
-    const std::vector<ShapeTypeV2> &ShapeTypes() const;
+    [[nodiscard]] const std::vector<ShapeTypeV2> &ShapeTypes() const;
 
-    const std::vector<MyType3> &Positions() const;
+    [[nodiscard]] const std::vector<Vector3<MyType>> &Positions() const;
 
-    const std::vector<int> &PositionIndices() const;
+    [[nodiscard]] const std::vector<int> &PositionIndices() const;
 
-    const MyType3 &Translation() const;
+    [[nodiscard]] const Vector3<MyType> &Translation() const;
 
-    const MyType3I &Repetitons() const;
+    [[nodiscard]] const Vector3<int> &Repetitions() const;
 
-    std::vector<int> LocationCounts() const;
+    [[nodiscard]] std::vector<int> LocationCounts() const;
 
 private:
-    const std::vector<MyType2> parameters_;
+    const std::vector<Vector2<MyType>> parameters_;
     const std::vector<int> parameter_indices_;
-    const std::vector<MyType2> upper_bounds_;
-    const std::vector<MyType2> lower_bounds_;
+    const std::vector<Vector2<MyType>> upper_bounds_;
+    const std::vector<Vector2<MyType>> lower_bounds_;
     const std::vector<ShapeTypeV2> shape_types_;
-    const std::vector<MyType3> positions_;
+    const std::vector<Vector3<MyType>> positions_;
     const std::vector<int> position_indices_;
 
-    MyType3I repetitons_;
-    MyType3 translation_;
+    Vector3<int> repetitions_;
+    Vector3<MyType> translation_;
 };
 
 
-#endif //GISAXSMODELINGFRAMEWORK_FLAT_UNITCELL_H
+#endif

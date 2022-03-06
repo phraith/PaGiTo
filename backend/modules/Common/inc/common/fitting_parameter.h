@@ -3,21 +3,21 @@
 
 #include <string>
 
-#include "standard_vector_types.h"
+#include "standard_defs.h"
 
 class FittingParameter
 {
 public:
-	FittingParameter(std::string name, MyType2 mean_bounds, MyType2 stddev_bounds);
+	FittingParameter(std::string name, Vector2<MyType> mean_bounds, Vector2<MyType> stddev_bounds);
 
-	MyType2 MeanBounds() const;
-	MyType2 StddevBounds() const;
+    [[nodiscard]] Vector2<MyType> MeanBounds() const;
+    [[nodiscard]] Vector2<MyType> StddevBounds() const;
 
-	const std::string& Name() const;
+	[[nodiscard]] const std::string& Name() const;
 private:
 	std::string name_;
-	MyType2 mean_bounds_;
-	MyType2 stddev_bounds_;
+    Vector2<MyType> mean_bounds_;
+    Vector2<MyType> stddev_bounds_;
 };
 
 #endif

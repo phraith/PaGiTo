@@ -1,14 +1,10 @@
 #ifndef GISAXS_LIB_GPU_GISAXS_FUNCTIONS_CUH
 #define GISAXS_LIB_GPU_GISAXS_FUNCTIONS_CUH
 
-#include "cuda_runtime.h"
+#include <cuda_runtime.h>
 #include "gpu/util/cuda_numerics.h"
-
-#include "curand.h"
-#include "curand_kernel.h"
-
 #include "common/standard_defs.h"
-#include "standard_vector_types.h"
+#include "gpu/ff/shape.h"
 
 class DevUnitcell
 {

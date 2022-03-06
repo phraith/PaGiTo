@@ -19,7 +19,8 @@
 #include "common/timer.h"
 
 #include "common/standard_defs.h"
-#include "standard_vector_types.h"
+#include "random_generator.h"
+
 namespace GpuDeviceV2 {
 
 
@@ -57,8 +58,6 @@ namespace GpuDeviceV2 {
 
         int DeviceID() const;
 
-        void GenerateRandoms(float *rands, int size, float mean, float stddev) const;
-
         std::shared_ptr<Stream> ProvideStream();
 
         void UnlockAllMemory();
@@ -84,10 +83,9 @@ namespace GpuDeviceV2 {
         MyType scale_denom_;
         MyType *dev_scale_denom_;
 
-        curandGenerator_t gen_;
-
         EventProvider event_provider_;
         StreamProvider stream_provider_;
+        RandomGenerator random_generator_;
 
         mutable int runs_;
         mutable double complete_runtime_;

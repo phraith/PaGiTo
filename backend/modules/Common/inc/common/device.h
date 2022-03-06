@@ -4,7 +4,6 @@
 #include <common/simulation_description.h>
 
 #include "standard_defs.h"
-#include "standard_vector_types.h"
 
 class Device {
 public:

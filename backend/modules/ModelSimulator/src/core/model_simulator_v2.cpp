@@ -1,12 +1,12 @@
 #include "core/model_simulator_v2.h"
 #include "parameter_definitions/transformation_container.h"
 #include "common/unitcell_utility.h"
+#include "common/timer.h"
 
 #include <iostream>
 #include <thread>
 #include <algorithm>
 
-using namespace distribution_functions;
 using namespace GisaxsTransformationContainer;
 using json = nlohmann::json;
 

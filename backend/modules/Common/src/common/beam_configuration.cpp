@@ -1,11 +1,11 @@
 #include "common/beam_configuration.h"
 
 #define _USE_MATH_DEFINES 
-#include <math.h>
+#include <cmath>
 
 
 
-BeamConfiguration::BeamConfiguration(double deg_alpha_i, MyType2I beam_direction, double photon_ev, double coherency_ratio)
+BeamConfiguration::BeamConfiguration(double deg_alpha_i, Vector2<int> beam_direction, double photon_ev, double coherency_ratio)
 	:
 	alpha_i_(deg_alpha_i * 0.017453),
 	beam_direction_(beam_direction),
@@ -20,7 +20,7 @@ double BeamConfiguration::AlphaI() const
 	return alpha_i_;
 }
 
-const MyType2I& BeamConfiguration::BeamDirection() const
+const Vector2<int>& BeamConfiguration::BeamDirection() const
 {
 	return beam_direction_;
 }

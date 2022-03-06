@@ -2,7 +2,7 @@
 #define GISAXS_LIB_TEST_CUH
 
 #include "cuda_runtime.h"
-#include "standard_vector_types.h"
+#include "common/standard_defs.h"
 
 extern "C++"
 {

@@ -2,7 +2,6 @@
 #include <thread>
 #include "broker.h"
 #include "worker.h"
-#include "gpu/core/gpu_memory_provider_v2.h"
 
 static void RunSimWorker(const std::string& worker_address, const std::string& broker_address)
 {

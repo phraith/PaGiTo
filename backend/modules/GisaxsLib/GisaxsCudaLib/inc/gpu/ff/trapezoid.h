@@ -1,8 +1,9 @@
 #ifndef GISAXS_LIB_GPU_FF_TRAPEZOID_CUH
 #define GISAXS_LIB_GPU_FF_TRAPEZOID_CUH
 
-#include "standard_vector_types.h"
 #include "common/standard_defs.h"
+#include "shape.h"
+#include "gpu/util/util.h"
 
 class TrapezoidFF : public ShapeFF
 {

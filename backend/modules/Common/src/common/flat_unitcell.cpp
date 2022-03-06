@@ -5,8 +5,8 @@
 #include <utility>
 #include "common/flat_unitcell.h"
 
-FlatUnitcellV2::FlatUnitcellV2(GisaxsTransformationContainer::FlatShapeContainer shape_container, MyType3I repetitions,
-                               MyType3 translation)
+FlatUnitcellV2::FlatUnitcellV2(GisaxsTransformationContainer::FlatShapeContainer shape_container, Vector3<int> repetitions,
+                               Vector3<MyType> translation)
         :
         parameters_(std::move(shape_container.parameters)),
         parameter_indices_(std::move(shape_container.parameter_indices)),
@@ -15,11 +15,11 @@ FlatUnitcellV2::FlatUnitcellV2(GisaxsTransformationContainer::FlatShapeContainer
         shape_types_(std::move(shape_container.shape_types)),
         positions_(std::move(shape_container.positions)),
         position_indices_(std::move(shape_container.position_indices)),
-        repetitons_(repetitions),
+        repetitions_(repetitions),
         translation_(translation) {
 }
 
-const std::vector<MyType2> &FlatUnitcellV2::LowerBounds() const {
+const std::vector<Vector2<MyType>> &FlatUnitcellV2::LowerBounds() const {
     return lower_bounds_;
 }
 
@@ -27,7 +27,7 @@ const std::vector<ShapeTypeV2> &FlatUnitcellV2::ShapeTypes() const {
     return shape_types_;
 }
 
-const std::vector<MyType2> &FlatUnitcellV2::UpperBounds() const {
+const std::vector<Vector2<MyType>> &FlatUnitcellV2::UpperBounds() const {
     return upper_bounds_;
 }
 
@@ -35,11 +35,11 @@ const std::vector<int> &FlatUnitcellV2::ParameterIndices() const {
     return parameter_indices_;
 }
 
-const std::vector<MyType2> &FlatUnitcellV2::Parameters() const {
+const std::vector<Vector2<MyType>> &FlatUnitcellV2::Parameters() const {
     return parameters_;
 }
 
-const std::vector<MyType3> &FlatUnitcellV2::Positions() const {
+const std::vector<Vector3<MyType>> &FlatUnitcellV2::Positions() const {
     return positions_;
 }
 
@@ -47,11 +47,11 @@ const std::vector<int> &FlatUnitcellV2::PositionIndices() const {
     return position_indices_;
 }
 
-const MyType3I &FlatUnitcellV2::Repetitons() const {
-    return repetitons_;
+const Vector3<int> &FlatUnitcellV2::Repetitions() const {
+    return repetitions_;
 }
 
-const MyType3 &FlatUnitcellV2::Translation() const {
+const Vector3<MyType> &FlatUnitcellV2::Translation() const {
     return translation_;
 }
 

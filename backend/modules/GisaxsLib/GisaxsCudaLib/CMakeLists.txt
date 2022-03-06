@@ -15,7 +15,7 @@ endif (MSVC)
 #creating library
 add_library(GisaxsCudaLib
         STATIC
-        src/gpu/core/gpu_device_v2.cpp inc/gpu/core/gpu_device_v2.h)
+        inc/gpu/util/conversion_helper.h src/gpu/util/conversion_helper.cpp src/gpu/core/random_generator.cpp inc/gpu/core/random_generator.h)
 
 target_sources(GisaxsCudaLib
         PRIVATE
@@ -36,10 +36,14 @@ target_sources(GisaxsCudaLib
         src/gpu/core/gpu_device.cpp
 
         src/gpu/core/gpu_memory_provider_v2.cpp
+        src/gpu/core/gpu_device_v2.cpp
+        inc/gpu/core/gpu_device_v2.h
+
         inc/gpu/core/gpu_qgrid.h
         inc/gpu/core/gpu_memory_provider_v2.h
         inc/gpu/core/gisaxs_functions.h
         inc/gpu/core/gisaxs_functions_v2.h
+        inc/gpu/ff/shape.h
         inc/gpu/ff/sphere.h
         inc/gpu/ff/cylinder.h
         inc/gpu/ff/trapezoid.h
@@ -75,7 +79,6 @@ target_link_libraries(GisaxsCudaLib
         CUDA::curand
         CUDA::cudart
         CUDA::cuda_driver
-
         )
 
 target_include_directories(GisaxsCudaLib

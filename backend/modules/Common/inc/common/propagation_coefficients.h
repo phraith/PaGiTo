@@ -6,13 +6,12 @@
 #define GISAXSMODELINGFRAMEWORK_PROPAGATION_COEFFICIENTS_H
 
 #include <vector>
-#include "standard_vector_types.h"
 #include "parameter_definitions/detector_setup.h"
 #include "beam_configuration.h"
 #include "sample.h"
 
-namespace GisaxsPropagationCoefficients {
-    std::vector<MyComplex>
+namespace PropagationCoefficientsCpu {
+    std::vector<std::complex<MyType>>
     PropagationCoeffsTopBuried(const SampleConfiguration &sample_config, const DetectorConfiguration &detector,
                                const BeamConfiguration &beam_config);
 }

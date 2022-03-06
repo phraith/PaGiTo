@@ -6,9 +6,10 @@
 
 #include <cuComplex.h>
 #include <math_constants.h>
-#include "standard_vector_types.h"
+#include "common/standard_defs.h"
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
+#include "gpu/util/util.h"
 /*Switch complex type*/
 //typedef my_complex my_complex;
 

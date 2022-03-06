@@ -3,7 +3,6 @@
 
 #include <complex>
 
-#include "standard_vector_types.h"
 #include "standard_defs.h"
 
 class Layer

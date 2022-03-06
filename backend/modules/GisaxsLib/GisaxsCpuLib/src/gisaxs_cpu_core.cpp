@@ -10,7 +10,7 @@
 
 typedef std::complex<MyType> (*formfactor)(std::complex<MyType> qpar, std::complex<MyType> q, std::complex<MyType> qz,
                                            int first_parameter_index, int first_random_index,
-                                           const std::vector<MyType2> &parameters, const std::vector<MyType> &randoms);
+                                           const std::vector<Vector2<MyType>> &parameters, const std::vector<MyType> &randoms);
 
 const std::map<ShapeTypeV2, formfactor> shape_type_to_formfactor{
         {ShapeTypeV2::sphere, GisaxsCpuCore::CalculateSphereFF},
@@ -21,7 +21,7 @@ const std::map<ShapeTypeV2, formfactor> shape_type_to_formfactor{
 std::vector<std::complex<MyType>>
 GisaxsCpuCore::CalculateStructureFactors(const std::vector<std::complex<MyType>> &qxy,
                                          const std::vector<std::complex<MyType>> &qz,
-                                         MyType3 distances, MyType3I repetitions) {
+                                         Vector3<MyType> distances, Vector3<int> repetitions) {
     unsigned long qcount = qxy.size() / 2;
     std::vector<std::complex<MyType>> structure_factors(4 * qcount);
     for (
@@ -36,9 +36,9 @@ GisaxsCpuCore::CalculateStructureFactors(const std::vector<std::complex<MyType>>
         auto qz3 = qz[i + 2 * qcount];
         auto qz4 = qz[i + 3 * qcount];
 
-        MyType3 dx = {distances.x, 0, 0};
-        MyType3 dy = {0, distances.y, 0};
-        MyType3 dz = {0, 0, distances.z};
+        Vector3<MyType> dx = {distances.x, 0, 0};
+        Vector3<MyType> dy = {0, distances.y, 0};
+        Vector3<MyType> dz = {0, 0, distances.z};
 
         structure_factors[i] =
                 GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz1, dx, repetitions
@@ -86,7 +86,7 @@ GisaxsCpuCore::CalculateStructureFactors(const std::vector<std::complex<MyType>>
 
 std::complex<MyType>
 GisaxsCpuCore::EvaluateStructureFactor(const std::complex<MyType> &qx, const std::complex<MyType> &qy,
-                                       const std::complex<MyType> &qz, MyType3 d, MyType n) {
+                                       const std::complex<MyType> &qz, Vector3<MyType> d, MyType n) {
     std::complex<MyType> r = qx * d.x + qy * d.y + qz * d.z;
     if (r.real() == 0 && r.imag() == 0) {
         return std::complex<MyType>{n, 0};
@@ -98,9 +98,9 @@ GisaxsCpuCore::EvaluateStructureFactor(const std::complex<MyType> &qx, const std
 std::complex<MyType>
 GisaxsCpuCore::CalculateSphereFF(std::complex<MyType> qpar, std::complex<MyType> q, std::complex<MyType> qz,
                                  int first_parameter_index, int first_random_index,
-                                 const std::vector<MyType2> &parameters, const std::vector<MyType> &randoms) {
+                                 const std::vector<Vector2<MyType>> &parameters, const std::vector<MyType> &randoms) {
 
-    MyType2 radius_base = parameters.at(first_parameter_index);
+    Vector2<MyType> radius_base = parameters.at(first_parameter_index);
     MyType random_number = randoms.at(first_random_index);
 
     MyType radius = (random_number * radius_base.y) + radius_base.x;
@@ -119,12 +119,12 @@ GisaxsCpuCore::CalculateSphereFF(std::complex<MyType> qpar, std::complex<MyType>
 std::complex<MyType>
 GisaxsCpuCore::CalculateCylinderFF(std::complex<MyType> qpar, std::complex<MyType> q, std::complex<MyType> qz,
                                  int first_parameter_index, int first_random_index,
-                                 const std::vector<MyType2> &parameters, const std::vector<MyType> &randoms) {
-    MyType2 radius_base = parameters.at(first_parameter_index);
+                                 const std::vector<Vector2<MyType>> &parameters, const std::vector<MyType> &randoms) {
+    Vector2<MyType> radius_base = parameters.at(first_parameter_index);
     MyType random_number = randoms.at(first_random_index);
     MyType radius = (random_number * radius_base.y) + radius_base.x;
 
-    MyType2 height_base = parameters.at(first_parameter_index + 1);
+    Vector2<MyType> height_base = parameters.at(first_parameter_index + 1);
     MyType height_number = randoms.at(first_random_index + 1);
 
     MyType height = (height_number * height_base.y) + height_base.x;
@@ -158,7 +158,7 @@ GisaxsCpuCore::CalculateIntensities(const std::vector<std::complex<MyType>> &qpa
                                     const std::vector<std::complex<MyType>> &q,
                                     const std::vector<std::complex<MyType>> &qpoints_xy,
                                     const std::vector<std::complex<MyType>> &qpoints_z_coeffs,
-                                    const std::vector<MyComplex> &coefficients,
+                                    const std::vector<std::complex<MyType>> &coefficients,
                                     const FlatUnitcellV2 &flat_unitcell,
                                     const std::vector<MyType> &randoms,
                                     const std::vector<std::complex<MyType>> &sfs) {
@@ -199,18 +199,18 @@ GisaxsCpuCore::CalculateIntensities(const std::vector<std::complex<MyType>> &qpa
 
                     std::complex<MyType> shape_sum_u = {0, 0};
                     for (int l = 0; l < loc_count; ++l) {
-                        MyType3 loc = flat_unitcell.Positions()[loc_start_idx + l];
+                        Vector3<MyType> loc = flat_unitcell.Positions()[loc_start_idx + l];
                         std::complex<MyType> qr = qx * loc.x + qy * loc.y + qz_c * loc.z;
                         shape_sum_u = shape_sum_u + shape_sum * exp(-1.f * qr);
                     }
                     auto coeff = coefficients[k * qcount + i];
-                    scattering = scattering + std::complex<MyType>(coeff.x, coeff.y) * shape_sum_u * sfs_c;
+                    scattering = scattering + std::complex<MyType>(coeff.real(), coeff.imag()) * shape_sum_u * sfs_c;
                 }
             }
             MyType scatterAbs = abs(scattering);
             MyType local_intensity = scatterAbs * scatterAbs;
 
-            if (!isnan(local_intensity)) {
+            if (!std::isnan(local_intensity)) {
                 intensity += local_intensity;
             }
         }

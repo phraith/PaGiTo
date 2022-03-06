@@ -20,13 +20,13 @@ namespace GisaxsTransformationContainer {
                     shapes.parameter_indices.emplace_back(shapes.parameters.size());
                     auto radiusMean = shape.at("radius").at("mean");
                     auto radiusStddev = shape.at("radius").at("stddev");
-                    shapes.parameters.emplace_back(MyType2{radiusMean, radiusStddev});
+                    shapes.parameters.emplace_back(Vector2<MyType>{radiusMean, radiusStddev});
 
                     shapes.position_indices.emplace_back(shapes.positions.size());
-                    std::vector<MyType3> positions;
+                    std::vector<Vector3<MyType>> positions;
                     shapes.position_indices.emplace_back(shapes.positions.size());
                     for (json position: shape.at("locations")) {
-                        positions.emplace_back(MyType3{position.at("x"), position.at("y"), position.at("z")});
+                        positions.emplace_back(Vector3<MyType>{position.at("x"), position.at("y"), position.at("z")});
                     }
                     shapes.positions.insert(shapes.positions.end(), positions.begin(), positions.end());
                     break;
@@ -36,17 +36,17 @@ namespace GisaxsTransformationContainer {
                     shapes.parameter_indices.emplace_back(shapes.parameters.size());
                     auto radiusMean = shape.at("radius").at("mean");
                     auto radiusStddev = shape.at("radius").at("stddev");
-                    shapes.parameters.emplace_back(MyType2{radiusMean, radiusStddev});
+                    shapes.parameters.emplace_back(Vector2<MyType>{radiusMean, radiusStddev});
 
                     shapes.parameter_indices.emplace_back(shapes.parameters.size());
                     auto heightMean = shape.at("height").at("mean");
                     auto heightStddev = shape.at("height").at("stddev");
-                    shapes.parameters.emplace_back(MyType2{heightMean, heightStddev});
+                    shapes.parameters.emplace_back(Vector2<MyType>{heightMean, heightStddev});
 
-                    std::vector<MyType3> positions;
+                    std::vector<Vector3<MyType>> positions;
                     shapes.position_indices.emplace_back(shapes.positions.size());
                     for (json position: shape.at("locations")) {
-                        positions.emplace_back(MyType3{position.at("x"), position.at("y"), position.at("z")});
+                        positions.emplace_back(Vector3<MyType>{position.at("x"), position.at("y"), position.at("z")});
                     }
                     shapes.positions.insert(shapes.positions.end(), positions.begin(), positions.end());
                     break;

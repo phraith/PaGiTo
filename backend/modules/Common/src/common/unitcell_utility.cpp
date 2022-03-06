@@ -8,20 +8,6 @@ using json = nlohmann::json;
 
 namespace GisaxsModeling {
 
-//    UnitcellV2 CreateFromJson(json unitcell) {
-//        std::vector<std::unique_ptr<Shape>> shapes;
-//        for (const json &shape_json: unitcell.at("components")) {
-//            ShapeTypeV2 shape_type = shape_json.at("type").get<ShapeTypeV2>();
-//            std::vector<MyType3> locations;
-//            for (const auto &location: shape_json.at("locations")) {
-//                locations.emplace_back(MyType3{location[0], location[1], location[2]});
-//                std::unique_ptr<Shape> shape = CreateShape(shape_type, shape_json);
-//            }
-//
-//        }
-//    }
-
-
     UnitcellV2 Convert(FlatUnitcellV2 flat_unitcell) {
         std::vector<std::unique_ptr<Shape>> shapes;
 
@@ -31,17 +17,17 @@ namespace GisaxsModeling {
             int parameter_idx = flat_unitcell.ParameterIndices()[i];
             switch (shape_type) {
                 case ShapeTypeV2::sphere: {
-                    MyType2 radius = flat_unitcell.Parameters()[parameter_idx];
-                    MyType2 upper_bounds = flat_unitcell.UpperBounds()[parameter_idx];
-                    MyType2 lower_bounds = flat_unitcell.LowerBounds()[parameter_idx];
+                    Vector2<MyType> radius = flat_unitcell.Parameters()[parameter_idx];
+                    Vector2<MyType> upper_bounds = flat_unitcell.UpperBounds()[parameter_idx];
+                    Vector2<MyType> lower_bounds = flat_unitcell.LowerBounds()[parameter_idx];
 
-                    const std::vector<MyType3> &positions = flat_unitcell.Positions();
+                    const std::vector<Vector3<MyType>> &positions = flat_unitcell.Positions();
 
                     int positions_first_idx = flat_unitcell.PositionIndices()[i];
                     int positions_last_idx = (i < shape_count - 1) ? flat_unitcell.PositionIndices()[i + 1] :
                                              positions.size() - 1;
 
-                    std::vector<MyType3> shape_positions = std::vector<MyType3>(positions.begin() + positions_first_idx,
+                    std::vector<Vector3<MyType>> shape_positions = std::vector<Vector3<MyType>>(positions.begin() + positions_first_idx,
                                                                                 positions.begin() + positions_last_idx);
 
                     BoundedDistribution bounded_radius = BoundedDistribution(
@@ -56,28 +42,6 @@ namespace GisaxsModeling {
                     break;
             }
         }
-        return UnitcellV2(std::move(shapes), flat_unitcell.Repetitons(), flat_unitcell.Translation());
+        return UnitcellV2(std::move(shapes), flat_unitcell.Repetitions(), flat_unitcell.Translation());
     }
-
-//    std::unique_ptr<Shape> CreateShape(ShapeTypeV2 shape_type, const json &json) {
-//        std::vector<MyType3> locations;
-//        for (const auto &location: json.at("locations")) {
-//            locations.emplace_back(MyType3{location[0], location[1], location[2]});
-//        }
-//
-//        switch (shape_type) {
-//            case ShapeTypeV2::sphere: {
-//                MyType2 radius = {json.at("radius")[0], json.at("radius")[1]};
-//                return std::make_unique<Sphere>(
-//                        BoundedDistribution(
-//                                radius.x,
-//                                Bounds(radius.x, radius.x),
-//                                radius.y,
-//                                Bounds(radius.y, radius.y)),
-//                        locations);
-//            }
-//            case ShapeTypeV2::cylinder:
-//                return nullptr;
-//        }
-//    }
 }

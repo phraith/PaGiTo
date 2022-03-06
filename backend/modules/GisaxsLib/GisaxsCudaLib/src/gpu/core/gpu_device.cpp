@@ -3,14 +3,13 @@
 #include <memory>
 
 #include "gpu/core/gpu_helper.h"
-#include "gpu/util/cuda_numerics.h"
-#include "gpu/util/test.h"
 #include "gpu/util/util.h"
 
 #include "common/standard_constants.h"
 #include "common/standard_defs.h"
 #include "gpu/core/gpu_memory_provider_v2.h"
 #include "common/propagation_coefficients.h"
+#include "gpu/util/conversion_helper.h"
 
 
 GpuDevice::GpuDevice(gpu_info_t info, int device_id)
@@ -27,12 +26,7 @@ GpuDevice::GpuDevice(gpu_info_t info, int device_id)
         complete_runtime_(0),
         kernel_runtime_(0),
         runs_(0) {
-    auto status = curandCreateGenerator(&gen_,
-                                        CURAND_RNG_PSEUDO_DEFAULT);
 
-    if (status != CURAND_STATUS_SUCCESS) {
-        printf("Error encountered in generating handle\n");
-    }
 
     gpuErrchk(cudaHostRegister(&fitness_, sizeof(MyType), cudaHostRegisterMapped));
     gpuErrchk(cudaHostGetDevicePointer(&dev_fitness_, &fitness_, 0));
@@ -48,7 +42,6 @@ GpuDevice::~GpuDevice() {
     gpuErrchk(cudaHostUnregister(&fitness_));
     gpuErrchk(cudaHostUnregister(&scale_denom_));
     gpuErrchk(cudaHostUnregister(&scale_prod_));
-    curandDestroyGenerator(gen_);
 }
 
 SimData GpuDevice::RunGISAXS(const SimJob &descr, const ImageData *real_img, bool copy_intensities) {
@@ -60,9 +53,9 @@ SimData GpuDevice::RunGISAXS(const SimJob &descr, const ImageData *real_img, boo
 
     auto unitcell = descr.ExperimentInfo().Unitcell();
 
-    const auto &coefficients = GisaxsPropagationCoefficients::PropagationCoeffsTopBuried(
+    const auto coefficients = GpuConversionHelper::Convert(PropagationCoefficientsCpu::PropagationCoeffsTopBuried(
             descr.ExperimentInfo().SampleConfig(), descr.ExperimentInfo().DetectorConfig(),
-            descr.ExperimentInfo().BeamConfig());
+            descr.ExperimentInfo().BeamConfig()));
     const auto &current_params = unitcell.Parameters();
 
     const auto work_stream = ProvideStream();
@@ -109,13 +102,13 @@ SimData GpuDevice::RunGISAXS(const SimJob &descr, const ImageData *real_img, boo
     auto detector_width = descr.ExperimentInfo().DetectorConfig().Resolution().x;
     auto detector_height = descr.ExperimentInfo().DetectorConfig().Resolution().y;
 
-    GpuQGrid::CreateQGridFull(alpha_i, k0, pixelsize, sample_distance, direct_beam, detector_width, detector_height,
+    GpuQGrid::CreateQGridFull(alpha_i, k0, pixelsize, sample_distance, GpuConversionHelper::Convert(direct_beam), detector_width, detector_height,
                               container, work_stream->Get());
 
     gpuErrchk(cudaDeviceSynchronize());
     cudaMemset(dev_sim_intensities.Get(), 0, qcount * sizeof(MyType));
     dev_shapes.InitializeHtD(unitcell.ShapeTypes());
-    dev_params.InitializeHtD(current_params);
+    dev_params.InitializeHtD(GpuConversionHelper::Convert(current_params));
 
 
     if (dev_unitcell_ == nullptr) {
@@ -123,20 +116,20 @@ SimData GpuDevice::RunGISAXS(const SimJob &descr, const ImageData *real_img, boo
 
         auto location_counts = unitcell.LocationCounts();
         MemoryBlock<MyType3> dev_locations = memoryProviderV2.RequestMemory<MyType3>(locations.size());
-        dev_locations.InitializeHtD(locations);
+        dev_locations.InitializeHtD(GpuConversionHelper::Convert(locations));
 
         MemoryBlock<int> dev_location_counts = memoryProviderV2.RequestMemory<int>(location_counts.size());
         dev_location_counts.InitializeHtD(location_counts);
 
-        MyType3I repetitions = unitcell.Repetitons();
-        MyType3 distances = unitcell.Translation();
+        MyType3I repetitions = GpuConversionHelper::Convert(unitcell.Repetitions());
+        MyType3 distances = GpuConversionHelper::Convert(unitcell.Translation());
         cudaMalloc(&dev_unitcell_, sizeof(DevUnitcell *));
         Gisaxs::CreateUnitcell(dev_unitcell_, dev_shapes.Get(), dev_shapes.Size(), dev_locations.Get(),
                                dev_location_counts.Get(), RANDOM_DRAWS, repetitions, distances, work_stream->Get());
     }
 
     start->Record();
-    GenerateRandoms(dev_rands.Get(), dev_rands.Size(), 0, 1);
+    random_generator_.GenerateRandoms(dev_rands.Get(), dev_rands.Size(), 0, 1);
     Gisaxs::Update(dev_rands.Get(), qcount, dev_params.Get(), unitcell.ShapeTypes().size(), work_stream->Get());
 
     Gisaxs::RunSim(container.dev_qpar, container.dev_q, container.dev_qpoints_xy, container.dev_qpoints_z_coeffs,
@@ -217,10 +210,6 @@ void GpuDevice::SetStatus(WorkStatus status) const {
 
 int GpuDevice::DeviceID() const {
     return device_id_;
-}
-
-void GpuDevice::GenerateRandoms(float *rands, int size, float mean, float stddev) const {
-    curandGenerateNormal(gen_, rands, size, mean, stddev);
 }
 
 std::shared_ptr<Stream> GpuDevice::ProvideStream() {

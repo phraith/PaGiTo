@@ -11,7 +11,6 @@ add_library(
         ModelSimulatorLib STATIC
         src/core/model_simulator_v2.cpp
         src/core/simulation_interval.cpp
-        src/util/distribution_functions.cpp
         src/util/hardware_information.cpp
         src/util/utility.cpp
         src/util/sim_result.cpp
@@ -21,7 +20,6 @@ add_library(
         inc/core/model_simulator_v2.h
         inc/core/simulation_interval.h
         inc/util/cpu_information
-        inc/util/distribution_functions.h
         inc/util/hardware_information.h
         inc/util/utility.h
         inc/util/sim_result.h)

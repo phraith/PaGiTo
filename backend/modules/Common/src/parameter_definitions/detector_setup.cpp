@@ -31,11 +31,11 @@ MyType DetectorConfiguration::SampleDistance() const {
     return sample_distance_;
 }
 
-const MyType2I &DetectorConfiguration::Directbeam() const {
+const Vector2<int> &DetectorConfiguration::Directbeam() const {
     return directbeam_;
 }
 
-const MyType2I &DetectorConfiguration::Resolution() const {
+const Vector2<int> &DetectorConfiguration::Resolution() const {
     return resolution_;
 }
 

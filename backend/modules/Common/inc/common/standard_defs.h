@@ -4,32 +4,30 @@
 #include <vector>
 #include <string>
 #include "nlohmann/json.hpp"
-#include "standard_vector_types.h"
 
-//enum class ShapeType { kSphere = 0, kCylinder = 1, kTrapezoid = 2};
+typedef float MyType;
+
 enum class ShapeTypeV2 {
     sphere=0, cylinder=1
+};
+
+template <typename T>
+struct Vector2{
+    T x;
+    T y;
+};
+
+template <typename T>
+struct Vector3{
+    T x;
+    T y;
+    T z;
 };
 
 NLOHMANN_JSON_SERIALIZE_ENUM(ShapeTypeV2, {
 { ShapeTypeV2::sphere, "sphere" },
 { ShapeTypeV2::cylinder, "cylinder" }
 })
-
-//static std::string ShapeTypeToString(ShapeType type)
-//{
-//    switch (type)
-//    {
-//    case ShapeType::kSphere:
-//        return "sphere";
-//    case ShapeType::kCylinder:
-//        return "cylinder";
-//    case ShapeType::kTrapezoid:
-//        return "trapezoid";
-//    default:
-//        return "";
-//    }
-//}
 
 enum class ConstantMemoryId {
     QGRID_XY = 0,
@@ -38,14 +36,6 @@ enum class ConstantMemoryId {
     QGRID_Q = 3,
     QGRID_COEFFS= 4
 };
-
-typedef struct MyComplex4
-{
-    MyComplex x;
-    MyComplex y;
-    MyComplex z;
-    MyComplex w;
-} MyComplex4;
 
 typedef struct ParamData
 {
@@ -62,7 +52,7 @@ typedef struct SimData
     std::vector<MyType> qy;
     std::vector<MyType> qz;
 
-    MyType2I resolution;
+    Vector2<int> resolution;
 
     float scale;
 } SimData;
@@ -79,19 +69,6 @@ typedef struct TimeMeasurement
 
     int runs;
 } TimeMeasurement;
-
-class ShapeFF
-{
-public:
-    virtual __device__ ~ShapeFF() {};
-
-    virtual __device__ MyComplex Evaluate(MyComplex qx, MyComplex qy, MyComplex qz, int rand_idx) = 0;
-    virtual __device__ MyComplex Evaluate2(MyComplex qpar, MyComplex q, MyComplex qz, int rand_idx) = 0;
-
-    virtual __device__ ShapeTypeV2 Type() = 0;
-    virtual __device__ int ParamCount() = 0;
-private:
-};
 
 enum class WorkStatus
 {

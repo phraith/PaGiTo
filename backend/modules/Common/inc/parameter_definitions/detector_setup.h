@@ -7,7 +7,6 @@
 
 
 #include <string>
-#include "standard_vector_types.h"
 #include "transformation_container.h"
 
 class DetectorConfiguration {
@@ -20,17 +19,17 @@ public:
 
     [[nodiscard]] MyType SampleDistance() const;
 
-    [[nodiscard]] const MyType2I &Directbeam() const;
+    [[nodiscard]] const Vector2<int> &Directbeam() const;
 
-    [[nodiscard]] const MyType2I &Resolution() const;
+    [[nodiscard]] const Vector2<int> &Resolution() const;
 
     [[nodiscard]] int PixelCount() const;
 
     [[nodiscard]] std::string InfoStr() const;
 private:
     MyType sample_distance_;
-    MyType2I directbeam_;
-    MyType2I resolution_;
+    Vector2<int> directbeam_;
+    Vector2<int> resolution_;
     MyType pixelsize_;
 };
 
