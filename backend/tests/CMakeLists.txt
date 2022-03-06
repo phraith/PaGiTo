@@ -5,7 +5,6 @@ add_executable(GisaxsTests)
 target_sources(GisaxsTests
                     PRIVATE
                         main.cpp
-                        src/test_memory_provider.cpp
                         src/test_model_simulator.cpp)
 
 target_link_libraries(GisaxsTests
