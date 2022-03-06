@@ -28,7 +28,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 add_subdirectory(modules/Common)
 add_subdirectory(modules/ConnectionUtility)
 add_subdirectory(modules/ModelSimulator)
-add_subdirectory(modules/ModelFitter)
+#add_subdirectory(modules/ModelFitter)
 add_subdirectory(modules/GisaxsLib)
 
 if (CMAKE_CUDA_COMPILER)
