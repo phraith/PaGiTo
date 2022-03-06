@@ -1,4 +1,4 @@
-name: JobContainers Private reg
+name: GISAXS Simulator
 
 on: [workflow_dispatch]
 
