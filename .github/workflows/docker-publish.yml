@@ -10,5 +10,7 @@ jobs:
       credentials:
         username: phrait
         password: ${{ secrets.WCD_TOKEN }}
+      volumes:
+        - ${{ github.workspace }}/backend:/github/home/source
     steps:
-    - run: echo secret!
+    - run: cd /github/home/source/ && chmod +x build.sh && ./build.sh
