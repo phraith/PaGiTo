@@ -6,7 +6,7 @@ jobs:
   private:
     runs-on: ubuntu-latest
     container:
-      image: wavecomputing.xyz/gisaxs/base_dev
+      image: wavecomputing.xyz/gisaxs/base_dev:0.2
       credentials:
         username: phrait
         password: ${{ secrets.WCD_TOKEN }}
