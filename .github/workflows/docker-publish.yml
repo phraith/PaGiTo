@@ -13,4 +13,4 @@ jobs:
       volumes:
         - ${{ github.workspace }}/backend:/github/home/source
     steps:
-    - run: cd /github/home/source/ && chmod +x build.sh && ./build.sh
+    - run:  cd /github/home/source/ && ls
