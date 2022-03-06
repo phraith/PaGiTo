@@ -1,0 +1,22 @@
+name: GISAXS Simulator
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  private:
+    runs-on: ubuntu-latest
+    container:
+      image: wavecomputing.xyz/gisaxs/base_dev:0.2
+      credentials:
+        username: phrait
+        password: ${{ secrets.WCD_TOKEN }}
+      volumes:
+        - ${{ github.workspace }}/backend:/github/home/source
+    steps:
+    - uses: actions/checkout@v2
+    - run: chmod +x backend/build.sh
+    - run:  ./backend/build.sh
+    - run: ./backend/build/tests/GisaxsTests
