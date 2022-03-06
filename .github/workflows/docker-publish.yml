@@ -1,0 +1,14 @@
+name: JobContainers Private reg
+
+on: [workflow_dispatch]
+
+jobs:
+  private:
+    runs-on: ubuntu-latest
+    container:
+      image: wavecomputing.xyz/gisaxs/base_dev
+      credentials:
+        username: phrait
+        password: ${{ secrets.WCD_TOKEN }}
+    steps:
+    - run: echo secret!
