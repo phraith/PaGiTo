@@ -11,7 +11,6 @@ target_link_libraries(GisaxsTests
                             PRIVATE
                                 GisaxsLib
                                 ModelSimulatorLib
-                                ModelFitterLib
                                 GTest::gtest
                                 GTest::gtest_main)
 
