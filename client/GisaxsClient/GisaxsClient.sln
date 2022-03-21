@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GisaxsClient", "GisaxsClien
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConnectioniUtility", "..\..\optimization\ConnectioniUtility\ConnectioniUtility.csproj", "{38F29DE4-CA36-4644-A2BF-0FA7CEECB642}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizationLibrary", "..\OptimizationLibrary\OptimizationLibrary.csproj", "{9235DD69-68E0-4F7E-A4A1-7E6B67949D92}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{38F29DE4-CA36-4644-A2BF-0FA7CEECB642}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38F29DE4-CA36-4644-A2BF-0FA7CEECB642}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38F29DE4-CA36-4644-A2BF-0FA7CEECB642}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9235DD69-68E0-4F7E-A4A1-7E6B67949D92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9235DD69-68E0-4F7E-A4A1-7E6B67949D92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9235DD69-68E0-4F7E-A4A1-7E6B67949D92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9235DD69-68E0-4F7E-A4A1-7E6B67949D92}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

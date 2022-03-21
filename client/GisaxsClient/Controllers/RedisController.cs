@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ namespace RedisTest.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class RedisController : ControllerBase
     {
         private readonly ILogger<RedisController> logger;
@@ -18,17 +20,6 @@ namespace RedisTest.Controllers
         {
             this.logger = logger;
             this.redis = redis;
-        }
-        
-        public class DataRequest
-        {
-            public string Hash { get; set; }
-        }
-
-        public class DatabaseRequest
-        {
-            public string id { get; set; }
-            public char[] intensities { get; set; }
         }
 
         [HttpGet]
