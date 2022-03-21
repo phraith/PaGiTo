@@ -40,7 +40,7 @@ const App = () => {
     "winter",
   ];
 
-  const [connection, setConnection] = useState<HubConnection>(new HubConnectionBuilder()
+  const [connection, _] = useState<HubConnection>(new HubConnectionBuilder()
   .withUrl("/message", {
     skipNegotiation: true,
     transport: HttpTransportType.WebSockets,
@@ -55,6 +55,19 @@ const App = () => {
   const [intensities, setIntensities] = useState<string>();
 
   useEffect(() => {
+    const receiveJobResult = (message: any) => {
+      let url = "/api/redis?" + message;
+      fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
+          Accept: "application/json",
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => handleData(data));
+    };
+
     if (connection) {
         connection.start()
             .then(result => {
@@ -68,18 +81,7 @@ const App = () => {
     }
 }, [connection]);
 
-  const receiveJobResult = (message: any) => {
-    let url = "/api/redis?" + message;
-    fetch(url, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
-        Accept: "application/json",
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => handleData(data));
-  };
+
 
   const handleData = (input: any) => {
     var startTime = performance.now();

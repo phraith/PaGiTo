@@ -12,3 +12,4 @@ WORKDIR /vcpkg
 RUN ./vcpkg install cppzmq[draft] zeromq[draft]
 RUN ./vcpkg install gtest
 RUN ./vcpkg install nlohmann-json
+RUN ./vcpkg install spdlog

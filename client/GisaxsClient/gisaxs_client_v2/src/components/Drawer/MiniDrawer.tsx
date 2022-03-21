@@ -6,7 +6,6 @@ import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import List from "@mui/material/List";
 import CssBaseline from "@mui/material/CssBaseline";
-import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -19,12 +18,8 @@ import DeviceHubIcon from "@mui/icons-material/DeviceHub";
 import TimelineIcon from "@mui/icons-material/Timeline";
 import {
   Button,
-  Card,
   ClickAwayListener,
   Grid,
-  ListItem,
-  Stack,
-  TextField,
 } from "@mui/material";
 import Login from "../Login/Login";
 
@@ -103,7 +98,6 @@ export default function MiniDrawer() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
 
-  const [activeRoute, setActiveRoute] = React.useState("ModelSimulation");
   const [openLoginForm, setOpenLoginForm] = React.useState(false);
 
   const handleDrawerOpen = () => {

@@ -1,8 +1,6 @@
 import {
-  DeleteForever,
   ExpandLess,
   ExpandMore,
-  Remove,
 } from "@mui/icons-material";
 import {
   Button,
