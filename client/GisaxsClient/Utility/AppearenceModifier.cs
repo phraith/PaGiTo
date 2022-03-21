@@ -33,7 +33,8 @@ namespace RedisTest.Controllers
         public static string ApplyColorMap(byte[] data, int width, int height, string colormapTypeName="")
         {
             Mat imageMatrix = new(height, width, MatType.CV_8UC1, data);
-            Mat imageMatrixWithColormap = new();
+
+             Mat imageMatrixWithColormap = new();
             Mat flippedImageMatrixWithColormap = new();
 
             ColormapTypes colormapType = ColormapTypes.TwilightShifted;
