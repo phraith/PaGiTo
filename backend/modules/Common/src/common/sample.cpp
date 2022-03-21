@@ -6,7 +6,7 @@
 
 SampleConfiguration::SampleConfiguration(Layer substrate, const std::vector<Layer>& layers)
 	:
-	layers_({ Layer {0, 0, 0 , 0} })
+	layers_({ })
 {
 	for (const auto &layer : layers)
 	{

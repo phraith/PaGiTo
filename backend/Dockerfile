@@ -28,6 +28,7 @@ RUN ./vcpkg install cppzmq[draft] zeromq[draft]
 RUN ./vcpkg install capnproto
 RUN ./vcpkg install gtest
 RUN ./vcpkg install nlohmann-json
+RUN ./vcpkg install spdlog
 
 RUN apt-get -y install htop
 

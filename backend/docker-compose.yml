@@ -1,5 +1,5 @@
-#version: "2"
-#services:
+version: "2"
+services:
 #  device:
 #    build: .
 #    ports: [ 5558:5558, 5559:5559, 5556:5556, 5557:5557 ]
@@ -8,10 +8,32 @@
 #        reservations:
 #          devices:
 #            - capabilities: [ gpu ]
-#  redis_jobs:
-#    image: redislabs/rejson:latest
-#    command: --port 6379 --maxmemory 1024mb --maxmemory-policy allkeys-lru --appendonly no --save ""
-#    ports: [6379:6379]
+  redis_jobs:
+   image: redislabs/rejson:latest
+   command: --port 6379 --maxmemory 1024mb --maxmemory-policy allkeys-lru --appendonly no --save ""
+   ports: [6379:6379]
+
+  pg_admin4:
+    image: dpage/pgadmin4:latest 
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: postgres
+    ports:
+      - "5050:80"
+  postgres_users:
+   image: postgres:latest
+   restart: always
+   environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: test_db
+   ports:
+    - '5432:5432'
+   volumes: 
+    - db:/var/lib/postgresql/data
+volumes:
+  db:
+    driver: local
   # redis_clients:
   #   image: redislabs/rejson:latest
   #   command: --port 6380

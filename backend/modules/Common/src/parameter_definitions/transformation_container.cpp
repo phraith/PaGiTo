@@ -22,7 +22,6 @@ namespace GisaxsTransformationContainer {
                     auto radiusStddev = shape.at("radius").at("stddev");
                     shapes.parameters.emplace_back(Vector2<MyType>{radiusMean, radiusStddev});
 
-                    shapes.position_indices.emplace_back(shapes.positions.size());
                     std::vector<Vector3<MyType>> positions;
                     shapes.position_indices.emplace_back(shapes.positions.size());
                     for (json position: shape.at("locations")) {
@@ -52,8 +51,8 @@ namespace GisaxsTransformationContainer {
                     break;
                 }
             }
-            shapes.position_indices.emplace_back(shapes.positions.size());
         }
+        shapes.position_indices.emplace_back(shapes.positions.size());
     }
 
     void from_json(const json &j, SampleContainer &sample) {

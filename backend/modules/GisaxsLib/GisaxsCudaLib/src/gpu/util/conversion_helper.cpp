@@ -6,7 +6,7 @@
 
 std::vector <MyComplex> GpuConversionHelper::Convert(const std::vector<std::complex<MyType>> &input)
 {
-    std::vector<MyComplex> converted_vector(input.size());
+    std::vector<MyComplex> converted_vector;
     for (const auto &element : input) {
         converted_vector.emplace_back(MyComplex {element.real(), element.imag()});
     }
@@ -23,7 +23,7 @@ MyType2I GpuConversionHelper::Convert(const Vector2<int> &input) {
 }
 
 std::vector<MyType2> GpuConversionHelper::Convert(const std::vector<Vector2<MyType>> &input) {
-    std::vector<MyType2> converted_vector(input.size());
+    std::vector<MyType2> converted_vector;
     for (const auto &element : input) {
         converted_vector.emplace_back(MyComplex {element.x, element.y});
     }
@@ -32,7 +32,7 @@ std::vector<MyType2> GpuConversionHelper::Convert(const std::vector<Vector2<MyTy
 }
 
 std::vector<MyType3> GpuConversionHelper::Convert(const std::vector<Vector3<MyType>> &input) {
-    std::vector<MyType3> converted_vector(input.size());
+    std::vector<MyType3> converted_vector;
     for (const auto &element : input) {
         converted_vector.emplace_back(MyType3 {element.x, element.y, element.z});
     }
@@ -46,4 +46,8 @@ MyType3I GpuConversionHelper::Convert(const Vector3<int> &input) {
 
 MyType3 GpuConversionHelper::Convert(const Vector3<MyType> &input) {
     return MyType3 {input.x, input.y, input.z};
+}
+
+MyComplex GpuConversionHelper::Convert(const std::complex<MyType> &input) {
+    return {input.real(), input.imag()};
 }

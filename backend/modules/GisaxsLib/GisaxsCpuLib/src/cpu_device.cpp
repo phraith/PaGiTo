@@ -12,6 +12,7 @@
 #include "common/qgrid.h"
 #include <string>
 #include <cmath>
+#include <iostream>
 
 SimData CpuDevice::RunGISAXS(const SimJob &description, const ImageData *real_img, bool copy_intensities) {
     auto flat_unitcell = description.ExperimentInfo().Unitcell();
@@ -22,8 +23,13 @@ SimData CpuDevice::RunGISAXS(const SimJob &description, const ImageData *real_im
         randoms[i] = normal_distribution_(generator_);
     }
 
-    auto qgrid = QGrid(description.ExperimentInfo().DetectorConfig(), std::vector<int>(),
-                       description.ExperimentInfo().BeamConfig(), 0);
+    auto eConfig = description.ExperimentInfo();
+    auto dConfig = eConfig.DetectorConfig();
+    auto bConfig = eConfig.BeamConfig();
+
+    auto qgrid = QGrid(dConfig, std::vector<int>(),
+                       bConfig, 0);
+
     std::vector<std::complex<MyType>> sfs = GisaxsCpuCore::CalculateStructureFactors(qgrid.QPointsXY(),
                                                                                      qgrid.QPointsZCoeffs(),
                                                                                      flat_unitcell.Translation(),

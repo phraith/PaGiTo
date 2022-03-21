@@ -96,21 +96,21 @@ namespace CpuInfo {
     }
 
     int FindCacheSize(int level, std::string type, const std::string &cache_dir) {
-        for (const auto &cpu_cache_dir_entry: directory_iterator(cache_dir)) {
-            std::vector<std::string> cache_split;
-            std::string ccd_string = cpu_cache_dir_entry.path().u8string();
-            CpuInfo::Split(ccd_string, "/");
-
-            if (!std::regex_match(cache_split.back(), std::regex("index[0-9]+")))
-                continue;
-
-            std::string cache_type_dir = cache_dir + cache_split.back();
-
-            if (GetCacheLevel(cache_type_dir) != level || GetCacheType(cache_type_dir) != type)
-                continue;
-
-            return GetCacheSize(cache_type_dir);
-        }
+//        for (const auto &cpu_cache_dir_entry: directory_iterator(cache_dir)) {
+//            std::vector<std::string> cache_split;
+//            std::string ccd_string = cpu_cache_dir_entry.path().u8string();
+//            CpuInfo::Split(ccd_string, "/");
+//
+//            if (!std::regex_match(cache_split.back(), std::regex("index[0-9]+")))
+//                continue;
+//
+//            std::string cache_type_dir = cache_dir + cache_split.back();
+//
+//            if (GetCacheLevel(cache_type_dir) != level || GetCacheType(cache_type_dir) != type)
+//                continue;
+//
+//            return GetCacheSize(cache_type_dir);
+//        }
         return -1;
     }
 

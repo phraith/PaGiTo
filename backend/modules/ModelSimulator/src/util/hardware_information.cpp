@@ -15,7 +15,7 @@ HardwareInformation::HardwareInformation()
 	:
 	cpu_info_(CpuInfo::GetCpuInfo())
 {
-    devices_.emplace_back(std::make_shared<CpuDevice>());
+    //devices_.emplace_back(std::make_shared<CpuDevice>());
 #ifdef CUDA_GPUS_AVAILABLE
 	for (const auto &gpu : GetGpuInfo())
 	{

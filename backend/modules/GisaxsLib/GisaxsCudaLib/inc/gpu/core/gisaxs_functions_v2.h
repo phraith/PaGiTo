@@ -25,5 +25,11 @@ namespace GisaxsV2 {
     void RunSim(MyComplex *qpar, MyComplex *q, MyComplex *qpoints_xy, MyComplex *qpoints_z_coeffs, int qcount,
                 MyComplex *coefficients, MyType *intensities, int shape_count, MyComplex *sfs,
                 DeviceFlatUnitcell flat_unitcell, MyType *randoms,cudaStream_t work_stream);
+
+    void CalculatePropagationCoefficientsTopBuried(int qcount, MyType2I resolution, MyType2I beam_direction,
+                                                   MyType pixelsize,
+                                                   MyType sample_distance, MyType k0, MyComplex sub_n2m1,
+                                                   MyType alpha_i,
+                                                   MyComplex *coefficients, cudaStream_t work_stream);
 }
 #endif

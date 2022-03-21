@@ -10,7 +10,7 @@ public:
 	Device();
 	~Device();
 
-	virtual SimData RunGISAXS(const SimJob& descr, const ImageData *real_img, bool copy_intensities) = 0;
+	virtual SimData RunGISAXS(const SimJob &descr, const ImageData *real_img, bool copy_intensities) = 0;
 	virtual void SetStatus(WorkStatus status) const = 0;
 	virtual WorkStatus Status() const = 0;
 

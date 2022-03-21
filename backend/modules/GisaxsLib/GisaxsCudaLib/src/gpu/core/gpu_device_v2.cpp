@@ -5,6 +5,7 @@
 #include "gpu/core/gpu_device_v2.h"
 
 #include <memory>
+#include <spdlog/spdlog.h>
 
 #include "gpu/core/gpu_helper.h"
 #include "gpu/util/cuda_numerics.h"
@@ -50,6 +51,8 @@ namespace GpuDeviceV2 {
     }
 
     SimData GpuDeviceV2::RunGISAXS(const SimJob &descr, const ImageData *real_img, bool copy_intensities) {
+        Timer local_timer;
+
         complete_timer_.Start();
 
         //set current device
@@ -58,14 +61,11 @@ namespace GpuDeviceV2 {
 
         auto unitcell = descr.ExperimentInfo().Unitcell();
 
-        const auto &coefficients = GpuConversionHelper::Convert(PropagationCoefficientsCpu::PropagationCoeffsTopBuried(
-                descr.ExperimentInfo().SampleConfig(), descr.ExperimentInfo().DetectorConfig(),
-                descr.ExperimentInfo().BeamConfig()));
         const auto &current_params = unitcell.Parameters();
-
         const auto work_stream = ProvideStream();
         auto start = event_provider_.ProvideEvent(work_stream->Get());
         auto stop = event_provider_.ProvideEvent(work_stream->Get());
+
 
         //get cuda memory for work
         GpuMemoryProviderV2 memoryProviderV2(0);
@@ -84,8 +84,10 @@ namespace GpuDeviceV2 {
         MemoryBlock<MyType3> dev_positions = memoryProviderV2.RequestMemory<MyType3>(unitcell.Positions().size());
         MemoryBlock<int> dev_positions_indices = memoryProviderV2.RequestMemory<int>(unitcell.PositionIndices().size());
 
-        MemoryBlock<MyComplex> dev_coefficients = memoryProviderV2.RequestConstantMemory(ConstantMemoryId::QGRID_COEFFS,
-                                                                                         coefficients);
+//        MemoryBlock<MyComplex> dev_coefficients = memoryProviderV2.RequestConstantMemory(ConstantMemoryId::QGRID_COEFFS,
+//                                                                                         coefficients);
+        MemoryBlock<MyComplex> dev_coefficients = memoryProviderV2.RequestMemory<MyComplex>(4 * qcount);
+
         MemoryBlock<MyComplex> container_xy = memoryProviderV2.RequestMemory<MyComplex>(2 * qcount);
         MemoryBlock<MyComplex> container_zcoeffs = memoryProviderV2.RequestMemory<MyComplex>(4 * qcount);
         MemoryBlock<MyComplex> container_qpar = memoryProviderV2.RequestMemory<MyComplex>(qcount);
@@ -97,6 +99,20 @@ namespace GpuDeviceV2 {
         MemoryBlock<MyType> container_qy = memoryProviderV2.RequestMemory<MyType>(qcount);
         MemoryBlock<MyType> container_qz = memoryProviderV2.RequestMemory<MyType>(qcount);
 
+
+        local_timer.Start();
+        GisaxsV2::CalculatePropagationCoefficientsTopBuried(qcount,
+                                                            GpuConversionHelper::Convert(descr.ExperimentInfo().DetectorConfig().Resolution()),
+                                                            GpuConversionHelper::Convert(descr.ExperimentInfo().BeamConfig().BeamDirection()),
+                                                            descr.ExperimentInfo().DetectorConfig().Pixelsize(),
+                                                            descr.ExperimentInfo().DetectorConfig().SampleDistance(),
+                                                            descr.ExperimentInfo().BeamConfig().K0(),
+                                                            GpuConversionHelper::Convert(descr.ExperimentInfo().SampleConfig().Layers().at(0).N2MinusOne()),
+                                                            descr.ExperimentInfo().BeamConfig().AlphaI(),
+                                                            dev_coefficients.Get(),
+                                                            work_stream->Get());
+        local_timer.End();
+        spdlog::info("Calculating coefficients took {} ms", local_timer.Duration());
 
         GpuQGrid::GpuQGridContainer container{container_xy.Get(), container_zcoeffs.Get(), container_qpar.Get(),
                                               container_q.Get(), container_coeffs.Get(), container_alpha_fs.Get(),
@@ -111,7 +127,8 @@ namespace GpuDeviceV2 {
         auto detector_width = descr.ExperimentInfo().DetectorConfig().Resolution().x;
         auto detector_height = descr.ExperimentInfo().DetectorConfig().Resolution().y;
 
-        GpuQGrid::CreateQGridFull(alpha_i, k0, pixelsize, sample_distance, GpuConversionHelper::Convert(direct_beam), detector_width, detector_height,
+        GpuQGrid::CreateQGridFull(alpha_i, k0, pixelsize, sample_distance, GpuConversionHelper::Convert(direct_beam),
+                                  detector_width, detector_height,
                                   container, work_stream->Get());
 
         gpuErrchk(cudaDeviceSynchronize());
@@ -126,15 +143,17 @@ namespace GpuDeviceV2 {
         random_generator_.GenerateRandoms(dev_rands.Get(), dev_rands.Size(), 0, 1);
 
         GisaxsV2::DeviceFlatUnitcell dev_unitcell{dev_params.Get(), dev_parameters_indices.Get(), dev_positions.Get(),
-                                                  dev_positions_indices.Get(), dev_shapes.Get(), GpuConversionHelper::Convert(unitcell.Repetitions()),
+                                                  dev_positions_indices.Get(), dev_shapes.Get(),
+                                                  GpuConversionHelper::Convert(unitcell.Repetitions()),
                                                   GpuConversionHelper::Convert(unitcell.Translation())};
 
         GisaxsV2::RunSim(container.dev_qpar, container.dev_q, container.dev_qpoints_xy, container.dev_qpoints_z_coeffs,
                          qcount, dev_coefficients.Get(), dev_sim_intensities.Get(), unitcell.ShapeTypes().size(),
                          dev_sfs.Get(), dev_unitcell, dev_rands.Get(), work_stream->Get());
 
-        CalculateMaximumIntensity(dev_sim_intensities.Get(), dev_sim_intensities.Size(), dev_partial_sums.Get(), dev_max.Get(),
-            work_stream->Get());
+        CalculateMaximumIntensity(dev_sim_intensities.Get(), dev_sim_intensities.Size(), dev_partial_sums.Get(),
+                                  dev_max.Get(),
+                                  work_stream->Get());
 
         Preprocess(dev_sim_intensities.Get(), dev_sim_intensities.Size(), dev_sim_intensities_prep.Get(), dev_max.Get(),
                    work_stream->Get());

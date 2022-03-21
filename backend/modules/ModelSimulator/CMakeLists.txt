@@ -1,5 +1,6 @@
 find_package(cppzmq REQUIRED)
 find_package(nlohmann_json REQUIRED)
+find_package(spdlog REQUIRED)
 
 file(GLOB_RECURSE MODEL_SIMULATOR_FILES "src/*.cpp" "inc/*.h")
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${MODEL_SIMULATOR_FILES})
@@ -34,7 +35,7 @@ endif ()
 
 target_link_libraries(
         ModelSimulatorLib
-        PUBLIC CommonLib GisaxsLib ConnectionUtility nlohmann_json
+        PUBLIC CommonLib GisaxsLib ConnectionUtility nlohmann_json spdlog::spdlog
         nlohmann_json::nlohmann_json
         PRIVATE cppzmq)
 

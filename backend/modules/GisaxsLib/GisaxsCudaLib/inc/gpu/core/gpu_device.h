@@ -19,7 +19,7 @@ public:
     GpuDevice(gpu_info_t info, int device_id);
     ~GpuDevice();
 
-    SimData RunGISAXS(const SimJob& descr, const ImageData *real_img, bool copy_intensities);
+    SimData RunGISAXS(const SimJob &descr, const ImageData *real_img, bool copy_intensities);
 
     void SetStatus(WorkStatus status) const;
     WorkStatus Status() const;

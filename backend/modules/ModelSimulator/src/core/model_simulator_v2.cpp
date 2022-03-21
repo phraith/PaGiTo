@@ -2,7 +2,7 @@
 #include "parameter_definitions/transformation_container.h"
 #include "common/unitcell_utility.h"
 #include "common/timer.h"
-
+#include "spdlog/spdlog.h"
 #include <iostream>
 #include <thread>
 #include <algorithm>
@@ -21,15 +21,18 @@ ModelSimulatorV2::~ModelSimulatorV2() {
 
 
 std::string ModelSimulatorV2::HandleRequest(const std::string &request) const {
-    json data = json::parse(request);
+    Timer localTimer;
+    Timer globalTimer;
+    spdlog::info("Received request");
 
-    json detector = data.at("detector");
+    globalTimer.Start();
+    localTimer.Start();
+    json data = json::parse(request);
+    json detector = data.at("instrumentation").at("detector");
     json shapes = data.at("shapes");
     json sample = data.at("sample");
-    json beam = data.at("beam");
+    json beam = data.at("instrumentation").at("beam");
     json unitcellMeta = data.at("unitcellMeta");
-
-    std::cout << "Got request..." << std::endl;
 
     auto detector_container = ConvertToDetector(detector);
     auto shapes_container = ConvertToFlatShapes(shapes);
@@ -46,15 +49,23 @@ std::string ModelSimulatorV2::HandleRequest(const std::string &request) const {
 
     SimJob job(JobMetaInformation{"1"},
                ExperimentalData{detector_config, beam_config, sample_config, flat_unitcell});
-    Timer t;
-    t.Start();
-    SimData sim_data = RunGISAXS(job, nullptr, true);
-    t.End();
+    localTimer.End();
+    spdlog::info("Preparing data took {} ms", localTimer.Duration());
 
+    localTimer.Start();
+    SimData sim_data = RunGISAXS(job, nullptr, true);
+    localTimer.End();
+    spdlog::info("Simulation took {} ms", localTimer.Duration());
+
+    localTimer.Start();
     auto final_message = CreateSerializedResult(sim_data, detector_config, job.JobInfo());
+    localTimer.End();
+    spdlog::info("Serializing result took {} ms", localTimer.Duration());
+
     hw_info_->CleanUpDevices();
 
-    std::cout << "Finished request in " << t.Duration() << "ms" << std::endl;
+    globalTimer.End();
+    spdlog::info("Finished request in {} ms", globalTimer.Duration());
     return final_message;
 }
 
