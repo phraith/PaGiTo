@@ -4,6 +4,7 @@ using MathNet.Numerics.LinearAlgebra.Factorization;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using MathNet.Numerics.LinearAlgebra.Complex;
 
 namespace CMAESnet
 {
