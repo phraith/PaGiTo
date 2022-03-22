@@ -1,5 +1,4 @@
-﻿using ConnectioniUtility.ConnectionUtility.Majordomo;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using NetMQ;
 using Newtonsoft.Json.Linq;
@@ -50,14 +49,15 @@ namespace RedisTest
             }
 
             NetMQMessage? result = null;
-            NetMQMessage msg = new();
-            msg.Append(configJson);
+            
 
-            using (var client = new MajordomoClient("tcp://127.0.0.1:5555", true))
+            using (var client = new MajordomoClient("tcp://127.0.0.1:5555"))
             {
                 var attempt = 0;
                 retryPolicy.Execute(() =>
                 {
+                    NetMQMessage msg = new();
+                    msg.Append(configJson);
                     Console.WriteLine($"Attempt {++attempt}");
                     result = client.Send("sim", msg);
                 });
