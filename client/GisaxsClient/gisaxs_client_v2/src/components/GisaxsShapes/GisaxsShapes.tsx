@@ -14,6 +14,7 @@ import React, { useEffect } from "react";
 import Cylinder from "./Cylinder";
 import Sphere from "./Sphere";
 import { v4 as uuidv4 } from "uuid";
+import { CylinderConfig, SphereConfig } from "../Utility/DefaultConfigs";
 
 interface GisaxsShapesProps {
   jsonCallback: any;
@@ -21,14 +22,38 @@ interface GisaxsShapesProps {
 
 const GisaxsShapes = (props: GisaxsShapesProps) => {
   const [shapes, setShapes] = React.useState<any>([]);
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchor] = React.useState(null);
   const [jsonData, setJsonData] = React.useState({});
 
   useEffect(() => {
+    let formattedShapes = Object.keys(jsonData).map((key) => jsonData[key]);
+    props.jsonCallback(formattedShapes, "shapes");
 
-    let formattedShapes = Object.keys(jsonData).map((key) => jsonData[key])
-    props.jsonCallback(formattedShapes, "shapes")
+    let stringifiedConfig = JSON.stringify(formattedShapes);
+    if (stringifiedConfig !== JSON.stringify([])) {
+      localStorage.setItem("shapesConfig", stringifiedConfig);
+    }
   }, [jsonData]);
+
+  useEffect(() => {
+    let data = localStorage.getItem("shapesConfig");
+
+    if (data !== null) {
+      let shapesConfig = JSON.parse(data);
+      let cachedShapes: any = [];
+      for (var shape of shapesConfig) {
+        switch (shape.type) {
+          case "sphere":
+            cachedShapes = [...cachedShapes, createSphere(shape)];
+            break;
+          case "cylinder":
+            cachedShapes = [...cachedShapes, createCylinder(shape)];
+            break;
+        }
+      }
+      setShapes(cachedShapes);
+    }
+  }, []);
 
   const removeShape = (id: string) => {
     setShapes((shapes) => shapes.filter((shape) => shape.props.id !== id));
@@ -46,41 +71,47 @@ const GisaxsShapes = (props: GisaxsShapesProps) => {
   };
 
   const addShape = (e) => {
-    setAnchorEl(e.currentTarget);
+    setAnchor(e.currentTarget);
   };
 
   const addSphere = () => {
+    setShapes([...shapes, createSphere(SphereConfig)]);
+    setAnchor(null);
+  };
+
+  const createSphere = (sphereConfig) => {
     const myid = uuidv4();
-    setShapes([
-      ...shapes,
+    return (
       <Sphere
         key={myid}
         id={myid}
         removeCallback={() => removeShape(myid)}
         jsonCallback={createJsonForSphere}
-      />,
-    ]);
-
-    setAnchorEl(null);
+        initialConfig={sphereConfig}
+      />
+    );
   };
 
   const addCylinder = () => {
+    setShapes([...shapes, createCylinder(CylinderConfig)]);
+    setAnchor(null);
+  };
+
+  const createCylinder = (cylinderConfig) => {
     const myid = uuidv4();
-    setShapes([
-      ...shapes,
+    return (
       <Cylinder
         key={myid}
         id={myid}
         removeCallback={() => removeShape(myid)}
         jsonCallback={createJsonForSphere}
-      />,
-    ]);
-
-    setAnchorEl(null);
+        initialConfig={cylinderConfig}
+      />
+    );
   };
 
   const handleClose = () => {
-    setAnchorEl(null);
+    setAnchor(null);
   };
 
   return (

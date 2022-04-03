@@ -2,51 +2,91 @@ import {
   Card,
   CardActions,
   CardContent,
-  Container,
   Grid,
   InputAdornment,
   TextField,
   Typography,
 } from "@mui/material";
 import React, { useEffect } from "react";
+import {
+  InstrumentationConfig,
+  SetLocalStorageEntity,
+} from "../Utility/DefaultConfigs";
 
 interface InstrumentationProps {
   jsonCallback: any;
 }
 
 const Instrumentation = (props: InstrumentationProps) => {
-  const [alphaI, setAlphaI] = React.useState(0.2);
-  const [photonEv, setPhotonEv] = React.useState(12398.4);
-  const [beamX, setBeamX] = React.useState(737);
-  const [beamY, setBeamY] = React.useState(0);
-  const [resX, setResX] = React.useState(1475);
-  const [resY, setResY] = React.useState(1679);
-  const [pixelsize, setPixelsize] = React.useState(57.3e-3);
-  const [sampleDistance, setSampleDistance] = React.useState(1000);
+  const [alphaI, setAlphaI] = React.useState(InstrumentationConfig.beam.alphai);
+  const [photonEv, setPhotonEv] = React.useState(
+    InstrumentationConfig.beam.photonEv
+  );
+  const [beamX, setBeamX] = React.useState(
+    InstrumentationConfig.detector.beamImpact.x
+  );
+  const [beamY, setBeamY] = React.useState(
+    InstrumentationConfig.detector.beamImpact.y
+  );
+  const [resX, setResX] = React.useState(
+    InstrumentationConfig.detector.resolution.width
+  );
+  const [resY, setResY] = React.useState(
+    InstrumentationConfig.detector.resolution.height
+  );
+  const [pixelsize, setPixelsize] = React.useState(
+    InstrumentationConfig.detector.pixelsize
+  );
+  const [sampleDistance, setSampleDistance] = React.useState(
+    InstrumentationConfig.detector.sampleDistance
+  );
+
+  const localStorageEntityName : string = "instrumentationConfig"
+  const configFieldName : string = "instrumentation"
 
   useEffect(() => {
-    props.jsonCallback(
-      {
-        beam: {
-          alphai: alphaI,
-          photonEv: photonEv
+    let currentConfig = {
+      beam: {
+        alphai: alphaI,
+        photonEv: photonEv,
+      },
+      detector: {
+        pixelsize: pixelsize,
+        resolution: {
+          width: resX,
+          height: resY,
         },
-        detector: {
-          pixelsize: pixelsize,
-          resolution: {
-            width: resX,
-            height: resY
-          },
-          sampleDistance: sampleDistance,
-          beamImpact: {
-            x: beamX,
-            y: beamY
-          }
-        }
-      }
-      , "instrumentation"
+        sampleDistance: sampleDistance,
+        beamImpact: {
+          x: beamX,
+          y: beamY,
+        },
+      },
+    };
+
+    SetLocalStorageEntity(
+      currentConfig,
+      InstrumentationConfig,
+      localStorageEntityName
     );
+
+    props.jsonCallback(currentConfig, configFieldName);
   }, [alphaI, photonEv, beamX, beamY, resX, resY, pixelsize, sampleDistance]);
+
+  useEffect(() => {
+    let data = localStorage.getItem(localStorageEntityName);
+    if (data !== null) {
+      let instrumentationConfig = JSON.parse(data);
+      setAlphaI(instrumentationConfig.beam.alphai);
+      setPhotonEv(instrumentationConfig.beam.photonEv);
+      setBeamX(instrumentationConfig.detector.beamImpact.x);
+      setBeamY(instrumentationConfig.detector.beamImpact.y);
+      setResX(instrumentationConfig.detector.resolution.width);
+      setResY(instrumentationConfig.detector.resolution.height);
+      setPixelsize(instrumentationConfig.detector.pixelsize);
+      setSampleDistance(instrumentationConfig.detector.sampleDistance);
+    }
+  }, []);
 
   return (
     <Card sx={{}}>
@@ -61,7 +101,7 @@ const Instrumentation = (props: InstrumentationProps) => {
                 ),
               }}
               label="alphaI"
-              defaultValue={alphaI}
+              value={alphaI}
               type="number"
               onChange={(e) => {
                 setAlphaI(Number(e.target.value));
@@ -76,7 +116,7 @@ const Instrumentation = (props: InstrumentationProps) => {
                 ),
               }}
               label="photonEv"
-              defaultValue={photonEv}
+              value={photonEv}
               type="number"
               onChange={(e) => {
                 setPhotonEv(Number(e.target.value));
@@ -86,7 +126,7 @@ const Instrumentation = (props: InstrumentationProps) => {
           <Grid item xs={3}>
             <TextField
               label="beamX"
-              defaultValue={beamX}
+              value={beamX}
               type="number"
               onChange={(e) => {
                 setBeamX(Number(e.target.value));
@@ -96,7 +136,7 @@ const Instrumentation = (props: InstrumentationProps) => {
           <Grid item xs={3}>
             <TextField
               label="beamY"
-              defaultValue={beamY}
+              value={beamY}
               type="number"
               onChange={(e) => {
                 setBeamY(Number(e.target.value));
@@ -106,7 +146,7 @@ const Instrumentation = (props: InstrumentationProps) => {
           <Grid item xs={3}>
             <TextField
               label="resX"
-              defaultValue={resX}
+              value={resX}
               type="number"
               onChange={(e) => {
                 setResX(Number(e.target.value));
@@ -116,7 +156,7 @@ const Instrumentation = (props: InstrumentationProps) => {
           <Grid item xs={3}>
             <TextField
               label="resY"
-              defaultValue={resY}
+              value={resY}
               type="number"
               onChange={(e) => {
                 setResY(Number(e.target.value));
@@ -131,7 +171,7 @@ const Instrumentation = (props: InstrumentationProps) => {
                 ),
               }}
               label="pixelsize"
-              defaultValue={pixelsize}
+              value={pixelsize}
               type="number"
               onChange={(e) => {
                 setPixelsize(Number(e.target.value));
@@ -146,7 +186,7 @@ const Instrumentation = (props: InstrumentationProps) => {
                 ),
               }}
               label="sampleDistance"
-              defaultValue={sampleDistance}
+              value={sampleDistance}
               type="number"
               onChange={(e) => {
                 setSampleDistance(Number(e.target.value));

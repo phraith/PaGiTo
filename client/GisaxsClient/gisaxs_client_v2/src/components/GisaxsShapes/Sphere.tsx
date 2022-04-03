@@ -18,6 +18,7 @@ import ParameterWrapper from "./ParameterWrapper";
 
 interface SphereProps {
   id: string;
+  initialConfig: any;
   removeCallback: any;
   jsonCallback: any;
 }
@@ -25,13 +26,14 @@ interface SphereProps {
 const Sphere = (props: SphereProps) => {
   const [collapsed, setCollapsed] = useState(true);
 
-  const [rMean, setRMean] = useState(5);
-  const [rStddev, setRStddev] = useState(0);
-  const [posX, setPosX] = useState(0);
-  const [posY, setPosY] = useState(0);
-  const [posZ, setPosZ] = useState(0);
-  const [refBeta, setRefBeta] = useState(2e-8);
-  const [refDelta, setRefDelta] = useState(6e-6);
+  const [rMean, setRMean] = useState(props.initialConfig.radius.mean);
+  const [rStddev, setRStddev] = useState(props.initialConfig.radius.stddev);
+  //fix locations
+  const [posX, setPosX] = useState(props.initialConfig.locations[0].x);
+  const [posY, setPosY] = useState(props.initialConfig.locations[0].y);
+  const [posZ, setPosZ] = useState(props.initialConfig.locations[0].z);
+  const [refBeta, setRefBeta] = useState(props.initialConfig.refraction.beta);
+  const [refDelta, setRefDelta] = useState(props.initialConfig.refraction.delta);
 
   const handleButtonClick = () => {
     setCollapsed(!collapsed);

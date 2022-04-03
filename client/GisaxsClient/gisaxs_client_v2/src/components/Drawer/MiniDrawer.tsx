@@ -20,8 +20,10 @@ import {
   Button,
   ClickAwayListener,
   Grid,
+  ListItem,
 } from "@mui/material";
 import Login from "../Login/Login";
+import { Link, LinkProps } from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -116,6 +118,14 @@ export default function MiniDrawer() {
     setOpenLoginForm(false);
   };
 
+  const FittingLink = React.forwardRef<any, Omit<LinkProps, "to">>(
+    (props, ref) => <Link ref={ref} to="/fitting" {...props} />
+  );
+
+  const SimulationLink = React.forwardRef<any, Omit<LinkProps, "to">>(
+    (props, ref) => <Link ref={ref} to="/simulation" {...props} />
+  );
+
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
@@ -164,7 +174,8 @@ export default function MiniDrawer() {
         </DrawerHeader>
         <Divider />
         <List>
-          <ListItemButton
+          <ListItem
+            component={SimulationLink}
             sx={{
               minHeight: 48,
               justifyContent: open ? "initial" : "center",
@@ -184,10 +195,11 @@ export default function MiniDrawer() {
             >
               {<DeviceHubIcon />}
             </ListItemIcon>
-          </ListItemButton>
+          </ListItem>
 
-          <ListItemButton
-            key={"ModelSimulation"}
+          <ListItem
+            component={FittingLink}
+            key={"ModelFitting"}
             sx={{
               minHeight: 48,
               justifyContent: open ? "initial" : "center",
@@ -207,7 +219,7 @@ export default function MiniDrawer() {
             >
               {<TimelineIcon />}
             </ListItemIcon>
-          </ListItemButton>
+          </ListItem>
         </List>
       </Drawer>
     </Box>

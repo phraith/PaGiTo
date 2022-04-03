@@ -7,18 +7,19 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useEffect } from "react";
+import { UnitcellMetaConfig } from "../Utility/DefaultConfigs";
 
 interface UnitcellMetaProps {
   jsonCallback: any;
 }
 
 const UnitcellMeta = (props: UnitcellMetaProps) => {
-  const [repX, setRepX] = React.useState(1);
-  const [repY, setRepY] = React.useState(1);
-  const [repZ, setRepZ] = React.useState(1);
-  const [posX, setPosX] = React.useState(0);
-  const [posY, setPosY] = React.useState(0);
-  const [posZ, setPosZ] = React.useState(0);
+  const [repX, setRepX] = React.useState(UnitcellMetaConfig.repetitions.x);
+  const [repY, setRepY] = React.useState(UnitcellMetaConfig.repetitions.y);
+  const [repZ, setRepZ] = React.useState(UnitcellMetaConfig.repetitions.z);
+  const [posX, setPosX] = React.useState(UnitcellMetaConfig.translation.x);
+  const [posY, setPosY] = React.useState(UnitcellMetaConfig.translation.y);
+  const [posZ, setPosZ] = React.useState(UnitcellMetaConfig.translation.z);
 
   useEffect(() => {
     props.jsonCallback(
