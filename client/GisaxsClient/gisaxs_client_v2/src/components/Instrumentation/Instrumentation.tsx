@@ -1,12 +1,13 @@
-import {
-  Card,
-  CardActions,
-  CardContent,
-  Grid,
-  InputAdornment,
-  TextField,
-  Typography,
-} from "@mui/material";
+import Button from "@mui/material/Button"
+import Card from "@mui/material/Card"
+import CardActions from "@mui/material/CardActions"
+import CardContent from "@mui/material/CardContent"
+import Collapse from "@mui/material/Collapse"
+import InputAdornment from "@mui/material/InputAdornment"
+import Grid from "@mui/material/Grid"
+import Typography from "@mui/material/Typography"
+import TextField from "@mui/material/TextField"
+
 import React, { useEffect } from "react";
 import {
   InstrumentationConfig,

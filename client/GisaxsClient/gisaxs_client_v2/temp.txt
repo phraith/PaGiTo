@@ -1,0 +1,1 @@
+// "start": "tsc && concurrently --kill-others \"tsc -w\" \"web-dev-server --watch --config web-dev-server.config.js\" \"rollup --environment NODE_ENV:development -c -w\" ",

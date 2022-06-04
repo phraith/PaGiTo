@@ -6,7 +6,7 @@ using System;
 using System.Linq;
 using MathNet.Numerics.LinearAlgebra.Complex;
 
-namespace CMAESnet
+namespace OptimizationLibrary.Cmaes
 {
     public class CMA
     {
@@ -82,7 +82,7 @@ namespace CMAESnet
 
             int alphacCov = 2;
             double c1 = alphacCov / (Math.Pow(nDim + 1.3, 2) + mu_eff);
-            double cmu = Math.Min(1 - c1, alphacCov * (mu_eff - 2 + (1 / mu_eff)) / (Math.Pow(nDim + 2, 2) + (alphacCov * mu_eff / 2)));
+            double cmu = Math.Min(1 - c1, alphacCov * (mu_eff - 2 + 1 / mu_eff) / (Math.Pow(nDim + 2, 2) + alphacCov * mu_eff / 2));
             if (!(c1 <= 1 - cmu))
             {
                 throw new Exception("invalid learning rate for the rank-one update");
@@ -92,7 +92,7 @@ namespace CMAESnet
                 throw new Exception("invalid learning rate for the rank-μ update");
             }
 
-            double minAlpha = Math.Min(1 + (c1 / cmu), Math.Min(1 + (2 * muEffMinus / (mu_eff + 2)), (1 - c1 - cmu) / (nDim * cmu)));
+            double minAlpha = Math.Min(1 + c1 / cmu, Math.Min(1 + 2 * muEffMinus / (mu_eff + 2), (1 - c1 - cmu) / (nDim * cmu)));
 
             double positiveSum = weightsPrime.Where(x => x > 0).Sum();
             double negativeSum = Math.Abs(weightsPrime.Where(x => x < 0).Sum());
@@ -107,13 +107,13 @@ namespace CMAESnet
             int cm = 1;
 
             double c_sigma = (mu_eff + 2) / (nDim + mu_eff + 5);
-            double d_sigma = 1 + (2 * Math.Max(0, Math.Sqrt((mu_eff - 1) / (nDim + 1)) - 1)) + c_sigma;
+            double d_sigma = 1 + 2 * Math.Max(0, Math.Sqrt((mu_eff - 1) / (nDim + 1)) - 1) + c_sigma;
             if (!(c_sigma < 1))
             {
                 throw new Exception("invalid learning rate for cumulation for the step-size control");
             }
 
-            double cc = (4 + (mu_eff / nDim)) / (nDim + 4 + (2 * mu_eff / nDim));
+            double cc = (4 + mu_eff / nDim) / (nDim + 4 + 2 * mu_eff / nDim);
             if (!(cc <= 1))
             {
                 throw new Exception("invalid learning rate for cumulation for the rank-one update");
@@ -131,7 +131,7 @@ namespace CMAESnet
             _d_sigma = d_sigma;
             _cm = cm;
 
-            _chi_n = Math.Sqrt(Dim) * (1.0 - (1.0 / (4.0 * Dim)) + 1.0 / (21.0 * (Math.Pow(Dim, 2))));
+            _chi_n = Math.Sqrt(Dim) * (1.0 - 1.0 / (4.0 * Dim) + 1.0 / (21.0 * Math.Pow(Dim, 2)));
 
             _weights = weights;
 
@@ -142,7 +142,7 @@ namespace CMAESnet
             _C = Matrix<double>.Build.DenseIdentity(Dim, Dim);
             _sigma = sigma;
 
-            if (!(bounds == null || (bounds.RowCount == Dim && bounds.ColumnCount == 2)))
+            if (!(bounds == null || bounds.RowCount == Dim && bounds.ColumnCount == 2))
             {
                 throw new Exception("bounds should be (n_dim, 2)-dim matrix");
             }
@@ -150,7 +150,7 @@ namespace CMAESnet
             _n_max_resampling = nMaxResampling;
 
             Generation = 0;
-            
+
             _normalDistribution = new Normal(0, 1);
 
             _epsilon = 1e-8;
@@ -208,7 +208,7 @@ namespace CMAESnet
 
             var dC = _C.Diagonal();
 
-            if (Generation > _funhist_term && (_funhist_values.Max() - _funhist_values.Min() < _tolfun))
+            if (Generation > _funhist_term && _funhist_values.Max() - _funhist_values.Min() < _tolfun)
             {
                 return true;
             }
@@ -223,13 +223,13 @@ namespace CMAESnet
                 return true;
             }
 
-            if (dC.Any(x => _mean == _mean + (0.2 * _sigma * Math.Sqrt(x))))
+            if (dC.Any(x => _mean == _mean + 0.2 * _sigma * Math.Sqrt(x)))
             {
                 return true;
             }
 
             int i = Generation / Dim;
-            if (D.Select((x, i) => (x, i)).All(entry => _mean == _mean + (0.1 * _sigma * entry.x * B.Row(entry.i))))
+            if (D.Select((x, i) => (x, i)).All(entry => _mean == _mean + 0.1 * _sigma * entry.x * B.Row(entry.i)))
             {
                 return true;
             }
@@ -250,7 +250,7 @@ namespace CMAESnet
 
         public void SetBounds(Matrix<double> bounds = null)
         {
-            if (!(bounds == null || (bounds.RowCount == Dim && bounds.ColumnCount == 2)))
+            if (!(bounds == null || bounds.RowCount == Dim && bounds.ColumnCount == 2))
             {
                 throw new Exception("bounds should be (n_dim, 2)-dim matrix");
             }
@@ -303,17 +303,17 @@ namespace CMAESnet
 
             double sqrtFactor = Math.Sqrt(_c_sigma * (2 - _c_sigma) * _mu_eff);
             var g = sqrtFactor * (C_2 * y_w);
-            var q = (C_2 * y_w);
-            _p_sigma = ((1 - _c_sigma) * _p_sigma) + sqrtFactor * (C_2 * y_w);
+            var q = C_2 * y_w;
+            _p_sigma = (1 - _c_sigma) * _p_sigma + sqrtFactor * (C_2 * y_w);
 
             double norm_pSigma = _p_sigma.L2Norm();
             _sigma *= Math.Exp(_c_sigma / _d_sigma * (norm_pSigma / _chi_n - 1));
             //Console.WriteLine($"Sigma: | {string.Join(", ", _p_sigma)} | {norm_pSigma}, {Math.Exp(_c_sigma / _d_sigma * (norm_pSigma / _chi_n - 1))}, {_sigma}");
             double h_sigma_cond_left = norm_pSigma / Math.Sqrt(1 - Math.Pow(1 - _c_sigma, 2 * (Generation + 1)));
-            double h_sigma_cond_right = (1.4 + (2 / (double)(Dim + 1))) * _chi_n;
+            double h_sigma_cond_right = (1.4 + 2 / (double)(Dim + 1)) * _chi_n;
             double h_sigma = h_sigma_cond_left < h_sigma_cond_right ? 1.0 : 0.0;
 
-            _pc = ((1 - _cc) * _pc) + (h_sigma * Math.Sqrt(_cc * (2 - _cc) * _mu_eff) * y_w);
+            _pc = (1 - _cc) * _pc + h_sigma * Math.Sqrt(_cc * (2 - _cc) * _mu_eff) * y_w;
 
             Vector<double> w_io = Vector<double>.Build.Dense(_weights.Count, 1);
             Vector<double> w_iee = (C_2 * y_k.Transpose()).ColumnNorms(2).PointwisePower(2);
@@ -341,17 +341,17 @@ namespace CMAESnet
             {
                 rank_mu += w_io[i] * y_k.Row(i).OuterProduct(y_k.Row(i));
             }
-            _C = (
+            _C =
                     (
-                    1 
+                    1
                     + _c1 * delta_h_sigma
                     - _c1
                     - _cmu * _weights.Sum()
-                    ) 
-                    * _C 
-                    + _c1 * rank_one 
+                    )
+                    * _C
+                    + _c1 * rank_one
                     + _cmu * rank_mu
-                );
+                ;
         }
 
         private Vector<double> RepairInfeasibleParams(Vector<double> param)
@@ -392,7 +392,7 @@ namespace CMAESnet
             }
             var h = B * Matrix<double>.Build.DenseOfDiagonalArray(D.AsArray());
             var y = PointwiseMultiplicationOnRows(h, z);
-            Vector<double> x = _mean + (_sigma * y);
+            Vector<double> x = _mean + _sigma * y;
             return x;
         }
 

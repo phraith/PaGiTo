@@ -1,18 +1,15 @@
-import {
-  ExpandLess,
-  ExpandMore,
-} from "@mui/icons-material";
-import {
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Collapse,
-  FormControl,
-  Grid,
-  TextField,
-  Typography,
-} from "@mui/material";
+import ExpandLess from "@mui/icons-material/ExpandLess"
+import ExpandMore from "@mui/icons-material/ExpandMore"
+import Button from "@mui/material/Button"
+import Card from "@mui/material/Card"
+import CardActions from "@mui/material/CardActions"
+import CardContent from "@mui/material/CardContent"
+import Collapse from "@mui/material/Collapse"
+import FormControl from "@mui/material/FormControl"
+import Grid from "@mui/material/Grid"
+import Typography from "@mui/material/Typography"
+import TextField from "@mui/material/TextField"
+import Stack from "@mui/material/Stack"
 import { useEffect, useState } from "react";
 
 interface SubstrateProps {

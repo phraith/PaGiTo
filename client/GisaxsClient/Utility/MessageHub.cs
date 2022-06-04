@@ -1,75 +1,143 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using GisaxsClient;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using NetMQ;
-using Newtonsoft.Json.Linq;
-using Polly;
-using Polly.Retry;
-using RedisTest.Controllers;
 using StackExchange.Redis;
 using System;
-using System.Security.Cryptography;
-using System.Text;
+using System.Collections.Generic;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
-namespace RedisTest
+#nullable enable
+
+namespace GisaxsClient.Utility
 {
-    [Authorize]
+    //[Authorize]
     public class MessageHub : Hub
     {
-        private readonly IConnectionMultiplexer redis;
-        private readonly RetryPolicy retryPolicy;
+        private readonly IRequestHandler requestHandler;
+        private readonly IHashComputer hashComputer;
 
-        public MessageHub(IConnectionMultiplexer redis)
+        public MessageHub()
         {
-            this.redis = redis;
-            this.retryPolicy = Policy.Handle<TransientException>()
-                .WaitAndRetry(retryCount: 3, sleepDurationProvider: i => TimeSpan.FromSeconds(5));
+            requestHandler = new MajordomoRequestHandler();
+            hashComputer = new Sha256HashComputer();
         }
 
         public async Task IssueJob(string stringRequest)
+        {
+            IRequestFactory factory = new RequestFactory(hashComputer);
+            Request? request = factory.CreateRequest(stringRequest);
+
+            if (request == null) { return; }
+
+            await Clients.All.SendAsync("ReceiveJobInfos", $"hash={request.InfoHash}");
+
+            RequestResult? result = requestHandler.HandleRequest(request);
+            if (result == null) { return; }
+
+            await Clients.All.SendAsync(result.Command, result.Body);
+        }
+
+        public async Task GetProfiles(string stringRequest)
         {
             var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             };
 
-            JObject o = JObject.Parse(stringRequest);
-            JToken meta = o["info"];
-            JToken config = o["config"];
-            var configJson = config.ToString();
-            var metaInf = JsonSerializer.Deserialize<MetaInformation>(meta.ToString(), options);
-            var hash = BitConverter.ToString(SHA256.HashData(Encoding.UTF8.GetBytes(configJson)));
+            JsonNode? jsonNode = JsonNode.Parse(stringRequest);
+            if (jsonNode == null) { return; }
 
-            var db = redis.GetDatabase();
-            if (db.KeyExists(hash))
+            var info = jsonNode["profiles"];
+
+            var config = jsonNode["config"];
+            if (config == null || info == null) { return; }
+
+            var profileInfos = new List<LineProfileInfo>();
+            foreach (KeyValuePair<string, JsonNode?> node in info.AsObject())
             {
-                await Clients.All.SendAsync("ReceiveJobId", $"hash={hash}&colorMapName={metaInf.ColormapName}");
-                return;
+                var profile = node.Value.Deserialize<LineProfileInfo>(options);
+                profileInfos.Add(profile);
             }
 
-            NetMQMessage? result = null;
-            
 
-            using (var client = new MajordomoClient("tcp://127.0.0.1:5555"))
+
+            var hash = hashComputer.Hash(config.ToString());
+            IDatabase db = RedisConnectorHelper.Connection.GetDatabase();
+            if (!db.KeyExists(hash)) { return; }
+
+            byte[] data = db.StringGet(hash);
+
+            int x = BitConverter.ToInt32(data, 0);
+            int y = BitConverter.ToInt32(data, sizeof(int));
+
+            int dataStart = 2 * sizeof(int) + x * y;
+            byte[] relevantData = data[dataStart..];
+
+            var profiles = new List<LineProfile>();
+            foreach (var profileInfo in profileInfos)
             {
-                var attempt = 0;
-                retryPolicy.Execute(() =>
+                var start = profileInfo.AbsoluteStart(x, y);
+                var end = profileInfo.AbsoluteEnd(x, y);
+
+                if ((int)start.X == (int)end.X)
                 {
-                    NetMQMessage msg = new();
-                    msg.Append(configJson);
-                    Console.WriteLine($"Attempt {++attempt}");
-                    result = client.Send("sim", msg);
-                });
-            };
+                    var profileData = new double[y];
+                    for (int i = 0; i < y; ++i)
+                    {
+                        int dataIndex = i * x + (int)start.X;
+                        profileData[i] = Math.Log(BitConverter.ToDouble(relevantData, dataIndex * sizeof(double)));
+                    }
 
-            if (result != null)
-            {
-                string data = result.First.ConvertToString();
-                db.StringSet(hash, data);
-                await Clients.All.SendAsync("ReceiveJobId", $"hash={hash}&colorMapName={metaInf.ColormapName}");
+                    profiles.Add(new LineProfile { Data = profileData });
+                }
+                else if ((int)start.Y == (int)end.Y)
+                {
+                    var profileData = new double[y];
+                    for (int i = 0; i < x; ++i)
+                    {
+                        int dataIndex = (int)start.Y * x + i;
+                        profileData[i] = Math.Log(BitConverter.ToDouble(relevantData, dataIndex * sizeof(double)));
+                    }
+
+                    profiles.Add(new LineProfile { Data = profileData });
+                }
+                else
+                {
+                    return;
+                }
             }
-            return;
+            await Clients.All.SendAsync("ProcessLineprofiles", $"{{\"profiles\": {JsonSerializer.Serialize(profiles)}}}");
+        }
+
+        internal class LineProfileInfo
+        {
+            public Coordinate StartRel { get; set; }
+            public Coordinate EndRel { get; set; }
+
+
+            public Coordinate AbsoluteStart(int width, int height)
+            {
+                return new Coordinate { X = StartRel.X * width, Y = StartRel.Y * height };
+            }
+
+            public Coordinate AbsoluteEnd(int width, int height)
+            {
+                return new Coordinate { X = EndRel.X * width, Y = EndRel.Y * height };
+            }
+        }
+
+        internal class LineProfile
+        {
+            public double[] Data { get; set; }
+        }
+
+        internal class Coordinate
+        {
+            public double X { get; set; }
+            public double Y { get; set; }
         }
     }
 }

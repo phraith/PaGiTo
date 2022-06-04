@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CMAESnet
+namespace OptimizationLibrary.Cmaes
 {
 
     public record Solution()
@@ -61,7 +61,7 @@ namespace CMAESnet
 
         public void Optimize()
         {
-            while(true)
+            while (true)
             {
                 var solutions = new List<Solution>();
                 for (int i = 0; i < cma.PopulationSize; i++)

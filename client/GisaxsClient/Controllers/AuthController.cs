@@ -1,4 +1,5 @@
 ﻿using GisaxsClient.Security;
+using GisaxsClient.Utility;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -10,7 +11,6 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using UserDataProvider;
 
 namespace GisaxsClient.Controllers
 {
@@ -18,15 +18,15 @@ namespace GisaxsClient.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UserDataContext context;
         private readonly IConfiguration configuration;
         private readonly HMACSHA512 userIdGenerator;
+        private readonly UserStore userStore;
 
-        public AuthController(UserDataContext context, IConfiguration configuration)
+        public AuthController(IConfiguration configuration)
         {
-            this.context = context;
             this.configuration = configuration;
-            this.userIdGenerator = new HMACSHA512(Encoding.UTF8.GetBytes("MySecretKey"));
+            userIdGenerator = new HMACSHA512(Encoding.UTF8.GetBytes("MySecretKey"));
+            userStore = new UserStore(configuration);
         }
 
         [HttpPost("register")]
@@ -34,21 +34,22 @@ namespace GisaxsClient.Controllers
         {
             (long userId, byte[] passwordHash, byte[] passwordSalt) = CreatePasswordHash(request.Password, request.Username);
 
-            if (context.Users.Any(u => u.Id == userId))
+            var users = await userStore.Get();
+            if (users.Any(u => u.UserId == userId))
             {
                 return BadRequest();
             }
 
-            var user = new User { Id = userId, PasswordHash = passwordHash, PasswordSalt = passwordSalt };
-            await context.AddAsync(user);
-            await context.SaveChangesAsync();
+            var user = new User { UserId = userId, PasswordHash = passwordHash, PasswordSalt = passwordSalt };
+            userStore.Insert(user);
             return Ok();
         }
-        
+
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login(UserDto request)
         {
-            var matchingUsers = context.Users.Where(u => u.Id == CreateUserId(request.Username));
+            var users = await userStore.Get();
+            var matchingUsers = users.Where(u => u.UserId == CreateUserId(request.Username));
             if (matchingUsers.Count() != 1)
             {
                 return BadRequest();
@@ -68,7 +69,7 @@ namespace GisaxsClient.Controllers
         {
             List<Claim> claims = new()
             {
-                new Claim(ClaimTypes.NameIdentifier, $"{matchingUser.Id}")
+                new Claim(ClaimTypes.NameIdentifier, $"{matchingUser.UserId}")
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetSection("AppSettings:Token").Value));
@@ -79,7 +80,7 @@ namespace GisaxsClient.Controllers
                 claims: claims,
                 signingCredentials: cred,
                 expires: DateTime.Now.AddDays(1)
-            ); 
+            );
 
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
             return jwt;

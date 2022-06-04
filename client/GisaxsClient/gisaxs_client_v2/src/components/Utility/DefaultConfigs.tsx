@@ -1,5 +1,3 @@
-import * as _ from "lodash";
-
 export const InstrumentationConfig = {
   beam: {
     alphai: 0.2,
@@ -72,12 +70,28 @@ export const CylinderConfig = {
   ],
 };
 
+export const LayerConfig = {
+  refraction: {
+    delta: 6e-6,
+    beta: 2e-8,
+  },
+  thickness: 0.01,
+  order: -1,
+};
 
-export const SetLocalStorageEntity = (currentConfig: any, defaultConfig: any, entityName : string) => {
-    if (!_.isEqual(currentConfig, defaultConfig)) {
-        localStorage.setItem(
-            entityName,
-          JSON.stringify(currentConfig)
-        );
-      }
+const isEqualsJson = (obj1,obj2)=>{
+  let keys1 = Object.keys(obj1);
+  let keys2 = Object.keys(obj2);
+
+  return keys1.length === keys2.length && Object.keys(obj1).every(key=>obj1[key]==obj2[key]);
 }
+
+export const SetLocalStorageEntity = (
+  currentConfig: any,
+  defaultConfig: any,
+  entityName: string
+) => {
+  if (!isEqualsJson(currentConfig, defaultConfig)) {
+    localStorage.setItem(entityName, JSON.stringify(currentConfig));
+  }
+};

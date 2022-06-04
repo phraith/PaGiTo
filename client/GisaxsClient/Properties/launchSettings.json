@@ -15,7 +15,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "Pathfinder2": {
+    "GisaxsClient": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {

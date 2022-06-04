@@ -1,20 +1,40 @@
+using GisaxsClient.Utility;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
+using System;
 using System.Text;
 using System.Threading.Tasks;
-using UserDataProvider;
 
-namespace RedisTest
+namespace GisaxsClient
 {
+
+    public class RedisConnectorHelper
+    {
+        private static Lazy<ConnectionMultiplexer> lazyConnection;
+        static RedisConnectorHelper()
+        {
+            lazyConnection = new Lazy<ConnectionMultiplexer>(() =>
+            {
+                return ConnectionMultiplexer.Connect("localhost:6380");
+            });
+        }
+
+        public static ConnectionMultiplexer Connection
+        {
+            get
+            {
+                return lazyConnection.Value;
+            }
+        }
+    }
+
 
     public class Startup
     {
@@ -29,20 +49,14 @@ namespace RedisTest
         public void ConfigureServices(IServiceCollection services)
         {
 
-            var multiplexer = ConnectionMultiplexer.Connect("localhost");
             services.AddSignalR();
-            services.AddSingleton<IConnectionMultiplexer>(multiplexer);
             //services.AddSingleton(new ZmqSocketConnection(multiplexer));
             services.AddControllersWithViews();
-
-            services.AddDbContext<UserDataContext>(
-                o => o.UseNpgsql(Configuration.GetConnectionString("UsersDb"))
-            );
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
-                configuration.RootPath = "gisaxs_client_v2/build";
+                configuration.RootPath = "gisaxs_client_v2/dist";
             });
 
             services.AddAuthorization(auth =>
@@ -68,15 +82,10 @@ namespace RedisTest
                     {
 
                         string accessToken = context.Request.Query["access_token"];
-                        
-                        if(accessToken != null)
-                        {
-                            var f = 5;
-                        }
                         // If the request is for our hub...
                         var path = context.HttpContext.Request.Path;
                         if (!string.IsNullOrEmpty(accessToken) &&
-                            (path.StartsWithSegments("/message")))
+                            path.StartsWithSegments("/message"))
                         {
                             // Read the token out of the query string
                             context.Token = accessToken;
@@ -103,7 +112,7 @@ namespace RedisTest
             }
 
             app.UseHttpsRedirection();
-            
+
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
@@ -122,12 +131,13 @@ namespace RedisTest
 
             app.UseSpa(spa =>
             {
-                spa.Options.SourcePath = "gisaxs_client_v2";
+                spa.Options.SourcePath = "gisaxs_client_v2/dist";
 
-                if (env.IsDevelopment())
-                {
-                    spa.UseReactDevelopmentServer(npmScript: "start");
-                }
+                //if (env.IsDevelopment())
+                //{
+                //    spa.UseProxyToSpaDevelopmentServer("http://localhost:9996");
+                //    //spa.UseReactDevelopmentServer(npmScript: "start");
+                //}
             });
         }
     }

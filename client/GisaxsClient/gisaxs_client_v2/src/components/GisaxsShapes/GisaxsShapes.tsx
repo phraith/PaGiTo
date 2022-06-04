@@ -1,20 +1,23 @@
-import { Add } from "@mui/icons-material";
-import {
-  Button,
-  Card,
-  CardContent,
-  Grid,
-  List,
-  ListItem,
-  Menu,
-  MenuItem,
-  Typography,
-} from "@mui/material";
+import Add from "@mui/icons-material/Add";
+import Button from "@mui/material/Button"
+import Card from "@mui/material/Card"
+import CardActions from "@mui/material/CardActions"
+import CardContent from "@mui/material/CardContent"
+import MenuItem from "@mui/material/MenuItem"
+import Menu from "@mui/material/Menu"
+import Grid from "@mui/material/Grid"
+import Typography from "@mui/material/Typography"
+import List from "@mui/material/List"
+import ListItem from "@mui/material/ListItem"
 import React, { useEffect } from "react";
 import Cylinder from "./Cylinder";
 import Sphere from "./Sphere";
 import { v4 as uuidv4 } from "uuid";
-import { CylinderConfig, SphereConfig } from "../Utility/DefaultConfigs";
+import {
+  CylinderConfig,
+  SetLocalStorageEntity,
+  SphereConfig,
+} from "../Utility/DefaultConfigs";
 
 interface GisaxsShapesProps {
   jsonCallback: any;
@@ -25,18 +28,17 @@ const GisaxsShapes = (props: GisaxsShapesProps) => {
   const [anchorEl, setAnchor] = React.useState(null);
   const [jsonData, setJsonData] = React.useState({});
 
+  const localStorageEntityName: string = "shapesConfig";
+  const configFieldName: string = "shapes";
+
   useEffect(() => {
     let formattedShapes = Object.keys(jsonData).map((key) => jsonData[key]);
-    props.jsonCallback(formattedShapes, "shapes");
-
-    let stringifiedConfig = JSON.stringify(formattedShapes);
-    if (stringifiedConfig !== JSON.stringify([])) {
-      localStorage.setItem("shapesConfig", stringifiedConfig);
-    }
+    props.jsonCallback(formattedShapes, configFieldName);
+    SetLocalStorageEntity(formattedShapes, [], localStorageEntityName);
   }, [jsonData]);
 
   useEffect(() => {
-    let data = localStorage.getItem("shapesConfig");
+    let data = localStorage.getItem(localStorageEntityName);
 
     if (data !== null) {
       let shapesConfig = JSON.parse(data);
@@ -101,7 +103,7 @@ const GisaxsShapes = (props: GisaxsShapesProps) => {
     const myid = uuidv4();
     return (
       <Cylinder
-        key={myid}
+        
         id={myid}
         removeCallback={() => removeShape(myid)}
         jsonCallback={createJsonForSphere}

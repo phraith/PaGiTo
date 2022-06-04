@@ -1,4 +1,3 @@
-import "./App.css";
 import Simulation from "./components/Simulation/Simulation";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";

@@ -1,16 +1,14 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using StackExchange.Redis;
-using System.Threading.Tasks;
 
-namespace RedisTest
+namespace GisaxsClient
 {
     public class Program
     {
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
-            
+
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

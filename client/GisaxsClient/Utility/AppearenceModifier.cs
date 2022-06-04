@@ -2,18 +2,18 @@
 using System;
 using System.Collections.Generic;
 
-namespace RedisTest.Controllers
+namespace GisaxsClient.Utility
 {
     public static class AppearenceModifier
     {
         private static readonly Dictionary<string, ColormapTypes> colormapTypeMapping = new()
-        { 
+        {
             { "twilightshifted", ColormapTypes.TwilightShifted },
             { "twilight", ColormapTypes.Twilight },
             { "autumn", ColormapTypes.Autumn },
             { "parula", ColormapTypes.Parula },
             { "bone", ColormapTypes.Bone },
-            { "cividis", ColormapTypes.Cividis},
+            { "cividis", ColormapTypes.Cividis },
             { "cool", ColormapTypes.Cool },
             { "hot", ColormapTypes.Hot },
             { "hsv", ColormapTypes.Hsv },
@@ -30,11 +30,11 @@ namespace RedisTest.Controllers
             { "winter", ColormapTypes.Winter }
         };
 
-        public static string ApplyColorMap(byte[] data, int width, int height, string colormapTypeName="")
+        public static string ApplyColorMap(byte[] data, int width, int height, string colormapTypeName = "")
         {
             Mat imageMatrix = new(height, width, MatType.CV_8UC1, data);
 
-             Mat imageMatrixWithColormap = new();
+            Mat imageMatrixWithColormap = new();
             Mat flippedImageMatrixWithColormap = new();
 
             ColormapTypes colormapType = ColormapTypes.TwilightShifted;
@@ -46,6 +46,12 @@ namespace RedisTest.Controllers
             Cv2.ApplyColorMap(imageMatrix, imageMatrixWithColormap, colormapType);
             Cv2.Flip(imageMatrixWithColormap, flippedImageMatrixWithColormap, FlipMode.X);
             Cv2.ImEncode(".jpg", flippedImageMatrixWithColormap, out byte[] output, new ImageEncodingParam[] { new ImageEncodingParam(ImwriteFlags.JpegQuality, 95) });
+
+            using (new Window("dst image", flippedImageMatrixWithColormap))
+            {
+                Cv2.WaitKey();
+            }
+
             return Convert.ToBase64String(output, 0, output.Length);
         }
     }

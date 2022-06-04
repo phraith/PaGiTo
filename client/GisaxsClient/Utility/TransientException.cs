@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace RedisTest
+namespace GisaxsClient.Utility
 {
     [Serializable]
     internal class TransientException : Exception
