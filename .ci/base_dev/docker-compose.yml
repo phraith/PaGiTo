@@ -1,6 +1,7 @@
 version: "2"
 services:
  device:
+  image: wavecomputing.xyz/gisaxs/base_dev:0.3
   build: .
   command: bash -c "cd source && ./build.sh && ./build/apps/ModelSimulator/ModelSimulator"
   volumes:

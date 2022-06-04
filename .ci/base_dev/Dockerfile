@@ -9,6 +9,9 @@ ENV VCPKG_FORCE_SYSTEM_BINARIES="1"
 RUN apk update && apk add build-base cmake git zip ninja curl pkgconfig
 RUN git clone https://github.com/microsoft/vcpkg.git && cd vcpkg && ./bootstrap-vcpkg.sh && ./vcpkg integrate install
 WORKDIR /vcpkg
+RUN ./vcpkg update
+RUN apk add linux-headers
+RUN ./vcpkg install pagmo2
 RUN ./vcpkg install cppzmq[draft] zeromq[draft]
 RUN ./vcpkg install gtest
 RUN ./vcpkg install nlohmann-json
