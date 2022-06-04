@@ -3,7 +3,6 @@
 //
 
 #include "common/experimental_data.h"
-
 #include <utility>
 
 ExperimentalData::ExperimentalData(const DetectorConfiguration &detector, const BeamConfiguration &beam_configuration,

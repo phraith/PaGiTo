@@ -6,6 +6,7 @@
 
 #include <utility>
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 void majordomo::Broker::Start() {
     //ms_time_t now = ms_now();
@@ -138,6 +139,15 @@ majordomo::Broker::ProcessRequestFromWorker(const majordomo::remote_id_t &origin
     bool worker_ready = (workers_.find(origin) != workers_.end());
     std::shared_ptr<WorkerInformation> worker = WorkerRequire(origin);
 
+    if (majordomo::worker::info == command) {
+        remote_id_t client_id = multipart_msg.popstr();
+        multipart_msg.pop();
+        multipart_msg.pushstr("fit");
+        multipart_msg.pushstr(majordomo::client::ident);
+
+         zmq::send_result_t res = SendToRouter(socket_, multipart_msg, client_id);
+    }
+
     if (majordomo::worker::ready == command) {
         if (worker_ready) {
             DeleteWorker(worker, true);
@@ -185,7 +195,7 @@ majordomo::Broker::ProcessRequestFromWorker(const majordomo::remote_id_t &origin
 void majordomo::Broker::MakeAvailable(const std::shared_ptr<WorkerInformation> &worker) {
     waiting_workers_.insert(worker);
     worker->AssignedService()->WaitingWorkers().push_back(worker);
-    std::cout << "Make available" << std::endl;
+    spdlog::info("Worker {} with identity {} is now available!", worker->AssignedService()->Name(), worker->Identity());
     worker->Expiry(majordomo::ms_now() + heartbeat_expiry_);
     ServiceDispatch(worker->AssignedService());
 }

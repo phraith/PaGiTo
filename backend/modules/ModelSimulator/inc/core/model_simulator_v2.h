@@ -15,13 +15,13 @@
 
 class ModelSimulatorV2 : public Service {
 public:
-    ModelSimulatorV2();
+    ModelSimulatorV2(std::shared_ptr<HardwareInformation> hw_info);
 
     ~ModelSimulatorV2() override;
 
     std::string ServiceName() const override;
 
-    std::string HandleRequest(const std::string &request) const override;
+    std::vector<std::byte> HandleRequest(const std::string &request, std::vector<std::byte> image_data, const std::string &origin) override;
 
     std::vector<TimeMeasurement> GetDeviceTimings() const;
 
@@ -31,14 +31,16 @@ private:
     static std::string CreateSerializedResult(const SimData &sim_data, const DetectorConfiguration &detector_data,
                                        const JobMetaInformation &job_meta_information);
 
-    Device &LockAndReturnDevice() const;
+    static std::vector<std::byte> CreateSerializedByteResult(const SimData &sim_data, const DetectorConfiguration &detector_data,
+                                              const JobMetaInformation &job_meta_information);
 
-    void UnlockDevice(Device &device) const;
+//    Device &LockAndReturnDevice() const;
+
+//    void UnlockDevice(Device &device) const;
 
     std::shared_ptr<HardwareInformation> hw_info_;
 
-    mutable std::mutex mutex_;
-    mutable std::condition_variable cv_;
+
 };
 
 #endif

@@ -5,6 +5,7 @@
 #include <string>
 #include "nlohmann/json.hpp"
 
+
 typedef float MyType;
 
 enum class ShapeTypeV2 {
@@ -46,7 +47,7 @@ typedef struct ParamData
 typedef struct SimData
 {
 	MyType fitness;
-	std::vector<MyType> intensities;
+	std::vector<double> intensities;
     std::vector<unsigned char> normalized_intensities;
     std::vector<MyType> qx;
     std::vector<MyType> qy;
@@ -75,6 +76,8 @@ enum class WorkStatus
     kIdle,
     kWorking
 };
+
+
 
 typedef struct FittedParameter
 {

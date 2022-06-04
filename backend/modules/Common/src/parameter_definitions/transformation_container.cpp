@@ -1,4 +1,17 @@
+#include <spdlog/spdlog.h>
 #include "parameter_definitions/transformation_container.h"
+#include "common/timer.h"
+
+void from_json (const json &j, Vector3<MyType> &vector)
+{
+    vector = {j.at("x"), j.at("y"), j.at("z")};
+}
+
+void to_json (json &j, const Vector3<MyType> &vector) {
+    j["x"] = vector.x;
+    j["y"] = vector.y;
+    j["z"] = vector.z;
+}
 
 namespace GisaxsTransformationContainer {
     void
@@ -20,12 +33,14 @@ namespace GisaxsTransformationContainer {
                     shapes.parameter_indices.emplace_back(shapes.parameters.size());
                     auto radiusMean = shape.at("radius").at("mean");
                     auto radiusStddev = shape.at("radius").at("stddev");
+                    shapes.upper_bounds.emplace_back(Vector2<MyType>{radiusMean, radiusStddev});
+                    shapes.lower_bounds.emplace_back(Vector2<MyType>{radiusMean, radiusStddev});
                     shapes.parameters.emplace_back(Vector2<MyType>{radiusMean, radiusStddev});
 
                     std::vector<Vector3<MyType>> positions;
                     shapes.position_indices.emplace_back(shapes.positions.size());
                     for (json position: shape.at("locations")) {
-                        positions.emplace_back(Vector3<MyType>{position.at("x"), position.at("y"), position.at("z")});
+                        positions.emplace_back(position.get<Vector3<MyType>>());
                     }
                     shapes.positions.insert(shapes.positions.end(), positions.begin(), positions.end());
                     break;
@@ -35,17 +50,21 @@ namespace GisaxsTransformationContainer {
                     shapes.parameter_indices.emplace_back(shapes.parameters.size());
                     auto radiusMean = shape.at("radius").at("mean");
                     auto radiusStddev = shape.at("radius").at("stddev");
+                    shapes.upper_bounds.emplace_back(Vector2<MyType>{radiusMean, radiusStddev});
+                    shapes.lower_bounds.emplace_back(Vector2<MyType>{radiusMean, radiusStddev});
                     shapes.parameters.emplace_back(Vector2<MyType>{radiusMean, radiusStddev});
 
                     shapes.parameter_indices.emplace_back(shapes.parameters.size());
                     auto heightMean = shape.at("height").at("mean");
                     auto heightStddev = shape.at("height").at("stddev");
+                    shapes.upper_bounds.emplace_back(Vector2<MyType>{heightMean, heightStddev});
+                    shapes.lower_bounds.emplace_back(Vector2<MyType>{heightMean, heightStddev});
                     shapes.parameters.emplace_back(Vector2<MyType>{heightMean, heightStddev});
 
                     std::vector<Vector3<MyType>> positions;
                     shapes.position_indices.emplace_back(shapes.positions.size());
                     for (json position: shape.at("locations")) {
-                        positions.emplace_back(Vector3<MyType>{position.at("x"), position.at("y"), position.at("z")});
+                        positions.emplace_back(position.get<Vector3<MyType>>());
                     }
                     shapes.positions.insert(shapes.positions.end(), positions.begin(), positions.end());
                     break;
@@ -53,6 +72,51 @@ namespace GisaxsTransformationContainer {
             }
         }
         shapes.position_indices.emplace_back(shapes.positions.size());
+    }
+
+    void to_json(json& j, const FlatShapeContainer &shapes)
+    {
+        j = json::array();
+        for (int i = 0; i < shapes.shape_types.size(); ++i)
+        {
+            auto shape_type = shapes.shape_types.at(i);
+            int first_parameter = shapes.parameter_indices[i];
+
+            int first_position = shapes.position_indices[i];
+            int last_position = shapes.position_indices[i + 1];
+
+            json shape;
+            shape["type"] = shape_type;
+
+            std::vector<Vector3<MyType>> positions;
+            for(int j = first_position; j < last_position; ++j)
+            {
+                positions.emplace_back(shapes.positions[j]);
+            }
+            shape["locations"] = positions;
+            switch(shape_type)
+            {
+                case ShapeTypeV2::sphere: {
+                    auto radius = shapes.parameters[first_parameter];
+                    shape["radius"]["mean"] = radius.x;
+                    shape["radius"]["stddev"] = radius.y;
+                    j.push_back(shape);
+                    break;
+                }
+                case ShapeTypeV2::cylinder: {
+                    auto radius = shapes.parameters[first_parameter];
+                    auto height = shapes.parameters[first_parameter + 1];
+
+                    shape["radius"]["mean"] = radius.x;
+                    shape["radius"]["stddev"] = radius.y;
+
+                    shape["height"]["mean"] = radius.x;
+                    shape["height"]["stddev"] = radius.y;
+                    j.push_back(shape);
+                    break;
+                }
+            }
+        }
     }
 
     void from_json(const json &j, SampleContainer &sample) {
@@ -102,5 +166,55 @@ namespace GisaxsTransformationContainer {
 
     DetectorContainer ConvertToDetector(const json &json) {
         return json.get<DetectorContainer>();
+    }
+
+    SimJob CreateSimJobFromRequest(const std::string &request) {
+        json data = json::parse(request);
+        return CreateSimJobFromRequest(data);
+    }
+
+    json UpdateShapes(const json &input, const FlatShapeContainer &shape_container)
+    {
+        json j(input);
+        j["shapes"] = shape_container;
+        return j;
+    }
+
+    SimJob CreateSimJobFromRequest(json request) {
+        json detector = request.at("instrumentation").at("detector");
+        json shapes = request.at("shapes");
+
+        json sample = request.at("sample");
+        json beam = request.at("instrumentation").at("beam");
+        json unitcellMeta = request.at("unitcellMeta");
+
+        auto detector_container = ConvertToDetector(detector);
+        auto shapes_container = ConvertToFlatShapes(shapes);
+
+        Timer t;
+        t.Start();
+        json shapes_back;
+        shapes_back["shapes"] = shapes_container;
+        t.End();
+
+        spdlog::info("Recreating shapes took {} ms", t.Duration());
+
+        auto shape_str = shapes_back.dump();
+
+        auto sample_container = ConvertToSample(sample);
+        auto beam_container = ConvertToBeam(beam);
+        auto unitcell_meta_container = ConvertToUnitcellMeta(unitcellMeta);
+        auto flat_unitcell = FlatUnitcellV2(shapes_container, unitcell_meta_container.repetitions,
+                                            unitcell_meta_container.translation);
+
+        DetectorConfiguration detector_config(detector_container);
+        BeamConfiguration beam_config(beam_container.alphai, detector_config.Directbeam(), beam_container.photonEv,
+                                      0.1);
+        SampleConfiguration sample_config(
+                Layer(sample_container.substrate_delta, sample_container.substrate_beta, -1, 0),
+                sample_container.layers);
+
+        return {JobMetaInformation{"1"},
+                ExperimentalData{detector_config, beam_config, sample_config, flat_unitcell}};
     }
 }

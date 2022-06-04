@@ -4,26 +4,18 @@
 #include <vector>
 #include <string>
 
-#include "uuid_generator.h"
+#include "parameter_definitions/transformation_container.h"
 
-class ImageData
-{
+class ImageData {
 public:
-    ImageData(std::vector<float> intensities, std::vector<int> offsets);
+    explicit ImageData(std::vector<GisaxsTransformationContainer::LineProfileContainer> line_profiles);
+
     ~ImageData();
 
-    [[nodiscard]] const std::vector<float> &Intensities() const;
-    [[nodiscard]] const std::vector<int>& Offsets() const;
-    [[nodiscard]] const std::string& Id() const ;
+    const std::vector<GisaxsTransformationContainer::LineProfileContainer> &LineProfiles() const;
 
-    [[nodiscard]] int Size() const;
-    [[nodiscard]] float MaxIntensity() const;
 private:
-    std::vector<float> intensities_;
-    float max_intensity_;
-    float min_intensity_;
-    std::vector<int> offsets_;
-    std::string uuid_;
+    std::vector<GisaxsTransformationContainer::LineProfileContainer> line_profiles_;
 };
 
 #endif

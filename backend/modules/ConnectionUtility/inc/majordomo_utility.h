@@ -25,6 +25,7 @@ namespace majordomo {
         inline const char* reply = "\003";
         inline const char* heartbeat = "\004";
         inline const char* disconnect = "\005";
+        inline const char* info = "\009";
     }
 
     using ms_time_t = std::chrono::milliseconds;

@@ -29,6 +29,7 @@ public:
 
     [[nodiscard]] std::string Name() const override;
 private:
+    std::string WorkStatusToStr(WorkStatus status) const;
     std::normal_distribution<MyType> normal_distribution_;
     std::default_random_engine generator_;
     mutable WorkStatus work_status_;

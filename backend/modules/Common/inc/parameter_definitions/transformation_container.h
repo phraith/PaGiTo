@@ -7,43 +7,15 @@
 
 #include <nlohmann/json.hpp>
 #include "common/layer.h"
+#include "common/simulation_description.h"
+#include "data_containers.h"
 
 using json = nlohmann::json;
 
+void from_json (const json &j, Vector3<MyType> &vector);
+void to_json (json &j, const Vector3<MyType> &vector);
+
 namespace GisaxsTransformationContainer {
-    struct DetectorContainer {
-        Vector2<int> beamImpact;
-        Vector2<int> resolution;
-        MyType pixelsize;
-        MyType sampleDistance;
-    };
-
-    struct FlatShapeContainer {
-        std::vector<Vector2<MyType>> parameters;
-        std::vector<int> parameter_indices;
-        std::vector<Vector2<MyType>> upper_bounds;
-        std::vector<Vector2<MyType>> lower_bounds;
-        std::vector<Vector3<MyType>> positions;
-        std::vector<int> position_indices;
-        std::vector<ShapeTypeV2> shape_types;
-    };
-
-    struct SampleContainer {
-        std::vector<Layer> layers;
-
-        MyType substrate_delta;
-        MyType substrate_beta;
-    };
-
-    struct BeamContainer {
-        MyType alphai;
-        MyType photonEv;
-    };
-
-    struct UnitcellMetaContainer {
-        Vector3<int> repetitions;
-        Vector3<MyType> translation;
-    };
 
     FlatShapeContainer ConvertToFlatShapes(const json &json);
     void from_json(const json &j, FlatShapeContainer &shapes);
@@ -55,7 +27,9 @@ namespace GisaxsTransformationContainer {
     void from_json(const json &j, UnitcellMetaContainer &unitcellMeta);
     DetectorContainer ConvertToDetector(const json &json);
     void from_json(const json &j, DetectorContainer &detector);
-
+    json UpdateShapes(const json &input, const FlatShapeContainer &shape_container);
+    SimJob CreateSimJobFromRequest(const std::string &request);
+    SimJob CreateSimJobFromRequest(json request);
 
 
 }

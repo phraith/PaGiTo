@@ -102,7 +102,8 @@ SimData GpuDevice::RunGISAXS(const SimJob &descr, const ImageData *real_img, boo
     auto detector_width = descr.ExperimentInfo().DetectorConfig().Resolution().x;
     auto detector_height = descr.ExperimentInfo().DetectorConfig().Resolution().y;
 
-    GpuQGrid::CreateQGridFull(alpha_i, k0, pixelsize, sample_distance, GpuConversionHelper::Convert(direct_beam), detector_width, detector_height,
+    GpuQGrid::CreateQGridFull(alpha_i, k0, pixelsize, sample_distance, GpuConversionHelper::Convert(direct_beam),
+                              detector_width, detector_height,
                               container, work_stream->Get());
 
     gpuErrchk(cudaDeviceSynchronize());
@@ -149,9 +150,10 @@ SimData GpuDevice::RunGISAXS(const SimJob &descr, const ImageData *real_img, boo
     float scale = 1;
     if (real_img != nullptr) {
 
+
         MemoryBlock<MyType> dev_real_intensities = memoryProviderV2.RequestMemory<MyType>(
-                real_img->Intensities().size());
-        dev_real_intensities.InitializeHtD(real_img->Intensities());
+                real_img->LineProfiles()[0].intensities.size());
+        dev_real_intensities.InitializeHtD(real_img->LineProfiles()[0].intensities);
 
         SumReduce(dev_real_intensities.Get(), dev_real_intensities.Size(), dev_partial_sums.Get(), dev_scale_prod_,
                   work_stream->Get());
@@ -182,12 +184,18 @@ SimData GpuDevice::RunGISAXS(const SimJob &descr, const ImageData *real_img, boo
     runs_ += 1;
 
     if (copy_intensities) {
-        std::vector<unsigned char> copied_intensities(dev_sim_intensities_uchar.Size());
-        gpuErrchk(cudaMemcpy(&copied_intensities[0], dev_sim_intensities_uchar.Get(),
+        std::vector<unsigned char> copied_normalized_intensities(dev_sim_intensities_uchar.Size());
+        gpuErrchk(cudaMemcpy(&copied_normalized_intensities[0], dev_sim_intensities_uchar.Get(),
                              dev_sim_intensities_uchar.Size() * sizeof(unsigned char), cudaMemcpyDeviceToHost));
-        return {fitness_, std::vector<float>(), copied_intensities, container_qx.CopyToHost(),
-                container_qy.CopyToHost(),
-                container_qz.CopyToHost(), descr.ExperimentInfo().DetectorConfig().Resolution(), scale};
+
+        std::vector<MyType> copied_intensities(dev_sim_intensities.Size());
+        gpuErrchk(cudaMemcpy(&copied_intensities[0], dev_sim_intensities.Get(),
+                             dev_sim_intensities.Size() * sizeof(MyType), cudaMemcpyDeviceToHost));
+
+        return {fitness_, {copied_intensities.begin(), copied_intensities.end()}, copied_normalized_intensities,
+                container_qx.CopyToHost(),
+                container_qy.CopyToHost(), container_qz.CopyToHost(),
+                descr.ExperimentInfo().DetectorConfig().Resolution(), scale};
     }
 
     memoryProviderV2.UnlockAll();

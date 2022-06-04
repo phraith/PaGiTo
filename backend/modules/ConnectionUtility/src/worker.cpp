@@ -23,26 +23,40 @@ void Worker::Start() {
     bool interrupted = false;
     zmq::multipart_t reply;
     while (!interrupted) {
-            std::vector<zmq::poller_event<>> events(2);
-            int events_count = poller.wait_all(events, ms_time_t {500});
-            for (int i = 0; i < events_count; ++i) {
-                if (events[i].socket == worker.Socket()) {
-                    zmq::multipart_t request;
-                    worker.Receive(request);
-                    if (request.empty()) {
-                        break;
-                    }
-
-                    auto payload = request.popstr();
-                    auto result = service_->HandleRequest(payload);
-                    request.pushstr(result);
-                    reply = std::move(request);
-
-                    worker.Send(reply);
+        std::vector<zmq::poller_event<>> events(2);
+        int events_count = poller.wait_all(events, ms_time_t{500});
+        for (int i = 0; i < events_count; ++i) {
+            if (events[i].socket == worker.Socket()) {
+                zmq::multipart_t request;
+                worker.Receive(request);
+                if (request.empty()) {
+                    break;
                 }
+
+                auto payload = request.popstr();
+
+                std::vector<std::byte> image_data;
+
+                if (request.size() == 1) {
+                    auto image_bytes = request.pop();
+
+                    if (!image_bytes.empty()) {
+                        image_data = std::vector<std::byte>(image_bytes.size());
+                        std::copy(reinterpret_cast<const std::byte *>(image_bytes.data()),
+                                  reinterpret_cast<const std::byte *>(image_bytes.data()) + image_bytes.size(),
+                                  &image_data[0]);
+                    }
+                }
+
+                auto result = service_->HandleRequest(payload, image_data, worker.ReplyTo());
+                request.pushmem(&result[0], result.size());
+                reply = std::move(request);
+
+                worker.Send(reply);
             }
         }
     }
+}
 
 Worker::Worker(std::unique_ptr<Service> &service, const std::string &worker_address, const std::string &broker_address)
         :

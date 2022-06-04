@@ -10,17 +10,13 @@ add_library(ModelFitterLib STATIC)
 
 target_sources(ModelFitterLib
                 PRIVATE
-                  src/core/connector.cpp
                   src/core/fitting_description.cpp
                   src/core/fitting_result.cpp
-                  src/core/model_fitter.cpp
-                  src/core/publisher.cpp
+                  src/core/model_fitter_v2.cpp
 
-                  inc/core/connector.h
                   inc/core/fitting_description.h
                   inc/core/fitting_result.h
-                  inc/core/model_fitter.h
-                  inc/core/publisher.h     
+                  inc/core/model_fitter_v2.h
 )
 
 target_link_libraries(  ModelFitterLib 

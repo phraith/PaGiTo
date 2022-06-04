@@ -109,4 +109,8 @@ zmq::socket_t &WorkerRequestHandler::Socket() {
     return socket_;
 }
 
+const std::string &WorkerRequestHandler::ReplyTo() const {
+    return reply_to_;
+}
+
 

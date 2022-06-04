@@ -1,3 +1,4 @@
+#include <mutex>
 #include "util/hardware_information.h"
 #include "util/cpu_information.h"
 
@@ -15,18 +16,22 @@ HardwareInformation::HardwareInformation()
 	:
 	cpu_info_(CpuInfo::GetCpuInfo())
 {
-    //devices_.emplace_back(std::make_shared<CpuDevice>());
+
 #ifdef CUDA_GPUS_AVAILABLE
 	for (const auto &gpu : GetGpuInfo())
 	{
 		devices_.emplace_back(gpu);
 	}
 #endif //CUDA_GPUS_AVAILABLE
+    devices_.emplace_back(std::make_shared<CpuDevice>());
 }
 
-HardwareInformation::~HardwareInformation() = default;
+HardwareInformation::~HardwareInformation()
+{
+    auto f = 5;
+}
 
-Device* HardwareInformation::FindFreeDevice()
+Device* HardwareInformation::FindFreeDevice() const
 {
 	for (const auto& gpu : devices_)
 	{
@@ -35,6 +40,31 @@ Device* HardwareInformation::FindFreeDevice()
 	}
 
 	return nullptr;
+}
+
+Device &HardwareInformation::LockAndReturnDevice() const {
+    auto lk = std::unique_lock<std::mutex>(mutex_);
+
+    Device *device = nullptr;
+
+    while(device == nullptr)
+    {
+        cv_.wait(lk, [&] {
+            device = FindFreeDevice();
+            return device != nullptr;
+        });
+    }
+
+
+    device->SetStatus(WorkStatus::kWorking);
+
+    return *device;
+}
+
+void HardwareInformation::UnlockDevice(Device &device) const {
+    auto lk = std::unique_lock<std::mutex>(mutex_);
+    device.SetStatus(WorkStatus::kIdle);
+    cv_.notify_one();
 }
 
 const std::vector<CpuInfo::cpu_info_t>& HardwareInformation::CpuInfo() const

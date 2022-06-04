@@ -24,6 +24,8 @@ PropagationCoefficientsCpu::PropagationCoeffsTopBuried(const SampleConfiguration
     MyType quad_dist_x = std::sqrt(
             detector.SampleDistance() * detector.SampleDistance() + detector.Pixelsize() * detector.Pixelsize());
 
+
+#pragma omp parallel for default(none) shared(qcount, detector, beam_config, quad_dist_x, kzi, trans_refs, ns2m1, rki)
     for (int i = 0; i < qcount; ++i) {
         int y = (i / detector.Resolution().x) + 1;
 
@@ -41,8 +43,8 @@ PropagationCoefficientsCpu::PropagationCoeffsTopBuried(const SampleConfiguration
             trans_refs[3 * qcount + i] = {0, 0};
         } else {
             MyType sin_af = kzf / beam_config.K0();
-            tmp = std::sqrt(sin_af * sin_af - ns2m1);
-            std::complex<MyType> rkf = (sin_af - tmp) / (sin_af + tmp);
+            auto t = std::sqrt(sin_af * sin_af - ns2m1);
+            std::complex<MyType> rkf = (sin_af - t) / (sin_af + t);
 
             std::complex<MyType> t4 = rki * rkf;
 

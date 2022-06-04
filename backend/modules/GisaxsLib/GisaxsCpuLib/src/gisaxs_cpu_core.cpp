@@ -10,10 +10,11 @@
 
 typedef std::complex<MyType> (*formfactor)(std::complex<MyType> qpar, std::complex<MyType> q, std::complex<MyType> qz,
                                            int first_parameter_index, int first_random_index,
-                                           const std::vector<Vector2<MyType>> &parameters, const std::vector<MyType> &randoms);
+                                           const std::vector<Vector2<MyType>> &parameters,
+                                           const std::vector<MyType> &randoms);
 
 const std::map<ShapeTypeV2, formfactor> shape_type_to_formfactor{
-        {ShapeTypeV2::sphere, GisaxsCpuCore::CalculateSphereFF},
+        {ShapeTypeV2::sphere,   GisaxsCpuCore::CalculateSphereFF},
         {ShapeTypeV2::cylinder, GisaxsCpuCore::CalculateCylinderFF},
 };
 
@@ -24,10 +25,9 @@ GisaxsCpuCore::CalculateStructureFactors(const std::vector<std::complex<MyType>>
                                          Vector3<MyType> distances, Vector3<int> repetitions) {
     unsigned long qcount = qxy.size() / 2;
     std::vector<std::complex<MyType>> structure_factors(4 * qcount);
-    for (
-            int i = 0;
-            i < qcount;
-            ++i) {
+
+#pragma omp parallel for default(none) shared(qcount, qxy, qz, distances, structure_factors, repetitions)
+    for (int i = 0; i < qcount; ++i) {
         auto qx = qxy[i];
         auto qy = qxy[qcount + i];
 
@@ -41,47 +41,26 @@ GisaxsCpuCore::CalculateStructureFactors(const std::vector<std::complex<MyType>>
         Vector3<MyType> dz = {0, 0, distances.z};
 
         structure_factors[i] =
-                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz1, dx, repetitions
-                        .x)
-                *
-                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz1, dy, repetitions
-                        .y)
-                *
-                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz1, dz, repetitions
-                        .z);
+                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz1, dx, repetitions.x) *
+                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz1, dy, repetitions.y) *
+                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz1, dz, repetitions.z);
         structure_factors[i + qcount] =
-                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz2, dx, repetitions
-                        .x)
-                *
-                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz2, dy, repetitions
-                        .y)
-                *
-                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz2, dz, repetitions
-                        .z);
+                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz2, dx, repetitions.x) *
+                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz2, dy, repetitions.y) *
+                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz2, dz, repetitions.z);
 
         structure_factors[i + 2 * qcount] =
-                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz3, dx, repetitions
-                        .x)
-                *
-                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz3, dy, repetitions
-                        .y)
-                *
-                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz3, dz, repetitions
-                        .z);
+                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz3, dx, repetitions.x) *
+                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz3, dy, repetitions.y) *
+                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz3, dz, repetitions.z);
 
         structure_factors[i + 3 * qcount] =
-                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz4, dx, repetitions
-                        .x)
-                *
-                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz4, dy, repetitions
-                        .y)
-                *
-                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz4, dz, repetitions
-                        .z);
+                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz4, dx, repetitions.x) *
+                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz4, dy, repetitions.y) *
+                GisaxsCpuCore::EvaluateStructureFactor(qx, qy, qz4, dz, repetitions.z);
     }
 
-    return
-            structure_factors;
+    return structure_factors;
 }
 
 std::complex<MyType>
@@ -102,7 +81,6 @@ GisaxsCpuCore::CalculateSphereFF(std::complex<MyType> qpar, std::complex<MyType>
 
     Vector2<MyType> radius_base = parameters.at(first_parameter_index);
     MyType random_number = randoms.at(first_random_index);
-
     MyType radius = (random_number * radius_base.y) + radius_base.x;
 
     std::complex<MyType> qr = q * radius;
@@ -110,16 +88,16 @@ GisaxsCpuCore::CalculateSphereFF(std::complex<MyType> qpar, std::complex<MyType>
         return 0;
     }
 
-    auto sincos = sin(qr) - cos(qr) * qr;
-    auto expval = Eiz(qz * radius);
-    auto ff = (static_cast<MyType>(4.0 * M_PI) / (q * q * q)) * expval * sincos;
+    auto sin_cos = sin(qr) - cos(qr) * qr;
+    auto exp_val = Eiz(qz * radius);
+    auto ff = (static_cast<MyType>(4.0 * M_PI) / (q * q * q)) * exp_val * sin_cos;
     return ff;
 }
 
 std::complex<MyType>
 GisaxsCpuCore::CalculateCylinderFF(std::complex<MyType> qpar, std::complex<MyType> q, std::complex<MyType> qz,
-                                 int first_parameter_index, int first_random_index,
-                                 const std::vector<Vector2<MyType>> &parameters, const std::vector<MyType> &randoms) {
+                                   int first_parameter_index, int first_random_index,
+                                   const std::vector<Vector2<MyType>> &parameters, const std::vector<MyType> &randoms) {
     Vector2<MyType> radius_base = parameters.at(first_parameter_index);
     MyType random_number = randoms.at(first_random_index);
     MyType radius = (random_number * radius_base.y) + radius_base.x;
@@ -129,11 +107,10 @@ GisaxsCpuCore::CalculateCylinderFF(std::complex<MyType> qpar, std::complex<MyTyp
 
     MyType height = (height_number * height_base.y) + height_base.x;
 
-    MyType     temp1 = 2.f * M_PI * radius * radius * height;
-    std::complex<MyType> temp2 = { 0,0 };
+    MyType temp1 = static_cast<MyType>(2) * M_PI * radius * radius * height;
+    std::complex<MyType> temp2 = {0, 0};
 
-    if ((qpar.real() * qpar.real() + qpar.imag() * qpar.imag()) > 1.0e-13)
-    {
+    if ((qpar.real() * qpar.real() + qpar.imag() * qpar.imag()) > 1.0e-13) {
         auto qpar_radius = qpar * radius;
         temp2 = std::complex<MyType>(std::cyl_bessel_jf(1, qpar_radius.real()), 0.0) / qpar_radius;
     }
@@ -144,12 +121,13 @@ GisaxsCpuCore::CalculateCylinderFF(std::complex<MyType> qpar, std::complex<MyTyp
     std::complex<MyType> ff = temp1 * temp2 * temp3 * temp4;
     return ff;
 }
+
 std::complex<MyType> GisaxsCpuCore::Eiz(std::complex<MyType> z) {
-    return std::exp(std::complex {-z.imag(), z.real()});
+    return std::exp(std::complex{-z.imag(), z.real()});
 }
 
-std::complex<MyType>  GisaxsCpuCore::Sinc(std::complex<MyType> z) {
-    if(abs(z.real()) < 1e-9 && abs(z.imag()) < 1e-9) return { 1.0, 0.0 };
+std::complex<MyType> GisaxsCpuCore::Sinc(std::complex<MyType> z) {
+    if (std::abs(z.real()) < 1e-9 && std::abs(z.imag()) < 1e-9) return {1.0, 0.0};
     else return std::sin(z) / z;
 }
 
@@ -164,6 +142,7 @@ GisaxsCpuCore::CalculateIntensities(const std::vector<std::complex<MyType>> &qpa
                                     const std::vector<std::complex<MyType>> &sfs) {
     unsigned long qcount = sfs.size() / 4;
     std::vector<MyType> intensities(qcount);
+#pragma omp parallel for default(none) shared(qcount, COHERENCY_DRAW_RATIO, qpoints_xy, qpar, flat_unitcell, qpoints_z_coeffs, q, sfs, shape_type_to_formfactor, randoms, coefficients, intensities)
     for (int i = 0; i < qcount; ++i) {
         MyType intensity = 0;
         for (int n = 0; n < COHERENCY_DRAW_RATIO.y; ++n) {
@@ -180,14 +159,13 @@ GisaxsCpuCore::CalculateIntensities(const std::vector<std::complex<MyType>> &qpa
                     auto qabs_c = q[k * qcount + i];
                     auto sfs_c = sfs[k * qcount + i];
 
-
                     int loc_start_idx = flat_unitcell.PositionIndices().at(j);
                     int loc_end_idx = (j + 1 < flat_unitcell.PositionIndices().size())
                                       ? flat_unitcell.PositionIndices().at(
                                     j + 1) : flat_unitcell.Positions().size();
                     int loc_count = loc_end_idx - loc_start_idx;
-
                     int first_parameter_idx = flat_unitcell.ParameterIndices().at(j);
+
                     std::complex<MyType> shape_sum = 0;
                     for (int l = 0; l < COHERENCY_DRAW_RATIO.x; ++l) {
                         int rand_idx = 2 * first_parameter_idx * n * COHERENCY_DRAW_RATIO.x + l;
@@ -203,8 +181,8 @@ GisaxsCpuCore::CalculateIntensities(const std::vector<std::complex<MyType>> &qpa
                         std::complex<MyType> qr = qx * loc.x + qy * loc.y + qz_c * loc.z;
                         shape_sum_u = shape_sum_u + shape_sum * exp(-1.f * qr);
                     }
-                    auto coeff = coefficients[k * qcount + i];
-                    scattering = scattering + std::complex<MyType>(coeff.real(), coeff.imag()) * shape_sum_u * sfs_c;
+                    auto coefficient = coefficients[k * qcount + i];
+                    scattering = scattering + coefficient * shape_sum_u * sfs_c;
                 }
             }
             MyType scatterAbs = abs(scattering);

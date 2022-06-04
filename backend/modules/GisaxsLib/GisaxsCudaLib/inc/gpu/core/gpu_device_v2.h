@@ -57,7 +57,7 @@ namespace GpuDeviceV2 {
         int Bind() const;
 
         int DeviceID() const;
-
+        std::string WorkStatusToStr(WorkStatus status) const;
         std::shared_ptr<Stream> ProvideStream();
 
         void UnlockAllMemory();

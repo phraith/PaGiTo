@@ -131,7 +131,7 @@ namespace CpuInfo {
 
         std::string cpu_dir{"/sys/devices/system/cpu/"};
         for (const auto &cpu_dir_entry: directory_iterator(cpu_dir)) {
-            std::string cd_string = cpu_dir_entry.path().u8string();
+            std::string cd_string = cpu_dir_entry.path().string();
             std::vector<std::string> dir_split = Split(cd_string, "/");
 
             if (!std::regex_match(dir_split.back(), std::regex("cpu[0-9]+")))
@@ -142,7 +142,7 @@ namespace CpuInfo {
             int numa_node = GetNumaNode(cpu_core_dir);
             std::string cache_dir = cpu_core_dir + "/cache/";
             for (const auto &cpu_cache_dir_entry: directory_iterator(cache_dir)) {
-                std::string ccd_string = cpu_cache_dir_entry.path().u8string();
+                std::string ccd_string = cpu_cache_dir_entry.path().string();
                 std::vector<std::string> cache_split = Split(ccd_string, "/");
 
                 if (!std::regex_match(cache_split.back(), std::regex("index[0-9]+")))

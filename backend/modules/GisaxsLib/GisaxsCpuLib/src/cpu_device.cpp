@@ -13,13 +13,14 @@
 #include <string>
 #include <cmath>
 #include <iostream>
+#include <spdlog/spdlog.h>
 
 SimData CpuDevice::RunGISAXS(const SimJob &description, const ImageData *real_img, bool copy_intensities) {
     auto flat_unitcell = description.ExperimentInfo().Unitcell();
 
     auto randoms = std::vector<MyType>(
             COHERENCY_DRAW_RATIO.x * COHERENCY_DRAW_RATIO.y * flat_unitcell.Parameters().size());
-    for (int i = 0; i < COHERENCY_DRAW_RATIO.x * COHERENCY_DRAW_RATIO.y; ++i) {
+    for (int i = 0; i < randoms.size(); ++i) {
         randoms[i] = normal_distribution_(generator_);
     }
 
@@ -59,12 +60,23 @@ SimData CpuDevice::RunGISAXS(const SimJob &description, const ImageData *real_im
         normalized_intensities[i] = (unsigned char) (log_val * 255.0);
     }
 
-    return {0, std::vector<float>(), normalized_intensities, std::vector<float>(),
+    return {0, std::vector<double>(), normalized_intensities, std::vector<float>(),
             std::vector<float>(), std::vector<float>(), description.ExperimentInfo().DetectorConfig().Resolution(), 0};
 }
 
 void CpuDevice::SetStatus(WorkStatus status) const {
+    spdlog::info("Cpu: status {}", WorkStatusToStr(status));
     work_status_ = status;
+}
+
+std::string CpuDevice::WorkStatusToStr(WorkStatus status) const {
+    switch(status)
+    {
+        case WorkStatus::kIdle:
+            return "idle";
+        case WorkStatus::kWorking:
+            return "working";
+    }
 }
 
 WorkStatus CpuDevice::Status() const {

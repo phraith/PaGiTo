@@ -105,6 +105,7 @@ void QGrid::InitializeQGrid() {
     } else {
         Timer t;
         t.Start();
+#pragma omp parallel for default(none)
         for (int i = 0; i < resolution_.y; ++i) {
             for (int j = 0; j < resolution_.x; ++j) {
                 int idx = i * resolution_.x + j;

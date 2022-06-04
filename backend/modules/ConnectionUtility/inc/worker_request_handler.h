@@ -16,6 +16,7 @@ public:
 
     void Receive(zmq::multipart_t &request);
     void Send(zmq::multipart_t &reply);
+    const std::string &ReplyTo() const;
     zmq::socket_t &Socket();
 private:
     void ConnectToBroker(bool reconnect = true);

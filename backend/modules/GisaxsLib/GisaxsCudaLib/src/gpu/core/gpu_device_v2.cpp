@@ -66,6 +66,10 @@ namespace GpuDeviceV2 {
         auto start = event_provider_.ProvideEvent(work_stream->Get());
         auto stop = event_provider_.ProvideEvent(work_stream->Get());
 
+        if (work_stream->Get() == nullptr)
+        {
+            auto f = 5;
+        }
 
         //get cuda memory for work
         GpuMemoryProviderV2 memoryProviderV2(0);
@@ -83,9 +87,6 @@ namespace GpuDeviceV2 {
                 unitcell.ParameterIndices().size());
         MemoryBlock<MyType3> dev_positions = memoryProviderV2.RequestMemory<MyType3>(unitcell.Positions().size());
         MemoryBlock<int> dev_positions_indices = memoryProviderV2.RequestMemory<int>(unitcell.PositionIndices().size());
-
-//        MemoryBlock<MyComplex> dev_coefficients = memoryProviderV2.RequestConstantMemory(ConstantMemoryId::QGRID_COEFFS,
-//                                                                                         coefficients);
         MemoryBlock<MyComplex> dev_coefficients = memoryProviderV2.RequestMemory<MyComplex>(4 * qcount);
 
         MemoryBlock<MyComplex> container_xy = memoryProviderV2.RequestMemory<MyComplex>(2 * qcount);
@@ -102,12 +103,16 @@ namespace GpuDeviceV2 {
 
         local_timer.Start();
         GisaxsV2::CalculatePropagationCoefficientsTopBuried(qcount,
-                                                            GpuConversionHelper::Convert(descr.ExperimentInfo().DetectorConfig().Resolution()),
-                                                            GpuConversionHelper::Convert(descr.ExperimentInfo().BeamConfig().BeamDirection()),
+                                                            GpuConversionHelper::Convert(
+                                                                    descr.ExperimentInfo().DetectorConfig().Resolution()),
+                                                            GpuConversionHelper::Convert(
+                                                                    descr.ExperimentInfo().BeamConfig().BeamDirection()),
                                                             descr.ExperimentInfo().DetectorConfig().Pixelsize(),
                                                             descr.ExperimentInfo().DetectorConfig().SampleDistance(),
                                                             descr.ExperimentInfo().BeamConfig().K0(),
-                                                            GpuConversionHelper::Convert(descr.ExperimentInfo().SampleConfig().Layers().at(0).N2MinusOne()),
+                                                            GpuConversionHelper::Convert(
+                                                                    descr.ExperimentInfo().SampleConfig().Layers().at(
+                                                                            0).N2MinusOne()),
                                                             descr.ExperimentInfo().BeamConfig().AlphaI(),
                                                             dev_coefficients.Get(),
                                                             work_stream->Get());
@@ -164,8 +169,8 @@ namespace GpuDeviceV2 {
         if (real_img != nullptr) {
 
             MemoryBlock<MyType> dev_real_intensities = memoryProviderV2.RequestMemory<MyType>(
-                    real_img->Intensities().size());
-            dev_real_intensities.InitializeHtD(real_img->Intensities());
+                    real_img->LineProfiles()[0].intensities.size());
+            dev_real_intensities.InitializeHtD(real_img->LineProfiles()[0].intensities);
 
             SumReduce(dev_real_intensities.Get(), dev_real_intensities.Size(), dev_partial_sums.Get(), dev_scale_prod_,
                       work_stream->Get());
@@ -196,21 +201,26 @@ namespace GpuDeviceV2 {
         runs_ += 1;
 
         if (copy_intensities) {
-            std::vector<unsigned char> copied_intensities(dev_sim_intensities_uchar.Size());
-            gpuErrchk(cudaMemcpy(&copied_intensities[0], dev_sim_intensities_uchar.Get(),
+            std::vector<unsigned char> copied_normalized_intensities(dev_sim_intensities_uchar.Size());
+            gpuErrchk(cudaMemcpy(&copied_normalized_intensities[0], dev_sim_intensities_uchar.Get(),
                                  dev_sim_intensities_uchar.Size() * sizeof(unsigned char), cudaMemcpyDeviceToHost));
-            return {fitness_, std::vector<float>(), copied_intensities, container_qx.CopyToHost(),
-                    container_qy.CopyToHost(),
-                    container_qz.CopyToHost(), descr.ExperimentInfo().DetectorConfig().Resolution(), scale};
+
+            std::vector<MyType> copied_intensities(dev_sim_intensities.Size());
+            gpuErrchk(cudaMemcpy(&copied_intensities[0], dev_sim_intensities.Get(),
+                                 dev_sim_intensities.Size() * sizeof(MyType), cudaMemcpyDeviceToHost));
+            //memoryProviderV2.UnlockAll();
+            return {fitness_, {copied_intensities.begin(), copied_intensities.end()}, copied_normalized_intensities,
+                    container_qx.CopyToHost(),
+                    container_qy.CopyToHost(), container_qz.CopyToHost(),
+                    descr.ExperimentInfo().DetectorConfig().Resolution(), 0};//scale};
         }
 
-        memoryProviderV2.UnlockAll();
-        return {fitness_, {}, std::vector<unsigned char>(), {}, {}, {}, {0, 0}, scale};
+        //memoryProviderV2.UnlockAll();
+        return {fitness_, {}, std::vector<unsigned char>(), {}, {}, {}, {0, 0}, 0};//scale};
     }
 
     int GpuDeviceV2::Bind() const {
         gpuErrchk(cudaSetDevice(device_id_));
-
         return device_id_;
     }
 
@@ -219,7 +229,19 @@ namespace GpuDeviceV2 {
     }
 
     void GpuDeviceV2::SetStatus(WorkStatus status) const {
+        spdlog::info("Gpu: status {}", WorkStatusToStr(status));
         work_status_ = status;
+    }
+
+    std::string GpuDeviceV2::WorkStatusToStr(WorkStatus status) const {
+        switch(status)
+        {
+            case WorkStatus::kIdle:
+                return "idle";
+            case WorkStatus::kWorking:
+                return "working";
+        }
+        return "";
     }
 
     int GpuDeviceV2::DeviceID() const {

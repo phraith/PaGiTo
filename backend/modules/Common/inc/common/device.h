@@ -4,6 +4,7 @@
 #include <common/simulation_description.h>
 
 #include "standard_defs.h"
+#include "image_data.h"
 
 class Device {
 public:

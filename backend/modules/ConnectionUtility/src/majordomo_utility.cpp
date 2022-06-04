@@ -80,42 +80,6 @@ namespace majordomo {
         std::this_thread::sleep_for(timeout);
     }
 
-    void EchoWorker(const std::string& broker_address, const std::string& worker_address) {
-        WorkerRequestHandler worker(worker_address, broker_address, "simm");
-        ms_time_t now = ms_now();
-        ms_time_t heartbeat_interval = HEARTBEAT_INTERVAL;
-        ms_time_t  heartbeat_at = now + heartbeat_interval;
-
-        zmq::poller_t poller;
-        poller.add(worker.Socket(), zmq::event_flags::pollin);
-
-        bool interrupted = false;
-        zmq::multipart_t reply;
-        while(!interrupted)
-        {
-            ms_time_t  timeout = ms_time_t::zero();
-            if (heartbeat_at > now)
-            {
-                timeout = heartbeat_at - now;
-                std::vector<zmq::poller_event<>> events(2);
-                int events_count = poller.wait_all(events, timeout);
-                for (int i = 0; i < events_count; ++i) {
-                    if(events[i].socket == worker.Socket() )
-                    {
-                        zmq::multipart_t request;
-                        worker.Receive(request);
-                        if(request.empty())
-                        {
-                            break;
-                        }
-                        reply = std::move(request);
-                        worker.Send(reply);
-                    }
-                }
-            }
-        }
-    }
-
     zmq::send_result_t
     SendToDealer(zmq::socket_t &socket, zmq::multipart_t &mulitpart_msg, zmq::send_flags flags) {
         mulitpart_msg.pushmem(nullptr, 0);

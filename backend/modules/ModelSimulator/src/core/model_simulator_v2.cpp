@@ -3,16 +3,14 @@
 #include "common/unitcell_utility.h"
 #include "common/timer.h"
 #include "spdlog/spdlog.h"
-#include <iostream>
 #include <thread>
 #include <algorithm>
 
-using namespace GisaxsTransformationContainer;
 using json = nlohmann::json;
 
-ModelSimulatorV2::ModelSimulatorV2()
+ModelSimulatorV2::ModelSimulatorV2(std::shared_ptr<HardwareInformation> hw_info)
         :
-        hw_info_(std::make_shared<HardwareInformation>()) {
+        hw_info_(hw_info) {
 }
 
 ModelSimulatorV2::~ModelSimulatorV2() {
@@ -20,49 +18,30 @@ ModelSimulatorV2::~ModelSimulatorV2() {
 }
 
 
-std::string ModelSimulatorV2::HandleRequest(const std::string &request) const {
+std::vector<std::byte> ModelSimulatorV2::HandleRequest(const std::string &request, std::vector<std::byte> image_data, const std::string &origin) {
     Timer localTimer;
     Timer globalTimer;
-    spdlog::info("Received request");
+    //spdlog::info("Received request");
 
     globalTimer.Start();
     localTimer.Start();
-    json data = json::parse(request);
-    json detector = data.at("instrumentation").at("detector");
-    json shapes = data.at("shapes");
-    json sample = data.at("sample");
-    json beam = data.at("instrumentation").at("beam");
-    json unitcellMeta = data.at("unitcellMeta");
 
-    auto detector_container = ConvertToDetector(detector);
-    auto shapes_container = ConvertToFlatShapes(shapes);
-    auto sample_container = ConvertToSample(sample);
-    auto beam_container = ConvertToBeam(beam);
-    auto unitcell_meta_container = ConvertToUnitcellMeta(unitcellMeta);
-    auto flat_unitcell = FlatUnitcellV2(shapes_container, unitcell_meta_container.repetitions,
-                                        unitcell_meta_container.translation);
-
-    DetectorConfiguration detector_config(detector_container);
-    BeamConfiguration beam_config(beam_container.alphai, detector_config.Directbeam(), beam_container.photonEv, 0.1);
-    SampleConfiguration sample_config(Layer(sample_container.substrate_delta, sample_container.substrate_beta, -1, 0),
-                                      sample_container.layers);
-
-    SimJob job(JobMetaInformation{"1"},
-               ExperimentalData{detector_config, beam_config, sample_config, flat_unitcell});
+    SimJob job = GisaxsTransformationContainer::CreateSimJobFromRequest(request);
     localTimer.End();
-    spdlog::info("Preparing data took {} ms", localTimer.Duration());
+    //spdlog::info("Preparing data took {} ms", localTimer.Duration());
 
     localTimer.Start();
     SimData sim_data = RunGISAXS(job, nullptr, true);
     localTimer.End();
-    spdlog::info("Simulation took {} ms", localTimer.Duration());
+    //spdlog::info("Simulation took {} ms", localTimer.Duration());
 
     localTimer.Start();
-    auto final_message = CreateSerializedResult(sim_data, detector_config, job.JobInfo());
-    localTimer.End();
-    spdlog::info("Serializing result took {} ms", localTimer.Duration());
 
-    hw_info_->CleanUpDevices();
+    auto final_message = CreateSerializedByteResult(sim_data, job.ExperimentInfo().DetectorConfig(), job.JobInfo());
+    localTimer.End();
+    //spdlog::info("Serializing result took {} ms", localTimer.Duration());
+
+    //hw_info_->CleanUpDevices();
 
     globalTimer.End();
     spdlog::info("Finished request in {} ms", globalTimer.Duration());
@@ -70,35 +49,35 @@ std::string ModelSimulatorV2::HandleRequest(const std::string &request) const {
 }
 
 SimData ModelSimulatorV2::RunGISAXS(const SimJob &descr, const ImageData *real_img, bool copy_intensities) const {
-    Device &device = LockAndReturnDevice();
+    Device &device = hw_info_->LockAndReturnDevice();
 
     SimData sim_data = device.RunGISAXS(descr, real_img, copy_intensities);
 
-    UnlockDevice(device);
+    hw_info_->UnlockDevice(device);
 
-    cv_.notify_one();
+
     return sim_data;
 }
 
-Device &ModelSimulatorV2::LockAndReturnDevice() const {
-    auto lk = std::unique_lock<std::mutex>(mutex_);
-
-    Device *device = nullptr;
-
-    cv_.wait(lk, [&] {
-        device = hw_info_->FindFreeDevice();
-        return device != nullptr;
-    });
-
-    device->SetStatus(WorkStatus::kWorking);
-
-    return *device;
-}
-
-void ModelSimulatorV2::UnlockDevice(Device &device) const {
-    auto lk = std::unique_lock<std::mutex>(mutex_);
-    device.SetStatus(WorkStatus::kIdle);
-}
+//Device &ModelSimulatorV2::LockAndReturnDevice() const {
+//    auto lk = std::unique_lock<std::mutex>(mutex_);
+//
+//    Device *device = nullptr;
+//
+//    cv_.wait(lk, [&] {
+//        device = hw_info_->FindFreeDevice();
+//        return device != nullptr;
+//    });
+//
+//    device->SetStatus(WorkStatus::kWorking);
+//
+//    return *device;
+//}
+//
+//void ModelSimulatorV2::UnlockDevice(Device &device) const {
+//    auto lk = std::unique_lock<std::mutex>(mutex_);
+//    device.SetStatus(WorkStatus::kIdle);
+//}
 
 std::vector<TimeMeasurement> ModelSimulatorV2::GetDeviceTimings() const {
     std::vector<TimeMeasurement> timings;
@@ -118,6 +97,7 @@ std::string ModelSimulatorV2::ServiceName() const {
 std::string
 ModelSimulatorV2::CreateSerializedResult(const SimData &sim_data, const DetectorConfiguration &detector_data,
                                          const JobMetaInformation &job_meta_information) {
+
     nlohmann::json message;
     message["intensities"] = sim_data.normalized_intensities;
     message["width"] = detector_data.Resolution().x;
@@ -125,4 +105,36 @@ ModelSimulatorV2::CreateSerializedResult(const SimData &sim_data, const Detector
     message["id"] = job_meta_information.ID();
 
     return message.dump();
+}
+
+std::vector<std::byte>
+ModelSimulatorV2::CreateSerializedByteResult(const SimData &sim_data, const DetectorConfiguration &detector_data,
+                                             const JobMetaInformation &job_meta_information) {
+    size_t s1 = sizeof detector_data.Resolution().x;
+    size_t s2 = job_meta_information.ID().size();
+    size_t s3 = sim_data.normalized_intensities.size() * sizeof sim_data.normalized_intensities[0];
+    size_t s4 = sim_data.intensities.size() * sizeof(double);
+
+    std::vector<std::byte> bytes(2 * s1 + s3 + s4);
+    std::copy(reinterpret_cast<const std::byte *>(&detector_data.Resolution().x),
+              reinterpret_cast<const std::byte *>(&detector_data.Resolution().x) + s1,
+              &bytes[0]);
+
+    std::copy(reinterpret_cast<const std::byte *>(&detector_data.Resolution().y),
+              reinterpret_cast<const std::byte *>(&detector_data.Resolution().y) + s1,
+              &bytes[0] + s1);
+
+//    std::copy(reinterpret_cast<const char*>(&job_meta_information.ID()),
+//              reinterpret_cast<const char*>(&job_meta_information.ID()) + s2,
+//              bytes + 2 * s1);
+
+    std::copy(reinterpret_cast<const std::byte *>(&sim_data.normalized_intensities[0]),
+              reinterpret_cast<const std::byte *>(&sim_data.normalized_intensities[0]) + s3,
+              &bytes[0] + 2 * s1);
+
+    std::copy(reinterpret_cast<const std::byte *>(&sim_data.intensities[0]),
+              reinterpret_cast<const std::byte *>(&sim_data.intensities[0]) + s4,
+              &bytes[0] + 2 * s1 + s3);
+
+    return bytes;
 }

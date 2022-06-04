@@ -2,11 +2,12 @@ include(CheckLanguage)
 check_language(CUDA)
 
 find_package(nlohmann_json REQUIRED)
+find_package(OpenMP)
 
 file(GLOB_RECURSE COMMON_LIB_FILES "src/*.cpp" "inc/*.h")
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${COMMON_LIB_FILES})
 
-add_library(CommonLib STATIC inc/parameter_definitions/transformation_container.h src/common/propagation_coefficients.cpp inc/common/propagation_coefficients.h)
+add_library(CommonLib STATIC inc/parameter_definitions/transformation_container.h src/common/propagation_coefficients.cpp inc/common/propagation_coefficients.h inc/parameter_definitions/data_containers.h inc/common/binary_serialization_utility.cpp inc/common/binary_serialization_utility.h)
 
 target_sources(
         CommonLib
@@ -55,4 +56,4 @@ target_sources(
 
 target_include_directories(CommonLib PUBLIC inc)
 
-target_link_libraries(CommonLib PUBLIC nlohmann_json nlohmann_json::nlohmann_json)
+target_link_libraries(CommonLib PUBLIC nlohmann_json nlohmann_json::nlohmann_json PRIVATE OpenMP::OpenMP_CXX)

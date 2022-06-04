@@ -10,7 +10,8 @@ target_sources  (ModelingFramework
 target_link_libraries(ModelingFramework
         PRIVATE
             ConnectionUtility
-            ModelSimulatorLib)
+            ModelSimulatorLib
+            ModelFitterLib)
 
 # Provide installation instructions
 install(TARGETS ModelingFramework

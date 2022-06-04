@@ -23,6 +23,7 @@ void Stream::Create()
 void Stream::Destroy()
 {
 	if (stream_ != nullptr)
+
 		gpuErrchk(cudaStreamDestroy(stream_));
 }
 

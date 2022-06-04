@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.18)
 
+find_package(OpenMP)
+
 project(GisaxsCpuLib)
 #creating library
 add_library(GisaxsCpuLib
@@ -17,6 +19,8 @@ target_sources(GisaxsCpuLib
 target_link_libraries(GisaxsCpuLib
         PUBLIC
         CommonLib
+        PRIVATE
+        OpenMP::OpenMP_CXX
         )
 
 target_include_directories(GisaxsCpuLib

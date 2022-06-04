@@ -16,8 +16,8 @@ RUN tar -xzvf cmake-3.21.2.tar.gz
 RUN cd cmake-3.21.2 && ./bootstrap && make -j$(nproc) && make install
 
 RUN apt -y install software-properties-common
-RUN add-apt-repository ppa:ubuntu-toolchain-r/ppa && apt-get -y update && apt-get -y install g++-10
-RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 90 --slave /usr/bin/g++ g++ /usr/bin/g++-10
+RUN add-apt-repository ppa:ubuntu-toolchain-r/test && apt -y update && apt -y install gcc-11 g++-11
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 110 --slave /usr/bin/g++ g++ /usr/bin/g++-11
 
 RUN apt-get -y install curl zip git pkg-config
 RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg
@@ -44,4 +44,8 @@ RUN ( \
   ) > /etc/ssh/sshd_config_test_clion \
   && mkdir /run/sshd
 
-CMD ["/usr/sbin/sshd", "-D", "-e", "-f", "/etc/ssh/sshd_config_test_clion"]
+COPY ./docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+ENTRYPOINT ["/docker-entrypoint.sh"]
+
+# CMD ["/usr/sbin/sshd", "-D", "-e", "-f", "/etc/ssh/sshd_config_test_clion"]

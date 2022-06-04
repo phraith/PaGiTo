@@ -5,10 +5,6 @@
 #include <map>
 #include <memory>
 
-#include "common/fitting_parameter.h"
-#include "common/image_data.h"
-
-#include "unitcell_v2.h"
 #include "job_meta_information.h"
 #include "experimental_data.h"
 

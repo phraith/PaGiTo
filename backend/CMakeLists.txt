@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.18)
 
 project (GisaxsModelingFramework LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 include(CheckLanguage)
 check_language(CUDA)
@@ -28,7 +28,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 add_subdirectory(modules/Common)
 add_subdirectory(modules/ConnectionUtility)
 add_subdirectory(modules/ModelSimulator)
-#add_subdirectory(modules/ModelFitter)
+add_subdirectory(modules/ModelFitter)
 add_subdirectory(modules/GisaxsLib)
 
 #if (CMAKE_CUDA_COMPILER)

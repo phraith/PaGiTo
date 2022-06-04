@@ -1,4 +1,4 @@
-version: "2"
+# version: "2"
 services:
 #  device:
 #    build: .
@@ -10,8 +10,9 @@ services:
 #            - capabilities: [ gpu ]
   redis_jobs:
    image: redislabs/rejson:latest
-   command: --port 6379 --maxmemory 1024mb --maxmemory-policy allkeys-lru --appendonly no --save ""
-   ports: [6379:6379]
+   command: --port 6380 --appendonly no --save ""
+   ports: 
+    - 6380:6380
 
   pg_admin4:
     image: dpage/pgadmin4:latest 
@@ -26,11 +27,31 @@ services:
    environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: test_db
+      POSTGRES_DB: base
+  #  command: [sh, -c, cd docker-entrypoint-initdb.d && chmod +x init-scatterstore.sh]
    ports:
     - '5432:5432'
    volumes: 
     - db:/var/lib/postgresql/data
+    # - ./postgres-scripts:/docker-entrypoint-initdb.d
+  gisaxs_remote_dev:
+    build: .
+    entrypoint: /docker-entrypoint.sh
+    image: cuda_dev:latest
+    container_name: gisaxs_remote_dev
+    command: tail -f /dev/null
+    ports:
+      - '5555:5555'
+      - '2222:22'
+    cap_add:
+      - SYS_PTRACE
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 volumes:
   db:
     driver: local
