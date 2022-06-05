@@ -30,12 +30,11 @@ export default {
             extensions: [".js"],
         }),
         commonjs({ sourceMap: false }),
-        babel({
-            extensions: [".ts"],
-            include: resolve("src", "**", "*.ts"),
-            exclude: "node_modules/**",
-            babelHelpers: 'bundle'
-        }),
+        // babel({
+        //     extensions: [".ts"],
+        //     include: resolve("src", "**", "*.ts"),
+        //     babelHelpers: 'bundle'
+        // }),
         scss(),
         replace({
             preventAssignment: true,
