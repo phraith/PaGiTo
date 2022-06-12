@@ -1,4 +1,4 @@
-using GisaxsClient.Utility;
+using GisaxsClient.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
@@ -12,41 +12,41 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddSignalR();
 
-//builder.Services.AddAuthorization(auth =>
-//{
-//    auth.AddPolicy("Bearer", new AuthorizationPolicyBuilder()
-//        .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
-//        .RequireAuthenticatedUser().Build());
-//});
+builder.Services.AddAuthorization(auth =>
+{
+    auth.AddPolicy("Bearer", new AuthorizationPolicyBuilder()
+        .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+        .RequireAuthenticatedUser().Build());
+});
 
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
-//{
-//    options.TokenValidationParameters = new TokenValidationParameters
-//    {
-//        ValidateIssuerSigningKey = true,
-//        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("AppSettings:Token").Value)),
-//        ValidateIssuer = false,
-//        ValidateAudience = false
-//    };
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("AppSettings:Token").Value)),
+        ValidateIssuer = false,
+        ValidateAudience = false
+    };
 
-//    options.Events = new JwtBearerEvents
-//    {
-//        OnMessageReceived = context =>
-//        {
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
 
-//            string accessToken = context.Request.Query["access_token"];
-//            // If the request is for our hub...
-//            var path = context.HttpContext.Request.Path;
-//            if (!string.IsNullOrEmpty(accessToken) &&
-//                path.StartsWithSegments("/message"))
-//            {
-//                // Read the token out of the query string
-//                context.Token = accessToken;
-//            }
-//            return Task.CompletedTask;
-//        }
-//    };
-//});
+            string accessToken = context.Request.Query["access_token"];
+            // If the request is for our hub...
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) &&
+                path.StartsWithSegments("/message"))
+            {
+                // Read the token out of the query string
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
+});
 
 var app = builder.Build();
 
@@ -61,8 +61,8 @@ app.UseWebSockets();
 //app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-//app.UseAuthentication();
-//app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(

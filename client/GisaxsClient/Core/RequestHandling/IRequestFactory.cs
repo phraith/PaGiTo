@@ -1,8 +1,7 @@
 ﻿#nullable enable
 
-using GisaxsClient.Utility;
 
-namespace GisaxsClient.Utility
+namespace GisaxsClient.Core.RequestHandling
 {
     internal interface IRequestFactory
     {

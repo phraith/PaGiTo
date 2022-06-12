@@ -1,4 +1,5 @@
 ﻿using GisaxsClient.Controllers;
+using GisaxsClient.Core.Connection;
 using NetMQ;
 using Polly;
 using Polly.Retry;
@@ -8,7 +9,7 @@ using System.Text.Json;
 
 #nullable enable
 
-namespace GisaxsClient.Utility
+namespace GisaxsClient.Core.RequestHandling
 {
     public class MajordomoRequestHandler : IRequestHandler
     {
@@ -18,7 +19,7 @@ namespace GisaxsClient.Utility
         {
             db = RedisConnectorHelper.Connection.GetDatabase();
             retryPolicy = Policy.Handle<TransientException>()
-                .WaitAndRetry(retryCount: 3, sleepDurationProvider: i => TimeSpan.FromSeconds(50));
+                .WaitAndRetry(retryCount: 3, sleepDurationProvider: i => TimeSpan.FromSeconds(5));
         }
 
         public RequestResult? HandleRequest(Request request)
@@ -109,7 +110,7 @@ namespace GisaxsClient.Utility
                 db.StringSet($"{dbKey}-v-{i}", verticalLineprofile);
             }
 
-            for (int i = 0; i < x; i++)
+            for (int i = 0; i < y; i++)
             {
                 int lineProfileStart = i * x * sizeof(double);
                 int lineProfileEnd = lineProfileStart + x * sizeof(double);

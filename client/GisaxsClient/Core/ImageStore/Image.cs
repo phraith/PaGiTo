@@ -1,8 +1,5 @@
-﻿using ScatterStore.Controllers;
-
-namespace ScatterStore
+﻿namespace GisaxsClient.Core.ImageStore
 {
-
     public class Image
     {
         public int Id { get; set; }
@@ -12,5 +9,4 @@ namespace ScatterStore
         public int Height { get; set; }
         public double[] Data { get; set; }
     }
-
 }

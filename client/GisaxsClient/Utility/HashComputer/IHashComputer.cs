@@ -1,8 +1,6 @@
 ﻿#nullable enable
 
-using GisaxsClient.Utility;
-
-namespace GisaxsClient.Utility
+namespace GisaxsClient.Utility.HashComputer
 {
     internal interface IHashComputer
     {

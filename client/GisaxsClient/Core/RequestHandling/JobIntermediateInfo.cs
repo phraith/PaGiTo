@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace GisaxsClient.Utility
+﻿namespace GisaxsClient.Core.RequestHandling
 {
     internal record class JobIntermediateInfo
     {

@@ -1,4 +1,4 @@
-﻿namespace GisaxsClient.Security
+﻿namespace GisaxsClient.Core.UserStore
 {
     public class UserDto
     {

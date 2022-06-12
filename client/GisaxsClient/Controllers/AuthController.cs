@@ -1,5 +1,5 @@
-﻿using GisaxsClient.Security;
-using GisaxsClient.Utility;
+﻿using GisaxsClient.Core.UserStore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -24,6 +24,7 @@ namespace GisaxsClient.Controllers
             userStore = new UserStore(configuration);
         }
 
+        [Authorize]
         [HttpPost("register")]
         public async Task<ActionResult<User>> Register(UserDto request)
         {

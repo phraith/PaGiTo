@@ -1,6 +1,6 @@
 ﻿using GisaxsClient.Controllers;
 
-namespace GisaxsClient.Utility
+namespace GisaxsClient.Core.RequestHandling
 {
     public record Request
     {

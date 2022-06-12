@@ -1,20 +1,20 @@
-﻿using GisaxsClient;
-using GisaxsClient.Controllers;
+﻿using GisaxsClient.Controllers;
+using GisaxsClient.Core.RequestHandling;
+using GisaxsClient.Utility.HashComputer;
+using GisaxsClient.Utility.LineProfile;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using NetMQ;
 using StackExchange.Redis;
-using System;
-using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Threading.Tasks;
 
 #nullable enable
 
-namespace GisaxsClient.Utility
+namespace GisaxsClient.Hubs
 {
-    //[Authorize]
+
+    [Authorize]
     public class MessageHub : Hub
     {
         private readonly IRequestHandler requestHandler;
@@ -43,11 +43,6 @@ namespace GisaxsClient.Utility
 
         public async Task GetProfiles(string stringRequest)
         {
-            //var profilesT = new List<LineProfile>();
-            //Random r = new Random();
-            //profilesT.Add(new LineProfile() { Data = Enumerable.Repeat(r.NextDouble(), 1679).ToArray() });
-            //await Clients.All.SendAsync("ProcessLineprofiles", $"{{\"profiles\": {JsonSerializer.Serialize(profilesT)}}}");
-
             var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
@@ -64,11 +59,9 @@ namespace GisaxsClient.Utility
             var profileInfos = new List<LineProfileInfo>();
             foreach (KeyValuePair<string, JsonNode?> node in info.AsObject())
             {
-                var profile = node.Value.Deserialize<LineProfileInfo>(options);
-                profileInfos.Add(profile);
+                LineProfileInfo? profile = node.Value.Deserialize<LineProfileInfo>(options);
+                if (profile != null) { profileInfos.Add(profile); }
             }
-
-
 
             var hash = hashComputer.Hash(config.ToString());
             IDatabase db = RedisConnectorHelper.Connection.GetDatabase();
@@ -85,14 +78,6 @@ namespace GisaxsClient.Utility
             int height = int.Parse(heightAsString);
             int width = int.Parse(widthAsString);
 
-            //byte[] data = db.StringGet(hash);
-
-            //int x = BitConverter.ToInt32(data, 0);
-            //int y = BitConverter.ToInt32(data, sizeof(int));
-
-            //int dataStart = 2 * sizeof(int) + x * y;
-            //byte[] relevantData = data[dataStart..];
-
             var profiles = new List<LineProfile>();
             foreach (var profileInfo in profileInfos)
             {
@@ -101,60 +86,49 @@ namespace GisaxsClient.Utility
 
                 if ((int)start.X == (int)end.X)
                 {
-                    var profileData = new double[height];
-                    byte[] data = await db.StringGetAsync($"{hash}-v-{(int)start.X}");
-                    for (int i = 0; i < height; ++i)
+                    var verticalLp = await GetLineprofile(db, LineprofileType.Vertical, hash, (int)start.X, height);
+                    if (verticalLp != null)
                     {
-                        int startIndex = i * sizeof(double);
-                        profileData[i] = Math.Log(BitConverter.ToDouble(data, startIndex));
+                        profiles.Add(verticalLp);
                     }
-                    profiles.Add(new LineProfile { Data = profileData });
                 }
                 else if ((int)start.Y == (int)end.Y)
                 {
-                    var profileData = new double[width];
-                    byte[] data = await db.StringGetAsync($"{hash}-h-{(int)start.Y}");
-                    for (int i = 0; i < width; ++i)
+                    var horizontalLp = await GetLineprofile(db, LineprofileType.Horizontal, hash, (int)start.Y, width);
+                    if (horizontalLp != null)
                     {
-                        int startIndex = i * sizeof(double);
-                        profileData[i] = Math.Log(BitConverter.ToDouble(data, startIndex));
+                        profiles.Add(horizontalLp);
                     }
-                    profiles.Add(new LineProfile { Data = profileData });
-                }
-                else
-                {
-                    return;
                 }
             }
+
             await Clients.All.SendAsync("ProcessLineprofiles", $"{{\"profiles\": {JsonSerializer.Serialize(profiles)}}}");
         }
 
-        internal class LineProfileInfo
+        private static async Task<LineProfile?> GetLineprofile(IDatabase db, LineprofileType lpType, string basicDataHash, int invariantPixelPosition, int axisDimension)
         {
-            public Coordinate StartRel { get; set; }
-            public Coordinate EndRel { get; set; }
+            string accessor = DataAccessor(lpType, basicDataHash, invariantPixelPosition);
+            if (!db.KeyExists(accessor)) { return null; }
+            byte[] data = await db.StringGetAsync(accessor);
 
-
-            public Coordinate AbsoluteStart(int width, int height)
+            if (data.Length != sizeof(double) * axisDimension) { return null; }
+            var profileData = new double[axisDimension];
+            for (int i = 0; i < axisDimension; ++i)
             {
-                return new Coordinate { X = StartRel.X * width, Y = StartRel.Y * height };
+                int startIndex = i * sizeof(double);
+                profileData[i] = Math.Log(BitConverter.ToDouble(data, startIndex));
             }
-
-            public Coordinate AbsoluteEnd(int width, int height)
-            {
-                return new Coordinate { X = EndRel.X * width, Y = EndRel.Y * height };
-            }
+            return new LineProfile(profileData);
         }
 
-        internal class LineProfile
+        private static string DataAccessor(LineprofileType lpType, string basicDataHash, int invariantPixelPosition)
         {
-            public double[] Data { get; set; }
-        }
-
-        internal class Coordinate
-        {
-            public double X { get; set; }
-            public double Y { get; set; }
+            return lpType switch
+            {
+                LineprofileType.Vertical => $"{basicDataHash}-v-{invariantPixelPosition}",
+                LineprofileType.Horizontal => $"{basicDataHash}-h-{invariantPixelPosition}",
+                _ => throw new NotImplementedException(nameof(lpType)),
+            };
         }
     }
 }

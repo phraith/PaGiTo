@@ -1,4 +1,4 @@
-﻿namespace GisaxsClient.Utility
+﻿namespace GisaxsClient.Core.RequestHandling
 {
     public record RequestResult
     {

@@ -1,8 +1,6 @@
 ﻿using OpenCvSharp;
-using System;
-using System.Collections.Generic;
 
-namespace GisaxsClient.Utility
+namespace GisaxsClient.Utility.ImageTransformations
 {
     public static class AppearenceModifier
     {

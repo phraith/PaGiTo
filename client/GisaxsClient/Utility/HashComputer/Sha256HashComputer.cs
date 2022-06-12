@@ -1,10 +1,9 @@
-﻿using System;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 
 #nullable enable
 
-namespace GisaxsClient.Utility
+namespace GisaxsClient.Utility.HashComputer
 {
     internal class Sha256HashComputer : IHashComputer
     {

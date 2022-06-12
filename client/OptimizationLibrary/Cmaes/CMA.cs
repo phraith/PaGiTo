@@ -1,10 +1,6 @@
 ﻿using MathNet.Numerics.Distributions;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Factorization;
-using System.Collections.Generic;
-using System;
-using System.Linq;
-using MathNet.Numerics.LinearAlgebra.Complex;
 
 namespace OptimizationLibrary.Cmaes
 {

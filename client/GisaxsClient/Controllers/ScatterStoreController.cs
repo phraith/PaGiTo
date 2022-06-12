@@ -1,7 +1,8 @@
-using GisaxsClient.Utility;
+using GisaxsClient.Core.ImageStore;
+using GisaxsClient.Utility.ImageTransformations;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ScatterStore.Controllers
+namespace GisaxsClient.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -19,7 +20,7 @@ namespace ScatterStore.Controllers
         [HttpGet("info")]
         public async Task<IEnumerable<ImageInfo>> Get()
         {
-            return await imageStore.Get();        
+            return await imageStore.Get();
         }
 
         [HttpGet("get")]
@@ -40,23 +41,17 @@ namespace ScatterStore.Controllers
         [RequestSizeLimit(100_000_000)]
         public void Push(Image image)
         {
-            imageStore.Insert(image);   
+            imageStore.Insert(image);
         }
 
         private byte Normalize(double intensity, double max)
         {
             double logmax = Math.Log(max);
-            //double logmin = 0;
             double logmin = Math.Log(Math.Max(2, 1e-10 * max));
 
             double logval = Math.Log(intensity);
-            logval /= (logmax - logmin);
+            logval /= logmax - logmin;
             return (byte)(logval * 255.0);
         }
-
-        //[HttpPost]
-        //public void Remove(IReadOnlyCollection<ImageInfo> infos)
-        //{
-        //}
     }
 }

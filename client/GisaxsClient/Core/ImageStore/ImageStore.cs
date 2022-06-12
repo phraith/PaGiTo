@@ -1,11 +1,10 @@
 ﻿using Dapper;
 using Npgsql;
-using ScatterStore.Controllers;
 using System.Data;
 
 #nullable enable
 
-namespace ScatterStore
+namespace GisaxsClient.Core.ImageStore
 {
     public class ImageStore
     {

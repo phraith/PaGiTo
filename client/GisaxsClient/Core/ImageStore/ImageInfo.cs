@@ -1,4 +1,4 @@
-﻿namespace ScatterStore.Controllers
+﻿namespace GisaxsClient.Core.ImageStore
 {
     public record ImageInfo
     {

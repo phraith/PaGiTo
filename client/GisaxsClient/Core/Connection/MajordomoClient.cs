@@ -1,10 +1,10 @@
-﻿using NetMQ;
+﻿using GisaxsClient.Core.RequestHandling;
+using NetMQ;
 using NetMQ.Sockets;
-using System;
 
 #nullable enable
 
-namespace GisaxsClient.Utility
+namespace GisaxsClient.Core.Connection
 {
     public class MajordomoClient : IDisposable
     {

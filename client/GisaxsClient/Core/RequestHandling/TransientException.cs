@@ -1,7 +1,6 @@
-﻿using System;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
-namespace GisaxsClient.Utility
+namespace GisaxsClient.Core.RequestHandling
 {
     [Serializable]
     internal class TransientException : Exception

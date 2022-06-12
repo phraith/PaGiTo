@@ -1,4 +1,5 @@
-﻿using Spectre.Cli;
+﻿using GisaxsClient.Core.ImageStore;
+using Spectre.Cli;
 using System.ComponentModel;
 using System.Text;
 using System.Text.Json;
@@ -51,15 +52,14 @@ namespace ImageStoreClient.Command
                 imageData.AddRange(doubles);
             }
 
-            ImageInfo info = new(-1, Path.GetFileNameWithoutExtension(imageDataPath), imageData.Count * sizeof(double));
             Image image = new()
             {
                 Data = imageData.ToArray(),
                 Height = height,
                 Width = width,
-                Name = info.Name,
-                Id = info.Id,
-                Size = info.Size
+                Name = Path.GetFileNameWithoutExtension(imageDataPath),
+                Id = -1,
+                Size = imageData.Count * sizeof(double)
             };
             return image;
         }

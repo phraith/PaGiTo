@@ -1,10 +1,11 @@
 ﻿using GisaxsClient.Controllers;
+using GisaxsClient.Utility.HashComputer;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
 #nullable enable
 
-namespace GisaxsClient.Utility
+namespace GisaxsClient.Core.RequestHandling
 {
     internal class RequestFactory : IRequestFactory
     {
