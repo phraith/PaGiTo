@@ -1,0 +1,65 @@
+{
+  "name": "gisaxs_client_v2.1",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.8.1",
+    "@microsoft/signalr": "^6.0.5",
+    "@mui/icons-material": "^5.6.2",
+    "@mui/material": "^5.8.2",
+    "@nivo/core": "^0.79.0",
+    "@nivo/line": "^0.79.1",
+    "decode-tiff": "^0.2.1",
+    "eslint-config-react-app": "^7.0.1",
+    "fs": "^0.0.1-security",
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0",
+    "react-router-dom": "^6.3.0",
+    "tiff": "^5.0.3",
+    "tweetnacl-util": "^0.15.1",
+    "typescript": "^4.7.3",
+    "uuid": "^8.3.2",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "tsc && concurrently --kill-others \"tsc -w\" \"rollup --environment NODE_ENV:development -c -w\" ",
+    "build": "rimraf dist && rollup -c"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@rollup/plugin-babel": "^5.3.1",
+    "@rollup/plugin-commonjs": "^22.0.0",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "@rollup/plugin-replace": "^4.0.0",
+    "@types/react": "^18.0.9",
+    "@types/react-dom": "^18.0.4",
+    "@web/dev-server": "^0.1.31",
+    "concurrently": "^7.1.0",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.73.0",
+    "rollup-plugin-copy": "^3.4.0",
+    "rollup-plugin-livereload": "^2.0.5",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "rollup-plugin-scss": "^3.0.0",
+    "rollup-plugin-serve": "^1.1.0",
+    "rollup-plugin-visualizer": "^5.6.0",
+    "sass": "^1.51.0"
+  }
+}
