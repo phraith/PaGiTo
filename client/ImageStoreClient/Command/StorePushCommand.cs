@@ -52,7 +52,15 @@ namespace ImageStoreClient.Command
             }
 
             ImageInfo info = new(-1, Path.GetFileNameWithoutExtension(imageDataPath), imageData.Count * sizeof(double));
-            Image image = new(info, imageData.ToArray());
+            Image image = new()
+            {
+                Data = imageData.ToArray(),
+                Height = height,
+                Width = width,
+                Name = info.Name,
+                Id = info.Id,
+                Size = info.Size
+            };
             return image;
         }
     }
