@@ -1,21 +1,73 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
+using GisaxsClient.Utility;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
-namespace GisaxsClient
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+
+builder.Services.AddControllersWithViews();
+
+builder.Services.AddSignalR();
+
+//builder.Services.AddAuthorization(auth =>
+//{
+//    auth.AddPolicy("Bearer", new AuthorizationPolicyBuilder()
+//        .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+//        .RequireAuthenticatedUser().Build());
+//});
+
+//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+//{
+//    options.TokenValidationParameters = new TokenValidationParameters
+//    {
+//        ValidateIssuerSigningKey = true,
+//        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("AppSettings:Token").Value)),
+//        ValidateIssuer = false,
+//        ValidateAudience = false
+//    };
+
+//    options.Events = new JwtBearerEvents
+//    {
+//        OnMessageReceived = context =>
+//        {
+
+//            string accessToken = context.Request.Query["access_token"];
+//            // If the request is for our hub...
+//            var path = context.HttpContext.Request.Path;
+//            if (!string.IsNullOrEmpty(accessToken) &&
+//                path.StartsWithSegments("/message"))
+//            {
+//                // Read the token out of the query string
+//                context.Token = accessToken;
+//            }
+//            return Task.CompletedTask;
+//        }
+//    };
+//});
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            CreateHostBuilder(args).Build().Run();
-
-        }
-
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
-    }
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
 }
+
+app.UseWebSockets();
+//app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+//app.UseAuthentication();
+//app.UseAuthorization();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller}/{action=Index}/{id?}");
+});
+app.MapHub<MessageHub>("/message");
+app.Run();

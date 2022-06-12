@@ -16,9 +16,11 @@ import {
 
 interface InstrumentationProps {
   jsonCallback: any;
+  initialResX: number;
+  initialResY: number;
 }
 
-const Instrumentation = (props: InstrumentationProps) => {
+const Instrumentation = ({initialResX=0, initialResY=0, ...props}) => {
   const [alphaI, setAlphaI] = React.useState(InstrumentationConfig.beam.alphai);
   const [photonEv, setPhotonEv] = React.useState(
     InstrumentationConfig.beam.photonEv
@@ -29,11 +31,15 @@ const Instrumentation = (props: InstrumentationProps) => {
   const [beamY, setBeamY] = React.useState(
     InstrumentationConfig.detector.beamImpact.y
   );
+
+  let resWidth = initialResX == 0 ? InstrumentationConfig.detector.resolution.width : initialResX
+  let resHeight = initialResY == 0 ? InstrumentationConfig.detector.resolution.height : initialResY
+
   const [resX, setResX] = React.useState(
-    InstrumentationConfig.detector.resolution.width
+    resWidth
   );
   const [resY, setResY] = React.useState(
-    InstrumentationConfig.detector.resolution.height
+    resHeight
   );
   const [pixelsize, setPixelsize] = React.useState(
     InstrumentationConfig.detector.pixelsize
@@ -44,6 +50,15 @@ const Instrumentation = (props: InstrumentationProps) => {
 
   const localStorageEntityName : string = "instrumentationConfig"
   const configFieldName : string = "instrumentation"
+
+
+  useEffect(() => {
+    console.log(initialResX, initialResY)
+    let resWidth = initialResX == 0 ? InstrumentationConfig.detector.resolution.width : initialResX
+    let resHeight = initialResY == 0 ? InstrumentationConfig.detector.resolution.height : initialResY
+    setResX(resWidth)
+    setResY(resHeight)
+    }, [initialResX, initialResY]);
 
   useEffect(() => {
     let currentConfig = {
@@ -146,6 +161,7 @@ const Instrumentation = (props: InstrumentationProps) => {
           </Grid>
           <Grid item xs={3}>
             <TextField
+              disabled={initialResX != 0}
               label="resX"
               value={resX}
               type="number"
@@ -156,6 +172,7 @@ const Instrumentation = (props: InstrumentationProps) => {
           </Grid>
           <Grid item xs={3}>
             <TextField
+              disabled={initialResY != 0}
               label="resY"
               value={resY}
               type="number"

@@ -1,8 +1,4 @@
 import MiniDrawer from "../Drawer/MiniDrawer";
-import Button from "@mui/material/Button"
-import Card from "@mui/material/Card"
-import CardActions from "@mui/material/CardActions"
-import CardContent from "@mui/material/CardContent"
 import MenuItem from "@mui/material/MenuItem"
 import FormControl from "@mui/material/FormControl"
 import Grid from "@mui/material/Grid"
@@ -15,7 +11,6 @@ import Instrumentation from "../Instrumentation/Instrumentation";
 import UnitcellMeta from "../UnitcellMeta/UnitcellMeta";
 import React, * as react from "react";
 import Sample from "../Sample/Sample";
-import LineProfileWrapper from "../ScatterImage/LineProfileWrapper";
 
 
 import {
@@ -25,7 +20,6 @@ import {
   HubConnectionState,
   LogLevel,
 } from "@microsoft/signalr";
-import { LineProfile } from "../../lib/LineProfile";
 
 const Simulation = () => {
   const colors = [

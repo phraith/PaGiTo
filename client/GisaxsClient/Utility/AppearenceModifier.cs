@@ -30,7 +30,7 @@ namespace GisaxsClient.Utility
             { "winter", ColormapTypes.Winter }
         };
 
-        public static string ApplyColorMap(byte[] data, int width, int height, string colormapTypeName = "")
+        public static string ApplyColorMap(byte[] data, int width, int height, bool revertImage = true, string colormapTypeName = "")
         {
             Mat imageMatrix = new(height, width, MatType.CV_8UC1, data);
 
@@ -44,13 +44,17 @@ namespace GisaxsClient.Utility
             }
 
             Cv2.ApplyColorMap(imageMatrix, imageMatrixWithColormap, colormapType);
-            Cv2.Flip(imageMatrixWithColormap, flippedImageMatrixWithColormap, FlipMode.X);
-            Cv2.ImEncode(".jpg", flippedImageMatrixWithColormap, out byte[] output, new ImageEncodingParam[] { new ImageEncodingParam(ImwriteFlags.JpegQuality, 95) });
 
-            using (new Window("dst image", flippedImageMatrixWithColormap))
+            if (revertImage)
             {
-                Cv2.WaitKey();
+                Cv2.Flip(imageMatrixWithColormap, flippedImageMatrixWithColormap, FlipMode.X);
             }
+            else
+            {
+                flippedImageMatrixWithColormap = imageMatrixWithColormap;
+            }
+
+            Cv2.ImEncode(".jpg", flippedImageMatrixWithColormap, out byte[] output, new ImageEncodingParam[] { new ImageEncodingParam(ImwriteFlags.JpegQuality, 95) });
 
             return Convert.ToBase64String(output, 0, output.Length);
         }

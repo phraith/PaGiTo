@@ -2,14 +2,15 @@
 
 namespace ScatterStore
 {
+
     public class Image
     {
-        public ImageInfo Info { get; set; }
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public long Size { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
         public double[] Data { get; set; }
-        public Image(ImageInfo info, double[] data)
-        {
-            Info = info;
-            Data = data;
-        }
     }
+
 }

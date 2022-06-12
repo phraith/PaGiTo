@@ -4,13 +4,8 @@
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
         public long Size { get; set; }
-
-        public ImageInfo(int id, string name, long size)
-        {
-            Id = id;
-            Name = name;
-            Size = size;
-        }
     }
 }

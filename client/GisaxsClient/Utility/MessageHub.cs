@@ -1,4 +1,5 @@
 ﻿using GisaxsClient;
+using GisaxsClient.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using NetMQ;
@@ -42,6 +43,11 @@ namespace GisaxsClient.Utility
 
         public async Task GetProfiles(string stringRequest)
         {
+            //var profilesT = new List<LineProfile>();
+            //Random r = new Random();
+            //profilesT.Add(new LineProfile() { Data = Enumerable.Repeat(r.NextDouble(), 1679).ToArray() });
+            //await Clients.All.SendAsync("ProcessLineprofiles", $"{{\"profiles\": {JsonSerializer.Serialize(profilesT)}}}");
+
             var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
@@ -66,42 +72,53 @@ namespace GisaxsClient.Utility
 
             var hash = hashComputer.Hash(config.ToString());
             IDatabase db = RedisConnectorHelper.Connection.GetDatabase();
-            if (!db.KeyExists(hash)) { return; }
 
-            byte[] data = db.StringGet(hash);
+            var keyWidth = $"{hash}-width";
+            var keyHeight = $"{hash}-height";
 
-            int x = BitConverter.ToInt32(data, 0);
-            int y = BitConverter.ToInt32(data, sizeof(int));
 
-            int dataStart = 2 * sizeof(int) + x * y;
-            byte[] relevantData = data[dataStart..];
+            if (!db.KeyExists(keyWidth) || !db.KeyExists(keyHeight)) { return; }
+
+            string heightAsString = await db.StringGetAsync(keyHeight);
+            string widthAsString = await db.StringGetAsync(keyWidth);
+
+            int height = int.Parse(heightAsString);
+            int width = int.Parse(widthAsString);
+
+            //byte[] data = db.StringGet(hash);
+
+            //int x = BitConverter.ToInt32(data, 0);
+            //int y = BitConverter.ToInt32(data, sizeof(int));
+
+            //int dataStart = 2 * sizeof(int) + x * y;
+            //byte[] relevantData = data[dataStart..];
 
             var profiles = new List<LineProfile>();
             foreach (var profileInfo in profileInfos)
             {
-                var start = profileInfo.AbsoluteStart(x, y);
-                var end = profileInfo.AbsoluteEnd(x, y);
+                var start = profileInfo.AbsoluteStart(width, height);
+                var end = profileInfo.AbsoluteEnd(width, height);
 
                 if ((int)start.X == (int)end.X)
                 {
-                    var profileData = new double[y];
-                    for (int i = 0; i < y; ++i)
+                    var profileData = new double[height];
+                    byte[] data = await db.StringGetAsync($"{hash}-v-{(int)start.X}");
+                    for (int i = 0; i < height; ++i)
                     {
-                        int dataIndex = i * x + (int)start.X;
-                        profileData[i] = Math.Log(BitConverter.ToDouble(relevantData, dataIndex * sizeof(double)));
+                        int startIndex = i * sizeof(double);
+                        profileData[i] = Math.Log(BitConverter.ToDouble(data, startIndex));
                     }
-
                     profiles.Add(new LineProfile { Data = profileData });
                 }
                 else if ((int)start.Y == (int)end.Y)
                 {
-                    var profileData = new double[y];
-                    for (int i = 0; i < x; ++i)
+                    var profileData = new double[width];
+                    byte[] data = await db.StringGetAsync($"{hash}-h-{(int)start.Y}");
+                    for (int i = 0; i < width; ++i)
                     {
-                        int dataIndex = (int)start.Y * x + i;
-                        profileData[i] = Math.Log(BitConverter.ToDouble(relevantData, dataIndex * sizeof(double)));
+                        int startIndex = i * sizeof(double);
+                        profileData[i] = Math.Log(BitConverter.ToDouble(data, startIndex));
                     }
-
                     profiles.Add(new LineProfile { Data = profileData });
                 }
                 else

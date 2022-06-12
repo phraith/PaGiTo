@@ -1,16 +1,8 @@
-﻿using GisaxsClient;
-using GisaxsClient.Utility;
-using Microsoft.AspNetCore.Authorization;
+﻿using GisaxsClient.Utility;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace GisaxsClient.Controllers
 {
@@ -48,24 +40,33 @@ namespace GisaxsClient.Controllers
                 PropertyNameCaseInsensitive = true
             };
 
+            var keyData = $"{hash}-simple";
+            var keyWidth = $"{hash}-width";
+            var keyHeight = $"{hash}-height";
+
             IDatabase db = RedisConnectorHelper.Connection.GetDatabase();
-            if (!db.KeyExists(hash)) { return NotFound(); }
-            byte[] data = await db.StringGetAsync(hash);
+            if (!db.KeyExists(keyData) || !db.KeyExists(keyWidth) || !db.KeyExists(keyHeight)) { return NotFound(); }
+            byte[] data = await db.StringGetAsync(keyData);
+            string heightAsString = await db.StringGetAsync(keyHeight);
+            string widthAsString = await db.StringGetAsync(keyWidth);
 
-            int x = BitConverter.ToInt32(data, 0);
-            int y = BitConverter.ToInt32(data, sizeof(int));
+            int height = int.Parse(heightAsString);
+            int width = int.Parse(widthAsString);
 
-            int start = 2 * sizeof(int);
-            int end = 2 * sizeof(int) + x * y;
+            //int x = BitConverter.ToInt32(data, 0);
+            //int y = BitConverter.ToInt32(data, sizeof(int));
 
-            Stopwatch w = new();
-            w.Start();
-            byte[] intensities = data[start..end];
-            w.Stop();
-            Console.WriteLine($"{w.ElapsedMilliseconds} ms");
+            //int start = 2 * sizeof(int);
+            //int end = 2 * sizeof(int) + x * y;
 
-            string modifiedData = AppearenceModifier.ApplyColorMap(intensities, x, y, colormapName);
-            return Ok(JsonSerializer.Serialize(new FinalResult() { data = modifiedData, width = x, height = y }));
+            //Stopwatch w = new();
+            //w.Start();
+            //byte[] intensities = data[start..end];
+            //w.Stop();
+            //Console.WriteLine($"{w.ElapsedMilliseconds} ms");
+
+            string modifiedData = AppearenceModifier.ApplyColorMap(data, width, height, true, colormapName);
+            return Ok(JsonSerializer.Serialize(new FinalResult() { data = modifiedData, width = width, height = height }));
         }
 
         [HttpGet("lineprofiles")]

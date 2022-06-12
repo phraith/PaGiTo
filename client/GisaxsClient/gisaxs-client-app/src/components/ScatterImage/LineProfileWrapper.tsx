@@ -1,7 +1,6 @@
 import Box from '@mui/material/Box/Box';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { LineProfile, Coordinate, LineProfileState, RelativeLineProfile } from '../../lib/LineProfile';
-import debounce from 'lodash.debounce';
 
 interface LineprofileWrapperProps {
     width: any;
@@ -71,7 +70,7 @@ const LineProfileWrapper : React.FC<LineprofileWrapperProps> = (props: Lineprofi
         ctx.beginPath();
         ctx.moveTo(lp.start.x, lp.start.y);
         ctx.lineTo(lp.end.x, lp.end.y);
-        ctx.strokeStyle = 'white';
+        ctx.strokeStyle = '#09ad45';
         ctx.lineWidth = 2.5;
         ctx.stroke();
     }
@@ -103,7 +102,7 @@ const LineProfileWrapper : React.FC<LineprofileWrapperProps> = (props: Lineprofi
     return (
     <Box onKeyDown={handleKeyDown}>
       <Box sx={{ height: props.height, width: "100%", position: 'relative', zIndex: 0 }}>
-        <Box sx={{ position: 'relative', zIndex: 0 }}>
+        <Box sx={{ height: props.height, width: "100%", position: 'relative', zIndex: 0 }}>
           {props.children}
         </Box>
         <Box sx={{ height: props.height, width: "100%", top: 0, left: 0, position: 'absolute', zIndex: 10 }}>

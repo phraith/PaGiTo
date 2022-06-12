@@ -1,12 +1,9 @@
-﻿using GisaxsClient;
+﻿using GisaxsClient.Controllers;
 using NetMQ;
 using Polly;
 using Polly.Retry;
 using StackExchange.Redis;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text.Json;
 
 #nullable enable
@@ -21,17 +18,17 @@ namespace GisaxsClient.Utility
         {
             db = RedisConnectorHelper.Connection.GetDatabase();
             retryPolicy = Policy.Handle<TransientException>()
-                .WaitAndRetry(retryCount: 3, sleepDurationProvider: i => TimeSpan.FromSeconds(5));
+                .WaitAndRetry(retryCount: 3, sleepDurationProvider: i => TimeSpan.FromSeconds(50));
         }
 
         public RequestResult? HandleRequest(Request request)
         {
-            if (db.KeyExists(request.JobHash))
+            if (db.KeyExists($"{request.JobHash}-simple"))
             {
                 return new RequestResult
                 {
                     Command = "ReceiveJobId",
-                    Body = $"hash={request.JobHash}&colorMapName={request.JobInformation.ColormapName}"
+                    Body = $"colorMapName={request.JobInformation.ColormapName}&hash={request.JobHash}"
                 };
             }
 
@@ -92,12 +89,39 @@ namespace GisaxsClient.Utility
         private RequestResult HandleSimulationResult(NetMQFrame contentFrame, string dbKey, string colormapName)
         {
             byte[] data = contentFrame.ToByteArray();
-            db.StringSet(dbKey, data);
+            int x = BitConverter.ToInt32(data, 0);
+            int y = BitConverter.ToInt32(data, sizeof(int));
+
+            int start = 2 * sizeof(int);
+            int end = 2 * sizeof(int) + x * y;
+            db.StringSet($"{dbKey}-simple", data[start..end]);
+            db.StringSet($"{dbKey}-width", x);
+            db.StringSet($"{dbKey}-height", y);
+
+            byte[] exactData = data[end..];
+            for (int i = 0; i < x; i++)
+            {
+                byte[] verticalLineprofile = new byte[y * sizeof(double)];
+                for (int j = 0; j < y; j++)
+                {
+                    Array.Copy(exactData, (j * x + i) * sizeof(double), verticalLineprofile, j * sizeof(double), sizeof(double));
+                }
+                db.StringSet($"{dbKey}-v-{i}", verticalLineprofile);
+            }
+
+            for (int i = 0; i < x; i++)
+            {
+                int lineProfileStart = i * x * sizeof(double);
+                int lineProfileEnd = lineProfileStart + x * sizeof(double);
+                byte[] horizontalLineprofile = exactData[lineProfileStart..lineProfileEnd];
+                db.StringSet($"{dbKey}-h-{i}", horizontalLineprofile);
+            }
+
 
             return new RequestResult
             {
                 Command = "ReceiveJobId",
-                Body = $"hash={dbKey}&colorMapName={colormapName}"
+                Body = $"colorMapName={colormapName}&hash={dbKey}"
             };
         }
 

@@ -1,13 +1,10 @@
+using GisaxsClient.Utility;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace ScatterStore.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class ScatterStoreController : ControllerBase
     {
         private readonly ILogger<ScatterStoreController> logger;
@@ -19,17 +16,42 @@ namespace ScatterStore.Controllers
             imageStore = new ImageStore(configuration);
         }
 
-        [HttpGet]
+        [HttpGet("info")]
         public async Task<IEnumerable<ImageInfo>> Get()
         {
             return await imageStore.Get();        
         }
 
-        [HttpPost]
+        [HttpGet("get")]
+        public async Task<string> Get(int id)
+        {
+            var image = await imageStore.Get(id);
+
+            if (image == null) { return string.Empty; }
+
+            var maxIntensity = image.Data.Max();
+            Console.WriteLine($"BornAgain {maxIntensity}");
+            byte[] normalizedImage = image.Data.Select(x => Normalize(x, maxIntensity)).ToArray();
+            var base64 = AppearenceModifier.ApplyColorMap(normalizedImage, image.Width, image.Height, false, "twilight");
+            return base64;
+        }
+
+        [HttpPost("push")]
         [RequestSizeLimit(100_000_000)]
         public void Push(Image image)
         {
             imageStore.Insert(image);   
+        }
+
+        private byte Normalize(double intensity, double max)
+        {
+            double logmax = Math.Log(max);
+            //double logmin = 0;
+            double logmin = Math.Log(Math.Max(2, 1e-10 * max));
+
+            double logval = Math.Log(intensity);
+            logval /= (logmax - logmin);
+            return (byte)(logval * 255.0);
         }
 
         //[HttpPost]
