@@ -45,22 +45,22 @@ SimData CpuDevice::RunGISAXS(const SimJob &description, const ImageData *real_im
                                                            flat_unitcell, randoms, sfs);
 
     MyType max_val = *max_element(intensities.begin(), intensities.end());
-
-    MyType logmax = std::log10(max_val);
-    //MyType logmin = std::log10(std::CalculateMaximumIntensity(2.f, 1e-10f * max_val));
-    MyType logmin = 0;
+    spdlog::info(max_val);
+    MyType logmax = std::log(max_val);
+    MyType logmin = std::log(std::max(2.f, 1e-10f * max_val));
+    //MyType logmin = 0;
 
     std::vector<unsigned char> normalized_intensities(intensities.size());
     for (int i = 0; i < intensities.size(); ++i) {
         MyType intensity_entry = intensities[i];
-        auto log_val = std::log10(intensity_entry);
+        auto log_val = std::log(intensity_entry);
         log_val -= logmin;
         log_val /= (logmax - logmin);
         log_val = std::max(0.f, log_val);
         normalized_intensities[i] = (unsigned char) (log_val * 255.0);
     }
 
-    return {0, std::vector<double>(), normalized_intensities, std::vector<float>(),
+    return {0, std::vector<double> (intensities.begin(), intensities.end()), normalized_intensities, std::vector<float>(),
             std::vector<float>(), std::vector<float>(), description.ExperimentInfo().DetectorConfig().Resolution(), 0};
 }
 
