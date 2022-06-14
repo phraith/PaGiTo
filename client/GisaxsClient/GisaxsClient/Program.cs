@@ -48,6 +48,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     };
 });
 
+builder.Services.AddSpaStaticFiles(configuration =>
+{
+    configuration.RootPath = "gisaxs-client-app/dist";
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -59,7 +64,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseWebSockets();
 //app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.UseSpaStaticFiles();
+app.UseSpa(configuration => { configuration.Options.SourcePath = "gisaxs-client-app"; });
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();

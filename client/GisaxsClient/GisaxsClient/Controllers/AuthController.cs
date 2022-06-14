@@ -24,7 +24,7 @@ namespace GisaxsClient.Controllers
             userStore = new UserStore(configuration);
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpPost("register")]
         public async Task<ActionResult<User>> Register(UserDto request)
         {
