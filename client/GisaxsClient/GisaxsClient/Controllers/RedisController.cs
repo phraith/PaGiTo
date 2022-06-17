@@ -8,7 +8,7 @@ namespace GisaxsClient.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class RedisController : ControllerBase
     {
         private readonly ILogger<RedisController> logger;
@@ -48,7 +48,7 @@ namespace GisaxsClient.Controllers
             int height = int.Parse(heightAsString);
             int width = int.Parse(widthAsString);
 
-            string modifiedData = AppearenceModifier.ApplyColorMap(data, width, height, true, colormapName);
+            string modifiedData = AppearanceModifier.ApplyColorMap(data, width, height, true, colormapName);
             return Ok(JsonSerializer.Serialize(new FinalResult() { data = modifiedData, width = width, height = height }));
         }
     }

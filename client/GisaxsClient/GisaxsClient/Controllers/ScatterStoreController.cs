@@ -33,7 +33,7 @@ namespace GisaxsClient.Controllers
             var maxIntensity = image.Data.Max();
             Console.WriteLine($"BornAgain {maxIntensity}");
             byte[] normalizedImage = image.Data.Select(x => Normalize(x, maxIntensity)).ToArray();
-            var base64 = AppearenceModifier.ApplyColorMap(normalizedImage, image.Width, image.Height, false, "twilight");
+            var base64 = AppearanceModifier.ApplyColorMap(normalizedImage, image.Width, image.Height, false, "twilight");
             return base64;
         }
 
