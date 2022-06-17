@@ -8,7 +8,7 @@ namespace GisaxsClient.Controllers
         {
             lazyConnection = new Lazy<ConnectionMultiplexer>(() =>
             {
-                return ConnectionMultiplexer.Connect("localhost:6380");
+                return ConnectionMultiplexer.Connect("redis_jobs:6379");
             });
         }
 

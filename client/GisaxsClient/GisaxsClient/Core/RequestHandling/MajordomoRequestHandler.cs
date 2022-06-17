@@ -35,7 +35,7 @@ namespace GisaxsClient.Core.RequestHandling
 
             RequestResult? response = null;
 
-            using (var client = new MajordomoClient("tcp://127.0.0.1:5555"))
+            using (var client = new MajordomoClient("tcp://gisaxs_backend:5555"))
             {
                 var attempt = 0;
                 retryPolicy.Execute(() =>

@@ -14,7 +14,7 @@ using System.Text.Json.Nodes;
 namespace GisaxsClient.Hubs
 {
 
-    [Authorize]
+    //[Authorize]
     public class MessageHub : Hub
     {
         private readonly IRequestHandler requestHandler;

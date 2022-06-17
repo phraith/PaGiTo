@@ -14,12 +14,15 @@ WORKDIR "/src/GisaxsClient"
 RUN dotnet build "GisaxsClient.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x
-RUN apt-get update && apt-get install -y nodejs npm
-RUN dotnet publish "GisaxsClient.csproj" -c Debug -o /app/publish
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash
+RUN apt-get update 
+RUN apt-get install -y nodejs
+
+RUN dotnet publish "GisaxsClient.csproj" -c Release -o /app/publish
 
 
 FROM base AS final
+# RUN apt-get update && apt-get install -y redis-tools
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "GisaxsClient.dll"]
