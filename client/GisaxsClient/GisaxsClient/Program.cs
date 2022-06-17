@@ -64,11 +64,17 @@ if (!app.Environment.IsDevelopment())
 
 app.UseWebSockets();
 //app.UseHttpsRedirection();
-app.UseSpaStaticFiles();
-app.UseSpa(configuration => { configuration.Options.SourcePath = "gisaxs-client-app"; });
+//app.UseSpa(configuration => {  });
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseSpaStaticFiles();
+app.UseSpa(spa =>
+{
+    spa.Options.SourcePath = "gisaxs-client-app";
+});
+
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(

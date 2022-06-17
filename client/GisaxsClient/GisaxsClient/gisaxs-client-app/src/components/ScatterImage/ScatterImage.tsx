@@ -15,7 +15,7 @@ const ScatterImage = (props: ScatterImagesProps) => {
     <img
       alt=""
       style={{ height: "100%", width: "100%", display: 'block' }}
-      src={`data:image/jpeg;base64,${props.intensities}`}
+      src={props.intensities}
     />
   );
 };
