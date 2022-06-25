@@ -1,65 +1,62 @@
 # version: "2"
 services:
-#  device:
-#    build: .
-#    ports: [ 5558:5558, 5559:5559, 5556:5556, 5557:5557 ]
-#    deploy:
-#      resources:
-#        reservations:
-#          devices:
-#            - capabilities: [ gpu ]
+  #  device:
+  #    build: .
+  #    ports: [ 5558:5558, 5559:5559, 5556:5556, 5557:5557 ]
+  #    deploy:
+  #      resources:
+  #        reservations:
+  #          devices:
+  #            - capabilities: [ gpu ]
   redis_jobs:
-  #  image: redislabs/rejson:latest
-   image: redis:latest
-  #  command: --port 6380 --appendonly no --save ""
-   networks:
+    #  image: redislabs/rejson:latest
+    image: redis:latest
+    #  command: --port 6380 --appendonly no --save ""
+    networks:
       - aspnetcoreapp-network
-   ports: 
-    - 6379:6379
+    ports:
+      - 6379:6379
 
   dotnet_client:
-   build: 
-    context: client/GisaxsClient
-    dockerfile: GisaxsClient/Dockerfile
-   command: tail -f /dev/null
-   links:
-    - redis_jobs
-  #   - postgres_users
-  #   - gisaxs_backend
-   networks:
+    build:
+      context: client/GisaxsClient
+      dockerfile: GisaxsClient/Dockerfile
+    command: tail -f /dev/null
+    links:
+      - redis_jobs
+    #   - postgres_users
+    #   - gisaxs_backend
+    networks:
       - aspnetcoreapp-network
-   ports:
-    - "8080:80"
-    - "8081:443"
-   depends_on:
-    - opencvsharp_base
+    ports:
+      - "8080:80"
+      - "8081:443"
   pg_admin4:
-    image: dpage/pgadmin4:latest 
+    image: dpage/pgadmin4:latest
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: postgres
     ports:
       - "5050:80"
 
-
   postgres_users:
-   image: postgres:latest
-   restart: always
-   environment:
+    image: postgres:latest
+    restart: always
+    environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: base
-  #  networks:
-  #     - aspnetcoreapp-network
-   ports:
-    - '5432:5432'
-   volumes: 
-    - db:/var/lib/postgresql/data
-    # - ./postgres-scripts:/docker-entrypoint-initdb.d
+    #  networks:
+    #     - aspnetcoreapp-network
+    ports:
+      - '5432:5432'
+    volumes:
+      - db:/var/lib/postgresql/data
+      # - ./postgres-scripts:/docker-entrypoint-initdb.d
   gisaxs_backend:
     build: backend
     ports:
-     - '5555:5555'
+      - '5555:5555'
     networks:
       - aspnetcoreapp-network
     cap_add:
@@ -70,7 +67,7 @@ services:
           devices:
             - driver: nvidia
               count: 1
-              capabilities: [gpu]
+              capabilities: [ gpu ]
   # gisaxs_remote_dev:
   #   build: backend
   #   entrypoint: /docker-entrypoint.sh
