@@ -1,0 +1,34 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+env:
+  DOCKER_USER: ${{secrets.DOCKER_USER}}
+  DOCKER_PASSWORD: ${{secrets.WCD_TOKEN}}
+  REPO_NAME: ${{secrets.REPO_NAME}}
+  REGISTRY: ${{secrets.REGISTRY_NAME}}
+  IMAGE_NAME: ${{ github.repository }}
+jobs:
+  update-semver:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: haya14busa/action-update-semver@v1
+        id: version
+        with:
+          major_version_tag_only: true  # (optional, default is "false")
+  build:
+    needs: [update-semver]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Docker login
+      run: docker login $REGISTRY -u $DOCKER_USER -p $DOCKER_PASSWORD
+    - name: Build the Docker image
+      run: |
+        tag_v=$(git describe --tags $(git rev-list --tags --max-count=1))
+        tag=$(echo $tag_v | sed 's/v//')
+        docker build . -t $DOCKER_USER/$REPO_NAME/client:${tag} -f client/GisaxsClient/GisaxsClient/Dockerfile
