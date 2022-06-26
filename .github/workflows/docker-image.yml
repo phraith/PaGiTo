@@ -12,7 +12,7 @@ env:
   REGISTRY: ${{secrets.REGISTRY_NAME}}
   IMAGE_NAME: ${{ github.repository }}
 jobs:
-  update-semver:
+  app-version:
     runs-on: ubuntu-latest
     steps:
       - uses: PaulHatch/semantic-version@v5.0.0-alpha2
@@ -29,14 +29,13 @@ jobs:
           # If this is set to true, *every* commit will be treated as a new version.
           bump_each_commit: false
   build:
-    needs: [update-semver]
+    needs: app-version
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - name: Docker login
-      run: docker login $REGISTRY -u $DOCKER_USER -p $DOCKER_PASSWORD
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login $REGISTRY -u $DOCKER_USER --password-stdin
+    - name: Test
+      run: echo ${{ needs.app-version.version_tag }}
     - name: Build the Docker image
-      run: |
-        tag_v=$(git describe --tags $(git rev-list --tags --max-count=1))
-        tag=$(echo $tag_v | sed 's/v//')
-        docker build . -t $DOCKER_USER/$REPO_NAME/client:${tag} -f client/GisaxsClient/GisaxsClient/Dockerfile
+      run: docker build . -t $DOCKER_USER/$REPO_NAME/client:${{ needs.app-version.version_tag }} -f client/GisaxsClient/GisaxsClient/Dockerfile
