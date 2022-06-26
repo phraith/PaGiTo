@@ -9,8 +9,9 @@ jobs:
   app-version:
     runs-on: ubuntu-latest
     steps:
-      - uses: PaulHatch/semantic-version@v5.0.0-alpha2
+      - name: Application Version
         id: tests
+        uses: PaulHatch/semantic-version@v5.0.0-alpha2
         with:
           # The prefix to use to identify tags
           tag_prefix: "v"
@@ -29,14 +30,17 @@ jobs:
     needs: app-version
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v2
-      with:
-        registry: ${{secrets.REGISTRY}}
-        username: ${{secrets.DOCKER_USER}}
-        password: ${{secrets.WCD_TOKEN}}
-    - name: Test
-      run: echo ${{ needs.app-version.version_tag }}
-    - name: Build the Docker image
-      run: docker build . -t ${{secrets.DOCKER_USER}}/${{secrets.REPO_NAME}}/client:${{ needs.app-version.version_tag }} -f client/GisaxsClient/GisaxsClient/Dockerfile
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{secrets.REGISTRY}}
+          username: ${{secrets.DOCKER_USER}}
+          password: ${{secrets.WCD_TOKEN}}
+      - name: Test
+        run: echo ${{ needs.app-version.version_tag }}
+      - name: Build the Docker image
+        run: docker build . -t ${{secrets.DOCKER_USER}}/${{secrets.REPO_NAME}}/client:${{ needs.app-version.version_tag }} -f client/GisaxsClient/GisaxsClient/Dockerfile
