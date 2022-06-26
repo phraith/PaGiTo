@@ -15,7 +15,7 @@ const LineProfileWrapper : React.FC<LineprofileWrapperProps> = (props: Lineprofi
     // const [currentLineprofile, setCurrentLineprofile] = useState<RelativeLineProfile>(new RelativeLineProfile(new Coordinate(0, 0), new Coordinate(0, 1), new Coordinate(0,0)) );
     // const [lineMode, setLineMode] = useState<boolean>(false);
     // const [lineprofiles, setLineprofiles] = useState<RelativeLineProfile[]>([])
-
+    //minor change
     const getMousePos = (canvas, evt) => {
         var bounds = canvas.getBoundingClientRect();
         // get the mouse coordinates, subtract the canvas top left and any scrolling
