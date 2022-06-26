@@ -24,8 +24,13 @@ jobs:
           password: ${{secrets.WCD_TOKEN}}
       - name: Test
         run: echo ${{ steps.semantic.outputs.new_release_version }}
-        
-      - name: Build and push Docker image
+      - name: Build and push backend docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./backend
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/backend:latest, ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/backend:${{ steps.version-bump.outputs.newTag }}
+      - name: Build and push client docker image
         uses: docker/build-push-action@v3
         with:
           context: ./client/GisaxsClient
