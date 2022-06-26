@@ -42,6 +42,6 @@ jobs:
           username: ${{secrets.DOCKER_USER}}
           password: ${{secrets.WCD_TOKEN}}
       - name: Test
-        run: echo ${{ needs.app-version.version_tag }}
+        run: echo ${{ needs.app-version.outputs.version_tag }}
       - name: Build the Docker image
-        run: docker build . -t ${{secrets.DOCKER_USER}}/${{secrets.REPO_NAME}}/client:${{ needs.app-version.version_tag }} -f client/GisaxsClient/GisaxsClient/Dockerfile
+        run: docker build . -t ${{secrets.DOCKER_USER}}/${{secrets.REPO_NAME}}/client:${{ needs.app-version.outputs.version_tag }} -f client/GisaxsClient/GisaxsClient/Dockerfile
