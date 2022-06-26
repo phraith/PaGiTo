@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid/DataGrid';
 import { Box } from '@mui/material';
 import React from 'react';
-import { ImageInfo } from '../../lib/ImageInfo';
+import { ImageInfo } from '../../utility/ImageInfo';
 
 interface ImageTableProps {
   setImageInfo: any

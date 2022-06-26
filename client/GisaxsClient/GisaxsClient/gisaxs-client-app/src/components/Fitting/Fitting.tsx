@@ -19,12 +19,12 @@ import {
     LogLevel,
 } from "@microsoft/signalr";
 import LineProfileWrapper from "../ScatterImage/LineProfileWrapper";
-import { Coordinate, LineProfile, LineProfileState, RelativeLineProfile } from "../../lib/LineProfile";
+import { Coordinate, LineProfile, LineProfileState, RelativeLineProfile } from "../../utility/LineProfile";
 import ImageTable from "./ImageTable";
 import MenuItem from "@mui/material/MenuItem";
 import { Button, Menu } from "@mui/material";
 import LineProfileGraphVx from "./LineProfileGraphVx";
-import { ImageInfo } from "../../lib/ImageInfo";
+import { ImageInfo } from "../../utility/ImageInfo";
 
 
 const Fitting = () => {

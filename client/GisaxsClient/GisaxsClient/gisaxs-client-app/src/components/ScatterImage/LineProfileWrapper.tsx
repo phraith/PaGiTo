@@ -1,6 +1,6 @@
 import Box from '@mui/material/Box/Box';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { LineProfile, Coordinate, LineProfileState, RelativeLineProfile } from '../../lib/LineProfile';
+import { LineProfile, Coordinate, LineProfileState, RelativeLineProfile } from '../../utility/LineProfile';
 
 interface LineprofileWrapperProps {
     width: any;
