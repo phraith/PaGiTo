@@ -19,8 +19,8 @@ services:
 
   dotnet_client:
     build:
-      context: client/GisaxsClient
-      dockerfile: GisaxsClient/Dockerfile
+      context: client/GisaxsClient/GisaxsClient
+      # dockerfile: Dockerfile
     command: tail -f /dev/null
     links:
       - redis_jobs

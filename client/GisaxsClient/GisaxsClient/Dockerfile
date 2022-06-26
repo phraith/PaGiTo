@@ -7,10 +7,11 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["GisaxsClient/GisaxsClient.csproj", "GisaxsClient/"]
-RUN dotnet restore "GisaxsClient/GisaxsClient.csproj"
+# COPY ["GisaxsClient/GisaxsClient.csproj", "GisaxsClient/"]
+COPY ["GisaxsClient.csproj", "GisaxsClient.csproj"]
+RUN dotnet restore "GisaxsClient.csproj"
 COPY . .
-WORKDIR "/src/GisaxsClient"
+WORKDIR "/src"
 RUN dotnet build "GisaxsClient.csproj" -c Release -o /app/build
 
 FROM build AS publish
