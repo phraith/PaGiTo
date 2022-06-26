@@ -16,7 +16,7 @@ namespace GisaxsClient.Core.Connection
         {
             ip = connectionString;
             client = new DealerSocket(connectionString);
-            timeout = TimeSpan.FromMilliseconds(28000);
+            timeout = TimeSpan.FromMilliseconds(50000);
         }
 
         public void Dispose()

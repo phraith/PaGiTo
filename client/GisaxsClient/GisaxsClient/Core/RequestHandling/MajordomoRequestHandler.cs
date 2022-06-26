@@ -19,7 +19,7 @@ namespace GisaxsClient.Core.RequestHandling
         {
             db = RedisConnectorHelper.Connection.GetDatabase();
             retryPolicy = Policy.Handle<TransientException>()
-                .WaitAndRetry(retryCount: 3, sleepDurationProvider: i => TimeSpan.FromSeconds(5));
+                .WaitAndRetry(retryCount: 3, sleepDurationProvider: i => TimeSpan.FromSeconds(50000));
         }
 
         public RequestResult? HandleRequest(Request request)
