@@ -13,6 +13,7 @@ jobs:
         id: tests
         uses: PaulHatch/semantic-version@v5.0.0-alpha2
         with:
+          change_path: "backend/client"
           # The prefix to use to identify tags
           tag_prefix: "v"
           # A string which, if present in a git commit, indicates that a change represents a
@@ -20,8 +21,6 @@ jobs:
           major_pattern: "(MAJOR)"
           # Same as above except indicating a minor change, supports regular expressions wrapped with '/'
           minor_pattern: "(MINOR)"
-          # A string to determine the format of the version output
-          format: "${major}.${minor}.${patch}-prerelease${increment}"
           # If this is set to true, *every* commit will be treated as a new version.
           bump_each_commit: false
     outputs:
@@ -44,4 +43,5 @@ jobs:
       - name: Test
         run: echo ${{ needs.app-version.outputs.version_tag }}
       - name: Build the Docker image
-        run: cd client/GisaxsClient && docker build . -t ${{secrets.DOCKER_USER}}/${{secrets.REPO_NAME}}/client:${{ needs.app-version.outputs.version_tag }} -f GisaxsClient/Dockerfile
+        run: cd client/GisaxsClient && docker build . -t ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:${{ needs.app-version.outputs.version_tag }} -f GisaxsClient/Dockerfile
+      - run: docker push ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:${{ needs.app-version.outputs.version_tag }}
