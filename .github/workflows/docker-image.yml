@@ -34,7 +34,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Docker login
-      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login $REGISTRY -u $DOCKER_USER --password-stdin
+      run:  docker login $REGISTRY -u $DOCKER_USER -p $DOCKER_PASSWORD
     - name: Test
       run: echo ${{ needs.app-version.version_tag }}
     - name: Build the Docker image
