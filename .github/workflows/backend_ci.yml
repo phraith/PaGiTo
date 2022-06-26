@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Gisaxs Backend Image Ci
 
 on:
   push:
@@ -28,7 +28,6 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
-          context: ./client/GisaxsClient
-          file: client/GisaxsClient/GisaxsClient/Dockerfile
+          context: ./backend
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:latest, ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:${{ steps.version-bump.outputs.newTag }}
+          tags: ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/backend:latest, ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/backend:${{ steps.version-bump.outputs.newTag }}
