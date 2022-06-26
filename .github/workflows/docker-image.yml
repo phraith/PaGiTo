@@ -6,34 +6,16 @@ on:
   pull_request:
     branches: [ "master" ]
 jobs:
-  app-version:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Application Version
-        id: tests
-        uses: PaulHatch/semantic-version@v5.0.0-alpha2
-        with:
-          change_path: "backend/client"
-          # The prefix to use to identify tags
-          tag_prefix: "v"
-          # A string which, if present in a git commit, indicates that a change represents a
-          # major (breaking) change, supports regular expressions wrapped with '/'
-          major_pattern: "(MAJOR)"
-          # Same as above except indicating a minor change, supports regular expressions wrapped with '/'
-          minor_pattern: "(MINOR)"
-          # If this is set to true, *every* commit will be treated as a new version.
-          bump_each_commit: false
-    outputs:
-        version_tag: ${{ steps.tests.outputs.version_tag }}  
-
   build:
-    needs: app-version
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+      - name: Automated Version Bump
+        id: version-bump
+        uses: 'phips28/gh-action-bump-version@master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -41,7 +23,12 @@ jobs:
           username: ${{secrets.DOCKER_USER}}
           password: ${{secrets.WCD_TOKEN}}
       - name: Test
-        run: echo ${{ needs.app-version.outputs.version_tag }}
-      - name: Build the Docker image
-        run: cd client/GisaxsClient && docker build . -t ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:${{ needs.app-version.outputs.version_tag }} -f GisaxsClient/Dockerfile
-      - run: docker push ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:${{ needs.app-version.outputs.version_tag }}
+        run: echo ${{ steps.semantic.outputs.new_release_version }}
+        
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./client/GisaxsClient
+          file: client/GisaxsClient/GisaxsClient/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:latest, ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:${{ steps.version-bump.outputs.newTag }}
