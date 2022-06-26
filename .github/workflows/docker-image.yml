@@ -28,7 +28,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Docker login
-      run:  docker login ${{secrets.REGISTRY_NAME}} -u ${{secrets.DOCKER_USER}} -p ${{secrets.WCD_TOKEN}}
+      run:  docker login ${{secrets.REGISTRY}} -u ${{secrets.DOCKER_USER}} -p ${{secrets.WCD_TOKEN}}
     - name: Test
       run: echo ${{ needs.app-version.version_tag }}
     - name: Build the Docker image
