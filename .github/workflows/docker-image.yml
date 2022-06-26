@@ -13,6 +13,7 @@ jobs:
         id: tests
         uses: PaulHatch/semantic-version@v5.0.0-alpha2
         with:
+          change_path: "backend/client"
           # The prefix to use to identify tags
           tag_prefix: "v"
           # A string which, if present in a git commit, indicates that a change represents a
