@@ -41,6 +41,7 @@ jobs:
           registry: ${{secrets.REGISTRY}}
           username: ${{secrets.DOCKER_USER}}
           password: ${{secrets.WCD_TOKEN}}
+      - run: echo ls
       - name: Test
         run: echo ${{ needs.app-version.outputs.version_tag }}
       - name: Build the Docker image
