@@ -15,11 +15,19 @@ jobs:
   update-semver:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: haya14busa/action-update-semver@v1
-        id: version
+      - uses: PaulHatch/semantic-version@v5.0.0-alpha2
         with:
-          major_version_tag_only: true  # (optional, default is "false")
+          # The prefix to use to identify tags
+          tag_prefix: "v"
+          # A string which, if present in a git commit, indicates that a change represents a
+          # major (breaking) change, supports regular expressions wrapped with '/'
+          major_pattern: "(MAJOR)"
+          # Same as above except indicating a minor change, supports regular expressions wrapped with '/'
+          minor_pattern: "(MINOR)"
+          # A string to determine the format of the version output
+          format: "${major}.${minor}.${patch}-prerelease${increment}"
+          # If this is set to true, *every* commit will be treated as a new version.
+          bump_each_commit: false
   build:
     needs: [update-semver]
     runs-on: ubuntu-latest
