@@ -29,6 +29,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: ./client/GisaxsClient
-          file: GisaxsClient/Dockerfile
+          file: client/GisaxsClient/GisaxsClient/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:latest, ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:${{ steps.version-bump.outputs.newTag }}
