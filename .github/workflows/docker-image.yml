@@ -44,5 +44,5 @@ jobs:
       - name: Test
         run: echo ${{ needs.app-version.outputs.version_tag }}
       - name: Build the Docker image
-        run: cd client/GisaxsClient && docker build . -t ${{secrets.DOCKER_USER}}/${{secrets.REPO_NAME}}/client:${{ needs.app-version.outputs.version_tag }} -f GisaxsClient/Dockerfile
-      - run: docker push ${{secrets.DOCKER_USER}}/${{secrets.REPO_NAME}}/client:${{ needs.app-version.outputs.version_tag }}
+        run: cd client/GisaxsClient && docker build . -t ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:${{ needs.app-version.outputs.version_tag }} -f GisaxsClient/Dockerfile
+      - run: docker push ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:${{ needs.app-version.outputs.version_tag }}
