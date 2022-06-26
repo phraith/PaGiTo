@@ -1,10 +1,10 @@
 # FROM nvidia/cuda:11.7.0-runtime-ubuntu22.04 AS base
-FROM alpine:latest
+FROM alpine:latest AS base
 WORKDIR /app
 EXPOSE 5555
 
 # FROM nvidia/cuda:11.7.0-devel-ubuntu22.04 AS build
-FROM alpine:latest
+FROM alpine:latest AS build
 WORKDIR /src
 COPY . .
 
