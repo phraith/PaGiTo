@@ -38,7 +38,7 @@ namespace GisaxsClient.Hubs
             RequestResult? result = requestHandler.HandleRequest(request);
             if (result == null) { return; }
 
-            await Clients.All.SendAsync(result.Command, result.Body);
+            await Clients.Caller.SendAsync(result.Command, result.Body);
         }
 
         public async Task GetProfiles(string stringRequest)
@@ -102,7 +102,7 @@ namespace GisaxsClient.Hubs
                 }
             }
 
-            await Clients.All.SendAsync("ProcessLineprofiles", $"{{\"profiles\": {JsonSerializer.Serialize(profiles)}}}");
+            await Clients.Caller.SendAsync("ProcessLineprofiles", $"{{\"profiles\": {JsonSerializer.Serialize(profiles)}}}");
         }
 
         private static async Task<LineProfile?> GetLineprofile(IDatabase db, LineprofileType lpType, string basicDataHash, int invariantPixelPosition, int axisDimension)
