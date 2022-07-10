@@ -8,14 +8,7 @@ services:
   #        reservations:
   #          devices:
   #            - capabilities: [ gpu ]
-  redis_jobs:
-    #  image: redislabs/rejson:latest
-    image: redis:latest
-    #  command: --port 6380 --appendonly no --save ""
-    networks:
-      - aspnetcoreapp-network
-    ports:
-      - 6379:6379
+
 
   dotnet_client:
     build:
@@ -31,6 +24,10 @@ services:
     ports:
       - "8080:80"
       - "8081:443"
+  redis_jobs:
+    image: redis:latest
+    ports:
+      - 6379:6379
   pg_admin4:
     image: dpage/pgadmin4:latest
     environment:
@@ -46,13 +43,10 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: base
-    #  networks:
-    #     - aspnetcoreapp-network
     ports:
       - '5432:5432'
     volumes:
       - db:/var/lib/postgresql/data
-      # - ./postgres-scripts:/docker-entrypoint-initdb.d
   gisaxs_backend:
     build: backend
     ports:
