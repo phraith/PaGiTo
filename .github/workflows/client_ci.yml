@@ -21,15 +21,9 @@ jobs:
         with:
           registry: ${{secrets.REGISTRY}}
           username: ${{secrets.DOCKER_USER}}
-          password: ${{secrets.WCD_TOKEN}}
+          password: ${{secrets.DOCKER_TOKEN}}
       - name: Test
         run: echo ${{ steps.semantic.outputs.new_release_version }}
-      - name: Build and push backend docker image
-        uses: docker/build-push-action@v3
-        with:
-          context: ./backend
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/backend:latest, ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/backend:${{ steps.version-bump.outputs.newTag }}
       - name: Build and push client docker image
         uses: docker/build-push-action@v3
         with:
@@ -37,3 +31,9 @@ jobs:
           file: client/GisaxsClient/GisaxsClient/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:latest, ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:${{ steps.version-bump.outputs.newTag }}
+      #- name: Build and push backend docker image
+     #   uses: docker/build-push-action@v3
+      #  with:
+      #    context: ./backend
+     #     push: ${{ github.event_name != 'pull_request' }}
+      #    tags: ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/backend:latest, ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/backend:${{ steps.version-bump.outputs.newTag }}
