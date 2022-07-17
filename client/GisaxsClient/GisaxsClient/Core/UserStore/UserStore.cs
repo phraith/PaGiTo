@@ -10,9 +10,9 @@ namespace GisaxsClient.Core.UserStore
     public class UserStore
     {
         private readonly string connectionString;
-        public UserStore(IConfiguration configuration, string connectionId = "Default")
+        public UserStore(string connectionString)
         {
-            connectionString = configuration.GetConnectionString(connectionId);
+            this.connectionString = connectionString;
             using IDbConnection connection = new NpgsqlConnection(connectionString);
             connection.Execute(
                 @$"CREATE TABLE IF NOT EXISTS users (

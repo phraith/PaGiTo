@@ -1,5 +1,6 @@
 ﻿using GisaxsClient.Controllers;
 using GisaxsClient.Core.Connection;
+using Microsoft.Extensions.Options;
 using NetMQ;
 using Polly;
 using Polly.Retry;
@@ -15,11 +16,15 @@ namespace GisaxsClient.Core.RequestHandling
     {
         private readonly IDatabase db;
         private readonly RetryPolicy retryPolicy;
-        public MajordomoRequestHandler()
+        private readonly IOptionsMonitor<ConnectionStrings> connectionStrings;
+
+        public MajordomoRequestHandler(IOptionsMonitor<ConnectionStrings> connectionStrings)
         {
-            db = RedisConnectorHelper.Connection.GetDatabase();
+            this.db = ConnectionMultiplexer.Connect(connectionStrings.CurrentValue.Redis).GetDatabase();
+
             retryPolicy = Policy.Handle<TransientException>()
                 .WaitAndRetry(retryCount: 3, sleepDurationProvider: i => TimeSpan.FromSeconds(50000));
+            this.connectionStrings = connectionStrings;
         }
 
         public RequestResult? HandleRequest(Request request)
@@ -35,7 +40,7 @@ namespace GisaxsClient.Core.RequestHandling
 
             RequestResult? response = null;
 
-            using (var client = new MajordomoClient("tcp://gisaxs_backend:5555"))
+            using (var client = new MajordomoClient(connectionStrings.CurrentValue.GisaxsBackend))
             {
                 var attempt = 0;
                 retryPolicy.Execute(() =>

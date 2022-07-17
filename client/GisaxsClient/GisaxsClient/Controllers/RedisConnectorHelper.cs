@@ -1,25 +1,27 @@
-﻿using StackExchange.Redis;
+﻿//using StackExchange.Redis;
 
-namespace GisaxsClient.Controllers
-{
-    internal class RedisConnectorHelper
-    {
-        static RedisConnectorHelper()
-        {
-            lazyConnection = new Lazy<ConnectionMultiplexer>(() =>
-            {
-                return ConnectionMultiplexer.Connect("redis_jobs:6379");
-            });
-        }
+//namespace GisaxsClient.Controllers
+//{
+//    internal class RedisConnectorHelper
+//    {
+//        private Lazy<ConnectionMultiplexer> lazyConnection;
+//        internal RedisConnectorHelper(IConfiguration configuration)
+//        {
 
-        private static Lazy<ConnectionMultiplexer> lazyConnection;
+//            var connectionString = configuration.GetConnectionString("Redis");
+//            lazyConnection = new Lazy<ConnectionMultiplexer>(() =>
+//            {
+//                return ConnectionMultiplexer.Connect(connectionString);
+//            });
+//        }
 
-        public static ConnectionMultiplexer Connection
-        {
-            get
-            {
-                return lazyConnection.Value;
-            }
-        }
-    }
-}
+
+//        public ConnectionMultiplexer Connection
+//        {
+//            get
+//            {
+//                return lazyConnection.Value;
+//            }
+//        }
+//    }
+//}

@@ -1,6 +1,7 @@
 ﻿using GisaxsClient.Utility.ImageTransformations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using System.Text.Json;
 
@@ -12,18 +13,19 @@ namespace GisaxsClient.Controllers
     public class RedisController : ControllerBase
     {
         private readonly ILogger<RedisController> logger;
+        private readonly ConnectionMultiplexer connection;
 
-        public RedisController(ILogger<RedisController> logger)
+        public RedisController(IOptionsMonitor<ConnectionStrings> connectionStrings, ILogger<RedisController> logger)
         {
             this.logger = logger;
-
+            this.connection = ConnectionMultiplexer.Connect(connectionStrings.CurrentValue.Redis);
             ThreadPool.SetMinThreads(16, 16);
         }
 
         [HttpGet("info")]
         public async Task<IActionResult> GetInfo(string hash)
         {
-            IDatabase db = RedisConnectorHelper.Connection.GetDatabase();
+            IDatabase db = connection.GetDatabase();
             if (!db.KeyExists(hash))
             {
                 return NotFound();
@@ -39,7 +41,7 @@ namespace GisaxsClient.Controllers
             var keyWidth = $"{hash}-width";
             var keyHeight = $"{hash}-height";
 
-            IDatabase db = RedisConnectorHelper.Connection.GetDatabase();
+            IDatabase db = connection.GetDatabase();
             if (!db.KeyExists(keyData) || !db.KeyExists(keyWidth) || !db.KeyExists(keyHeight)) { return NotFound(); }
             byte[] data = await db.StringGetAsync(keyData);
             string heightAsString = await db.StringGetAsync(keyHeight);

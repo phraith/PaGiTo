@@ -1,8 +1,10 @@
+using GisaxsClient.Controllers;
 using GisaxsClient.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +13,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddSignalR();
+
+builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection("ConnectionStrings"));
+builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection("AuthOptions"));
 
 builder.Services.AddAuthorization(auth =>
 {
@@ -24,7 +29,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("AppSettings:Token").Value)),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("AuthOptions:Token").Value)),
         ValidateIssuer = false,
         ValidateAudience = false
     };

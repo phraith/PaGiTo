@@ -2,8 +2,8 @@
 using GisaxsClient.Core.RequestHandling;
 using GisaxsClient.Utility.HashComputer;
 using GisaxsClient.Utility.LineProfile;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Options;
 using NetMQ;
 using StackExchange.Redis;
 using System.Text.Json;
@@ -19,11 +19,13 @@ namespace GisaxsClient.Hubs
     {
         private readonly IRequestHandler requestHandler;
         private readonly IHashComputer hashComputer;
+        private readonly ConnectionMultiplexer connection;
 
-        public MessageHub()
+        public MessageHub(IOptionsMonitor<ConnectionStrings> connectionStrings)
         {
-            requestHandler = new MajordomoRequestHandler();
+            requestHandler = new MajordomoRequestHandler(connectionStrings);
             hashComputer = new Sha256HashComputer();
+            this.connection = ConnectionMultiplexer.Connect(connectionStrings.CurrentValue.Redis);
         }
 
         public async Task IssueJob(string stringRequest)
@@ -64,7 +66,7 @@ namespace GisaxsClient.Hubs
             }
 
             var hash = hashComputer.Hash(config.ToString());
-            IDatabase db = RedisConnectorHelper.Connection.GetDatabase();
+            IDatabase db = connection.GetDatabase();
 
             var keyWidth = $"{hash}-width";
             var keyHeight = $"{hash}-height";

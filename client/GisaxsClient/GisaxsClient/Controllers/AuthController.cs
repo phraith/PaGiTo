@@ -1,6 +1,7 @@
 ﻿using GisaxsClient.Core.UserStore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -9,19 +10,22 @@ using System.Text;
 
 namespace GisaxsClient.Controllers
 {
+
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IConfiguration configuration;
         private readonly HMACSHA512 userIdGenerator;
         private readonly UserStore userStore;
+        private readonly IOptionsMonitor<ConnectionStrings> connectionStrings;
+        private readonly IOptionsMonitor<AuthOptions> authOptions;
 
-        public AuthController(IConfiguration configuration)
+        public AuthController(IOptionsMonitor<ConnectionStrings> connectionStrings, IOptionsMonitor<AuthOptions> authOptions)
         {
-            this.configuration = configuration;
             userIdGenerator = new HMACSHA512(Encoding.UTF8.GetBytes("MySecretKey"));
-            userStore = new UserStore(configuration);
+            userStore = new UserStore(connectionStrings.CurrentValue.Default);
+            this.connectionStrings = connectionStrings;
+            this.authOptions = authOptions;
         }
 
         //[Authorize]
@@ -68,7 +72,7 @@ namespace GisaxsClient.Controllers
                 new Claim(ClaimTypes.NameIdentifier, $"{matchingUser.UserId}")
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetSection("AppSettings:Token").Value));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authOptions.CurrentValue.Token));
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
             var token = new JwtSecurityToken
