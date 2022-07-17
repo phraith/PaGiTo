@@ -10,6 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.WebHost.ConfigureAppConfiguration(webBuilder => 
+{
+    webBuilder.SetBasePath("/vault/secrets/").AddJsonFile("appsettings.json", false, true);
+});
+
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddSignalR();
