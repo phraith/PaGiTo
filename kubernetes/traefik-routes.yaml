@@ -1,0 +1,101 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: gisaxs-client
+spec:
+  entryPoints:
+    - web
+    - websecure
+
+  routes:
+    - match: Host(`wavecomputing.xyz`)
+      kind: Rule
+      services:
+        - kind: TraefikService
+          name: gisaxs-client
+          namespace: default
+          passHostHeader: true
+  tls:
+    secretName: wavecomputing-cert
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-dashboard
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - match: Host(`traefik.wavecomputing.xyz`)
+      kind: Rule
+      services:
+        - name: api@internal
+          kind: TraefikService
+  tls:
+    secretName: wavecomputing-cert
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: private-registry-docker-registry
+spec:
+  entryPoints:
+    - web
+    - websecure
+
+  routes:
+    - match: Host(`registry.wavecomputing.xyz`)
+      kind: Rule
+      services:
+        - kind: TraefikService
+          name: private-registry-docker-registry
+          namespace: default
+          passHostHeader: true
+  tls:
+    secretName: wavecomputing-cert
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: vault
+spec:
+  entryPoints:
+    - web
+    - websecure
+
+  routes:
+    - match: Host(`vault.wavecomputing.xyz`)
+      kind: Rule
+      services:
+        - kind: TraefikService
+          name: vault
+          namespace: default
+          passHostHeader: true
+  tls:
+    secretName: wavecomputing-cert
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: pgadmin
+spec:
+  entryPoints:
+    - web
+    - websecure
+
+  routes:
+    - match: Host(`db.wavecomputing.xyz`)
+      kind: Rule
+      services:
+        - kind: TraefikService
+          name: pgadmin
+          namespace: default
+          passHostHeader: true
+  tls:
+    secretName: wavecomputing-cert

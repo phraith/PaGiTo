@@ -1,0 +1,10 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: TraefikService
+metadata:
+  name: vault
+  namespace: default
+spec:
+  weighted:
+    services:
+      - name: vault
+        port: 8200

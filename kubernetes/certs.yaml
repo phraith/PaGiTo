@@ -1,0 +1,71 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wavecomputing-cert
+spec:
+  commonName: wavecomputing.xyz
+  secretName: wavecomputing-cert
+  dnsNames:
+    - wavecomputing.xyz
+    - db.wavecomputing.xyz
+    - traefik.wavecomputing.xyz
+    - registry.wavecomputing.xyz
+    - vault.wavecomputing.xyz
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+# ---
+# apiVersion: cert-manager.io/v1
+# kind: Certificate
+# metadata:
+#   name: traefik-wavecomputing-cert
+# spec:
+#   commonName: traefik.wavecomputing.xyz
+#   secretName: traefik-wavecomputing-cert
+#   dnsNames:
+#     - traefik.wavecomputing.xyz
+#   issuerRef:
+#     name: letsencrypt-prod
+#     kind: ClusterIssuer
+
+# ---
+# apiVersion: cert-manager.io/v1
+# kind: Certificate
+# metadata:
+#   name: registry-wavecomputing-cert
+# spec:
+#   commonName: registry.wavecomputing.xyz
+#   secretName: registry-wavecomputing-cert
+#   dnsNames:
+#     - registry.wavecomputing.xyz
+#   issuerRef:
+#     name: letsencrypt-prod
+#     kind: ClusterIssuer
+
+# ---
+# apiVersion: cert-manager.io/v1
+# kind: Certificate
+# metadata:
+#   name: db-wavecomputing-cert
+# spec:
+#   commonName: db.wavecomputing.xyz
+#   secretName: db-wavecomputing-cert
+#   dnsNames:
+#     - db.wavecomputing.xyz
+#   issuerRef:
+#     name: letsencrypt-prod
+#     kind: ClusterIssuer
+
+# ---
+# apiVersion: cert-manager.io/v1
+# kind: Certificate
+# metadata:
+#   name: vault-wavecomputing-cert
+# spec:
+#   commonName: vault.wavecomputing.xyz
+#   secretName: vault-wavecomputing-cert
+#   dnsNames:
+#     - db.wavecomputing.xyz
+#   issuerRef:
+#     name: letsencrypt-prod
+#     kind: ClusterIssuer

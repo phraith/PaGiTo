@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: default
+  name: gisaxs-client
+  labels:
+    app: gisaxs-client
+spec:
+  selector:
+    matchLabels:
+      app: gisaxs-client
+  template:
+    metadata:
+      labels:
+        app: gisaxs-client
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-status: "update"
+        vault.hashicorp.com/agent-inject-secret-appsettings.json: "database/creds/postgres"
+        vault.hashicorp.com/agent-inject-template-appsettings.json: |
+          {
+            "Logging": {
+                "LogLevel": {
+                "Default": "Information",
+                "Microsoft": "Warning",
+                "Microsoft.Hosting.Lifetime": "Information"
+                }
+              },
+            "AllowedHosts": "*",
+            "ConnectionStrings": {
+              "Redis": "redis-master.default.svc.cluster.local",
+              "GisaxsBackend": "tcp://gisaxs-backend.default.svc.cluster.local:5555",
+               {{- with secret "database/creds/postgres" -}}
+              "Default": "Server=postgresql.default.svc.cluster.local;Database=default;Port=5432; User Id={{ .Data.username }};Password={{ .Data.password }}"
+               {{- end }}
+            },
+            "AuthOptions": {
+              "Token":  "not so top secret key for stuff"
+            }
+          }
+         
+        vault.hashicorp.com/role: "webapp"
+    spec:
+      serviceAccountName: vault
+      containers:
+      - name: gisaxs-client
+        image: registry.wavecomputing.xyz/gisaxs/client:latest
+        imagePullPolicy: Always
+      imagePullSecrets:
+      - name: regauth
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: TraefikService
+metadata:
+  name: gisaxs-client
+  namespace: default
+spec:
+  weighted:
+    services:
+      - name: gisaxs-client
+        port: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gisaxs-client
+spec:
+  ports:
+  - name: http
+    targetPort: 80
+    port: 80
+  selector:
+    app: gisaxs-client

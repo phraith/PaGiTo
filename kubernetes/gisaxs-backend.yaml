@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: default
+  name: gisaxs-backend
+  labels:
+    app: gisaxs-backend
+spec:
+  selector:
+    matchLabels:
+      app: gisaxs-backend
+  template:
+    metadata:
+      labels:
+        app: gisaxs-backend
+    spec:
+      containers:
+      - name: gisaxs-backend
+        image: registry.wavecomputing.xyz/gisaxs/backend:latest
+        imagePullPolicy: Always
+      imagePullSecrets:
+      - name: regauth
+---
+# apiVersion: traefik.containo.us/v1alpha1
+# kind: TraefikService
+# metadata:
+#   name: gisaxs-backend
+#   namespace: default
+# spec:
+#   weighted:
+#     services:
+#       - name: gisaxs-backend
+#         port: 5555
+# ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gisaxs-backend
+spec:
+  ports:
+  - name: http
+    targetPort: 5555
+    port: 5555
+  selector:
+    app: gisaxs-backend
