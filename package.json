@@ -1,6 +1,6 @@
 {
   "name": "gisaxs-modeling-framework",
-  "version": "0.3.14",
+  "version": "0.3.15",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/phraith/GISAXS-SimFit.git"
