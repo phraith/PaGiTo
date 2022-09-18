@@ -18,9 +18,9 @@ namespace GisaxsClient.Controllers
         private readonly HMACSHA512 userIdGenerator;
         private readonly UserStore userStore;
         private readonly IOptionsMonitor<ConnectionStrings> connectionStrings;
-        private readonly IOptionsMonitor<AuthOptions> authOptions;
+        private readonly IOptionsMonitor<AuthConfig> authOptions;
 
-        public AuthController(IOptionsMonitor<ConnectionStrings> connectionStrings, IOptionsMonitor<AuthOptions> authOptions)
+        public AuthController(IOptionsMonitor<ConnectionStrings> connectionStrings, IOptionsMonitor<AuthConfig> authOptions)
         {
             userIdGenerator = new HMACSHA512(Encoding.UTF8.GetBytes("MySecretKey"));
             userStore = new UserStore(connectionStrings.CurrentValue.Default);

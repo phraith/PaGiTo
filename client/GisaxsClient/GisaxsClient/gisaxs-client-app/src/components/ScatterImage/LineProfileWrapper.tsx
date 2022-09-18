@@ -12,11 +12,6 @@ interface LineprofileWrapperProps {
 
 const LineProfileWrapper : React.FC<LineprofileWrapperProps> = (props: LineprofileWrapperProps ) => {
     const canvasRef: any = useRef(null)
-    // const [currentLineprofile, setCurrentLineprofile] = useState<RelativeLineProfile>(new RelativeLineProfile(new Coordinate(0, 0), new Coordinate(0, 1), new Coordinate(0,0)) );
-    // const [lineMode, setLineMode] = useState<boolean>(false);
-    // const [lineprofiles, setLineprofiles] = useState<RelativeLineProfile[]>([])
-    //minor change
-    //feature change
 
     const getMousePos = (canvas, evt) => {
         var bounds = canvas.getBoundingClientRect();
@@ -72,7 +67,7 @@ const LineProfileWrapper : React.FC<LineprofileWrapperProps> = (props: Lineprofi
         ctx.beginPath();
         ctx.moveTo(lp.start.x, lp.start.y);
         ctx.lineTo(lp.end.x, lp.end.y);
-        ctx.strokeStyle = '#09ad45';
+        ctx.strokeStyle = '#10a464';
         ctx.lineWidth = 2.5;
         ctx.stroke();
     }
@@ -102,18 +97,31 @@ const LineProfileWrapper : React.FC<LineprofileWrapperProps> = (props: Lineprofi
         }
     };
     return (
-    <Box onKeyDown={handleKeyDown}>
-      <Box sx={{ height: props.height, width: "100%", position: 'relative', zIndex: 0 }}>
-        <Box sx={{ height: props.height, width: "100%", position: 'relative', zIndex: 0 }}>
-          {props.children}
+        <Box onKeyDown={handleKeyDown}>
+          <Box sx={{ height: "100%", width: "100%", position: 'relative', zIndex: 0 }}>
+            <Box sx={{ height: "100%", width: "100%", position: 'relative', zIndex: 0 }}>
+              {props.children}
+            </Box>
+            <Box sx={{ height: "100%", width: "100%", top: 0, left: 0, position: 'absolute', zIndex: 10 }}>
+              <canvas tabIndex={1} onMouseDown={handleMousePress} onMouseMove={handleMouseMove} style={{ height: "100%", width: "100%",  position: "absolute" }} id="canvas" ref={canvasRef}
+              />
+            </Box>
+          </Box>
         </Box>
-        <Box sx={{ height: props.height, width: "100%", top: 0, left: 0, position: 'absolute', zIndex: 10 }}>
-          <canvas tabIndex={1} onMouseDown={handleMousePress} onMouseMove={handleMouseMove} style={{ height: props.height, width: "100%",  position: "absolute" }} id="canvas" ref={canvasRef}
-          />
-        </Box>
-      </Box>
-    </Box>
-    );
+        );
+    // return (
+    // <Box onKeyDown={handleKeyDown}>
+    //   <Box sx={{ height: props.height, width: "100%", position: 'relative', zIndex: 0 }}>
+    //     <Box sx={{ height: props.height, width: "100%", position: 'relative', zIndex: 0 }}>
+    //       {props.children}
+    //     </Box>
+    //     <Box sx={{ height: props.height, width: "100%", top: 0, left: 0, position: 'absolute', zIndex: 10 }}>
+    //       <canvas tabIndex={1} onMouseDown={handleMousePress} onMouseMove={handleMouseMove} style={{ height: props.height, width: "100%",  position: "absolute" }} id="canvas" ref={canvasRef}
+    //       />
+    //     </Box>
+    //   </Box>
+    // </Box>
+    // );
 }
 
 export default LineProfileWrapper

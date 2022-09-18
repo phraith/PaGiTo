@@ -97,7 +97,10 @@ namespace GisaxsClient.Utility.ImageTransformations
         public static string ApplyColorMap(byte[] data, int width, int height, bool revertImage = true, string colormapTypeName = "")
         {
             Image<L8> image = Image.LoadPixelData<L8>(data, width, height);
-            image.Mutate(x => x.Rotate(RotateMode.Rotate180));
+            if (revertImage)
+            {
+                image.Mutate(x => x.Rotate(RotateMode.Rotate180));
+            }
             var newImage = image.ApplyColormap(colormapTypeName);
             var res = newImage.ToBase64String(JpegFormat.Instance);
             return res;

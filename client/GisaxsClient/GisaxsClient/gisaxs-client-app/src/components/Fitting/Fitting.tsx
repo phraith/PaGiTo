@@ -198,7 +198,7 @@ const Fitting = () => {
     }, [jsonData, colormap]);
 
     useEffect(() => {
-        let url = "/api/scatterstore/get?id=" + imageInfo.id;
+        let url = "/api/scatterstore/get?id=" + imageInfo.id + "&colormap=" + colormap;
         fetch(url, {
             method: "GET",
             headers: {
@@ -208,7 +208,7 @@ const Fitting = () => {
         })
             .then((response) => response.json())
             .then((data) => setRefIntensities(data));
-    }, [imageInfo.id]);
+    }, [imageInfo.id, colormap]);
 
 
     return (
@@ -238,10 +238,10 @@ const Fitting = () => {
                             paddingBottom: 10,
                             paddingLeft: 5
                         }}>
-                        <LineProfileWrapper key={"test2"} width={imgWidth} height={imgHeight} profileState={lineprofileState} setProfileState={(state) => {
+                        <LineProfileWrapper width={imgWidth} height={imgHeight} profileState={lineprofileState} setProfileState={(state) => {
                             setLineprofileState(state)
                         }}>
-                            <ScatterImage key={"test2"} intensities={refIntensities} width={imageInfo.width} height={imageInfo.height} />
+                            <ScatterImage  intensities={refIntensities} width={imageInfo.width} height={imageInfo.height} />
                         </LineProfileWrapper>
                     </Box>
                 </Grid>

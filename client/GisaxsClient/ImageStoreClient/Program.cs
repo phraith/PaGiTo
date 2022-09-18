@@ -1,4 +1,4 @@
-﻿using ImageStoreClient.Command;
+﻿using ImageStoreClient.CommandLineInterface.Commands;
 using Spectre.Cli;
 
 var app = new CommandApp();

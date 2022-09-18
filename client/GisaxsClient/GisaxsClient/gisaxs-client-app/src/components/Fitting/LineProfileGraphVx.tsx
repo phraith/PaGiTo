@@ -63,7 +63,7 @@ const LineProfileGraphVx = (props: LineProfileGraphVxProps) => {
             curve={curveLinear}
             x={d => xScale(x(d))}
             y={d => yScale(y(d))}
-            stroke="#575757"
+            stroke='#207b83b3'
             strokeWidth={1.5}
           />
         </Group>

@@ -1,26 +1,34 @@
+using Dapper;
+using GisaxsClient.Configuration;
 using GisaxsClient.Controllers;
+using GisaxsClient.Core.ImageStore;
 using GisaxsClient.Hubs;
+using ImageStoreClient.ImageUtility;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.WebHost.ConfigureAppConfiguration(webBuilder => 
+if (LaunchConfig.LaunchMode == LaunchMode.Kubernetes)
 {
-    webBuilder.SetBasePath("/vault/secrets/").AddJsonFile("appsettings.json", false, true);
-});
+    builder.WebHost.ConfigureAppConfiguration(webBuilder => 
+    {
+        webBuilder.SetBasePath("/vault/secrets/").AddJsonFile("appsettings.json", false, true);
+    });
+}
 
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddSignalR();
 
 builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection("ConnectionStrings"));
-builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection("AuthOptions"));
+builder.Services.Configure<AuthConfig>(builder.Configuration.GetSection("AuthOptions"));
 
 builder.Services.AddAuthorization(auth =>
 {

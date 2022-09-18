@@ -2,6 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
 		<TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
 		<TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
 		<IsPackable>false</IsPackable>
@@ -48,6 +49,10 @@
 		<Compile Remove="$(SpaRoot)**" />
 		<EmbeddedResource Remove="$(SpaRoot)**" />
 		<TypeScriptCompile Remove="$(SpaRoot)**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\ImageStoreClient\ImageStoreClient.csproj" />
 	</ItemGroup>
 
 

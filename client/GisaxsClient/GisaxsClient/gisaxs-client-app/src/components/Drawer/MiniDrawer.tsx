@@ -181,7 +181,7 @@ export default function MiniDrawer() {
             }}
           >
             <ListItemText
-              primary={"ModelSimulation"}
+              primary={"Simulation"}
               sx={{ opacity: open ? 1 : 0 }}
             />
             <ListItemIcon
@@ -205,7 +205,7 @@ export default function MiniDrawer() {
             }}
           >
             <ListItemText
-              primary={"ModelFitting"}
+              primary={"Fitting"}
               sx={{ opacity: open ? 1 : 0 }}
             />
             <ListItemIcon

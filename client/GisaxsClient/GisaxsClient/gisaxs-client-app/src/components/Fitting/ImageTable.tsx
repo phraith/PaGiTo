@@ -23,6 +23,16 @@ const ImageTable = (props: ImageTableProps) => {
   useEffect(() => {
     fetch("/api/scatterstore/info")
       .then((data) => data.json())
+      .then((data) => data.map(entry => {
+        return {
+          id: entry.id,
+          width: entry.info.width,
+          height: entry.info.height,
+          name: entry.info.name,
+          size: entry.info.size,
+        }
+      })
+      )
       .then((data) => setTableData(data))
   }, [])
 
@@ -36,7 +46,7 @@ const ImageTable = (props: ImageTableProps) => {
     }}>
       <DataGrid rows={tableData}
         columns={columns}
-        onRowClick= {(e) => { console.log(e); props.setImageInfo(new ImageInfo(e.row.id, e.row.width, e.row.height))}}
+        onRowClick={(e) => { console.log(e); props.setImageInfo(new ImageInfo(e.row.id, e.row.width, e.row.height)) }}
       />
     </Box>
 

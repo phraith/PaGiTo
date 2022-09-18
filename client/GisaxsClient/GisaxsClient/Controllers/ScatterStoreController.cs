@@ -1,5 +1,6 @@
 using GisaxsClient.Core.ImageStore;
 using GisaxsClient.Utility.ImageTransformations;
+using ImageStoreClient.ImageUtility;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GisaxsClient.Controllers
@@ -18,13 +19,13 @@ namespace GisaxsClient.Controllers
         }
 
         [HttpGet("info")]
-        public async Task<IEnumerable<ImageInfo>> Get()
+        public async Task<IEnumerable<ImageInfoDto>> Get()
         {
             return await imageStore.Get();
         }
 
         [HttpGet("get")]
-        public async Task<string> Get(int id)
+        public async Task<string> Get(int id, string colormap)
         {
             var image = await imageStore.Get(id);
 
@@ -33,7 +34,7 @@ namespace GisaxsClient.Controllers
             var maxIntensity = image.Data.Max();
             Console.WriteLine($"BornAgain {maxIntensity}");
             byte[] normalizedImage = image.Data.Select(x => Normalize(x, maxIntensity)).ToArray();
-            var base64 = AppearanceModifier.ApplyColorMap(normalizedImage, image.Width, image.Height, false, "twilight");
+            var base64 = AppearanceModifier.ApplyColorMap(normalizedImage, image.Info.Width, image.Info.Height, false, colormap);
             return base64;
         }
 
@@ -44,7 +45,7 @@ namespace GisaxsClient.Controllers
             imageStore.Insert(image);
         }
 
-        private byte Normalize(double intensity, double max)
+        private static byte Normalize(double intensity, double max)
         {
             double logmax = Math.Log(max);
             double logmin = Math.Log(Math.Max(2, 1e-10 * max));
