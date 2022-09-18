@@ -28,7 +28,6 @@ HardwareInformation::HardwareInformation()
 
 HardwareInformation::~HardwareInformation()
 {
-    auto f = 5;
 }
 
 Device* HardwareInformation::FindFreeDevice() const

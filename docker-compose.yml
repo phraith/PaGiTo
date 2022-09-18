@@ -3,20 +3,17 @@ services:
 
 
 
-  dotnet_client:
-    build:
-      context: client/GisaxsClient/GisaxsClient
-      dockerfile: GisaxsClient/Dockerfile
-    command: tail -f /dev/null
-    links:
-      - redis_jobs
-    #   - postgres_users
-    #   - gisaxs_backend
-    networks:
-      - aspnetcoreapp-network
-    ports:
-      - "8080:80"
-      - "8081:443"
+  # dotnet_client:
+  #   build:
+  #     context: client/GisaxsClient
+  #     dockerfile: GisaxsClient/Dockerfile
+  #   command: tail -f /dev/null
+  #   links:
+  #     - redis_jobs
+  #   ports:
+  #     - "8080:80"
+  #     - "8081:443"
+
   redis_jobs:
     image: redis:latest
     ports:
@@ -41,11 +38,13 @@ services:
     volumes:
       - db:/var/lib/postgresql/data
   gisaxs_backend:
-    build: backend
+    build:
+      context: backend
+      dockerfile: Dockerfile.cuda
     ports:
       - '5555:5555'
-    networks:
-      - aspnetcoreapp-network
+    # networks:
+    #   - aspnetcoreapp-network
     cap_add:
       - SYS_PTRACE
     deploy:
