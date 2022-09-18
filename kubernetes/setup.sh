@@ -19,15 +19,6 @@ kubectl apply -f secrets.yaml
 kubectl apply -f local-pv.yaml
 kubectl apply -f pv-claim.yaml
 
-helm install private-registry twuni/docker-registry \
-  --namespace default \
-  --set replicaCount=1 \
-  --set persistence.enabled=true \
-  --set persistence.size=30Gi \
-  --set persistence.deleteEnabled=true \
-  --set persistence.storageClass=docker-registry-local-storage \
-  --set persistence.existingClaim=docker-registry-pv-claim \
-  --set secrets.htpasswd=$(cat ./htpasswd)
 
 helm install private-registry twuni/docker-registry \
   --namespace default \
