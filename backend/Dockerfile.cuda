@@ -36,6 +36,7 @@ RUN cmake -DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake -B.
 FROM base AS final
 # RUN apt update -y && apt install -y build-essential
 # RUN apt-get update && apt-get install build-base
+RUN apt-get -y update && apt-get -y install libgomp1
 WORKDIR /app
 COPY --from=build /src/build .
 ENTRYPOINT ["./apps/ModelingFramework/ModelingFramework"]
