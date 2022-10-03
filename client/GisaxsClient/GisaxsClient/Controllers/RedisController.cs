@@ -9,7 +9,7 @@ namespace GisaxsClient.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class RedisController : ControllerBase
     {
         private readonly ILogger<RedisController> logger;

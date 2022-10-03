@@ -1,6 +1,7 @@
 using GisaxsClient.Core.ImageStore;
 using GisaxsClient.Utility.ImageTransformations;
 using ImageStoreClient.ImageUtility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GisaxsClient.Controllers
@@ -18,12 +19,14 @@ namespace GisaxsClient.Controllers
             imageStore = new ImageStore(configuration);
         }
 
+        [Authorize]
         [HttpGet("info")]
         public async Task<IEnumerable<ImageInfoDto>> Get()
         {
             return await imageStore.Get();
         }
 
+        [Authorize]
         [HttpGet("get")]
         public async Task<string> Get(int id, string colormap)
         {

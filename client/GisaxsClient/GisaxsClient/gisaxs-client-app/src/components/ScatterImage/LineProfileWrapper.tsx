@@ -109,19 +109,6 @@ const LineProfileWrapper : React.FC<LineprofileWrapperProps> = (props: Lineprofi
           </Box>
         </Box>
         );
-    // return (
-    // <Box onKeyDown={handleKeyDown}>
-    //   <Box sx={{ height: props.height, width: "100%", position: 'relative', zIndex: 0 }}>
-    //     <Box sx={{ height: props.height, width: "100%", position: 'relative', zIndex: 0 }}>
-    //       {props.children}
-    //     </Box>
-    //     <Box sx={{ height: props.height, width: "100%", top: 0, left: 0, position: 'absolute', zIndex: 10 }}>
-    //       <canvas tabIndex={1} onMouseDown={handleMousePress} onMouseMove={handleMouseMove} style={{ height: props.height, width: "100%",  position: "absolute" }} id="canvas" ref={canvasRef}
-    //       />
-    //     </Box>
-    //   </Box>
-    // </Box>
-    // );
 }
 
 export default LineProfileWrapper

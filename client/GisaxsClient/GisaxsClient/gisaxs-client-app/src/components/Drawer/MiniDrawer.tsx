@@ -11,17 +11,17 @@ import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
 import DeviceHubIcon from "@mui/icons-material/DeviceHub";
 import TimelineIcon from "@mui/icons-material/Timeline";
-import Button from "@mui/material/Button";
-import ClickAwayListener from "@mui/material/ClickAwayListener";
 import Grid from "@mui/material/Grid";
-import ListItem from "@mui/material/ListItem";
-
-import Login from "../Login/Login";
+import WorkHistoryIcon from '@mui/icons-material/WorkHistory';
+import Login from "../Authentication/Login";
 import { Link, LinkProps } from "react-router-dom";
+import Register from "../Authentication/Register";
+import ClickAwayComponent from "../Authentication/ClickAwayComponent";
+import { useEffect } from "react";
+import Logout from "../Authentication/Logout";
+import DrawerLink from "./DrawerLink";
 
 const drawerWidth = 240;
 
@@ -97,24 +97,22 @@ const Drawer = styled(MuiDrawer, {
 export default function MiniDrawer() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
+  const [authenticated, setAuthenticated] = React.useState(false)
 
-  const [openLoginForm, setOpenLoginForm] = React.useState(false);
+  useEffect(() => {
+    window.addEventListener("storage", () => {
+      // When storage changes refetch
+      let token = localStorage.getItem('apiToken')
+      let isAuthenticated = token ? true : false
+      setAuthenticated(isAuthenticated)
+    });
+    window.dispatchEvent(new Event("storage"));
+    return () => {
+      window.removeEventListener("storage", null);
+    };
+  }, []);
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
 
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
-
-  const openLoginMenu = () => {
-    setOpenLoginForm(true);
-  };
-
-  const closeLoginMenu = () => {
-    setOpenLoginForm(false);
-  };
 
   const FittingLink = React.forwardRef<any, Omit<LinkProps, "to">>(
     (props, ref) => <Link ref={ref} to="/fitting" {...props} />
@@ -122,6 +120,10 @@ export default function MiniDrawer() {
 
   const SimulationLink = React.forwardRef<any, Omit<LinkProps, "to">>(
     (props, ref) => <Link ref={ref} to="/simulation" {...props} />
+  );
+
+  const JobsLink = React.forwardRef<any, Omit<LinkProps, "to">>(
+    (props, ref) => <Link ref={ref} to="/jobs" {...props} />
   );
 
   return (
@@ -132,7 +134,7 @@ export default function MiniDrawer() {
           <IconButton
             color="inherit"
             aria-label="open drawer"
-            onClick={handleDrawerOpen}
+            onClick={() => setOpen(true)}
             edge="start"
             sx={{
               marginRight: 5,
@@ -141,28 +143,35 @@ export default function MiniDrawer() {
           >
             <MenuIcon />
           </IconButton>
-          <Grid container justifyContent={"space-between"}>
-            <Grid item />
-            <Grid item xs={3} md={3} lg={1}>
-              {!openLoginForm ? (
-                <Button onClick={openLoginMenu} color="inherit">
-                  Auth
-                </Button>
-              ) : (
-                <ClickAwayListener onClickAway={closeLoginMenu}>
-                  <Box sx={{position: "fixed"}}>
-                    <Login />
-                  </Box>
-                </ClickAwayListener>
-              )}
+          {!authenticated ? (
+            <Grid container justifyContent={"space-between"}>
+              <Grid item xs={10} md={10} lg={10} />
+              <Grid item xs={1} md={1} lg={1}>
+                <ClickAwayComponent description="Login">
+                  <Login />
+                </ClickAwayComponent>
+              </Grid>
+              <Grid item xs={1} md={1} lg={1}>
+                <ClickAwayComponent description="Register">
+                  <Register />
+                </ClickAwayComponent>
+              </Grid>
             </Grid>
-          </Grid>
+          ) : (
+            <Grid container justifyContent={"space-between"}>
+              <Grid item xs={10} md={10} lg={10} />
+              <Grid item xs={1} md={1} lg={1}>
+                <Logout />
+              </Grid>
+            </Grid>
+          )
+          }
         </Toolbar>
       </AppBar>
 
       <Drawer variant="permanent" open={open}>
         <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
+          <IconButton onClick={() => setOpen(false)}>
             {theme.direction === "rtl" ? (
               <ChevronRightIcon />
             ) : (
@@ -172,52 +181,17 @@ export default function MiniDrawer() {
         </DrawerHeader>
         <Divider />
         <List>
-          <ListItem
-            component={SimulationLink}
-            sx={{
-              minHeight: 48,
-              justifyContent: open ? "initial" : "center",
-              px: 2.5,
-            }}
-          >
-            <ListItemText
-              primary={"Simulation"}
-              sx={{ opacity: open ? 1 : 0 }}
-            />
-            <ListItemIcon
-              sx={{
-                minWidth: 0,
-                mr: open ? 3 : "auto",
-                justifyContent: "center",
-              }}
-            >
-              {<DeviceHubIcon />}
-            </ListItemIcon>
-          </ListItem>
+          <DrawerLink description="Simulation" link={SimulationLink} open={open}>
+            <DeviceHubIcon />
+          </DrawerLink>
 
-          <ListItem
-            component={FittingLink}
-            key={"ModelFitting"}
-            sx={{
-              minHeight: 48,
-              justifyContent: open ? "initial" : "center",
-              px: 2.5,
-            }}
-          >
-            <ListItemText
-              primary={"Fitting"}
-              sx={{ opacity: open ? 1 : 0 }}
-            />
-            <ListItemIcon
-              sx={{
-                minWidth: 0,
-                mr: open ? 3 : "auto",
-                justifyContent: "center",
-              }}
-            >
-              {<TimelineIcon />}
-            </ListItemIcon>
-          </ListItem>
+          <DrawerLink description="Fitting" link={FittingLink} open={open}>
+            <TimelineIcon />
+          </DrawerLink>
+
+          <DrawerLink description="Jobs" link={JobsLink} open={open}>
+            <WorkHistoryIcon />
+          </DrawerLink>
         </List>
       </Drawer>
     </Box>

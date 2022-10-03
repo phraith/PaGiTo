@@ -5,7 +5,6 @@ using Microsoft.Extensions.Options;
 
 namespace GisaxsClient.Controllers
 {
-
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
@@ -25,13 +24,13 @@ namespace GisaxsClient.Controllers
         {
             (long userId, byte[] passwordHash, byte[] passwordSalt) = authorizationHandler.CreatePasswordHash(request.Password, request.Username);
 
-            var users = await userStore.Get();
+            IEnumerable<User> users = await userStore.Get();
             if (users.Any(u => u.UserId == userId))
             {
                 return BadRequest();
             }
 
-            var user = new User { UserId = userId, PasswordHash = passwordHash, PasswordSalt = passwordSalt };
+            User user = new() { UserId = userId, PasswordHash = passwordHash, PasswordSalt = passwordSalt };
             userStore.Insert(user);
             return Ok();
         }
@@ -39,21 +38,21 @@ namespace GisaxsClient.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login(UserDto request)
         {
-            var users = await userStore.Get();
-            var matchingUsers = users.Where(u => u.UserId == authorizationHandler.CreateUserId(request.Username));
+            IEnumerable<User> users = await userStore.Get();
+            IEnumerable<User> matchingUsers = users.Where(u => u.UserId == authorizationHandler.CreateUserId(request.Username));
             if (matchingUsers.Count() != 1)
             {
                 return BadRequest();
             }
 
-            var matchingUser = matchingUsers.First();
+            User matchingUser = matchingUsers.First();
             if (!authorizationHandler.VerifyPasswordHash(matchingUser, request.Password))
             {
                 return BadRequest();
             }
 
-            string token = authorizationHandler.CreateJwtToken(matchingUser);
-            return Ok(token);
+            AuthInfo authInfo= authorizationHandler.CreateJwtToken(matchingUser);
+            return Ok(authInfo);
         }
     }
 }

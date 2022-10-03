@@ -74,7 +74,7 @@ const Fitting = () => {
     const [plotData, setPlotData] = React.useState([])
 
     const [openTable, setOpenTable] = React.useState<boolean>(false)
-    const [imageInfo, setImageInfo] = React.useState<ImageInfo>(new ImageInfo(0,0,0))
+    const [imageInfo, setImageInfo] = React.useState<ImageInfo>(new ImageInfo(0, 0, 0))
 
 
     useEffect(() => {
@@ -229,6 +229,16 @@ const Fitting = () => {
                             <ScatterImage key={"test2"} intensities={intensities} width={imgWidth} height={imgHeight} />
                         </LineProfileWrapper>
                     </Box>
+                    <Box
+                        sx={{
+                            paddingTop: 10,
+                            paddingBottom: 10,
+                            paddingLeft: 10
+                        }}>
+                        <Button>
+                            Create Job Description
+                        </Button>
+                    </Box>
                 </Grid>
                 <Grid item xs={6} sm={6} md={6} lg={4}>
                     <Box
@@ -241,7 +251,7 @@ const Fitting = () => {
                         <LineProfileWrapper width={imgWidth} height={imgHeight} profileState={lineprofileState} setProfileState={(state) => {
                             setLineprofileState(state)
                         }}>
-                            <ScatterImage  intensities={refIntensities} width={imageInfo.width} height={imageInfo.height} />
+                            <ScatterImage intensities={refIntensities} width={imageInfo.width} height={imageInfo.height} />
                         </LineProfileWrapper>
                     </Box>
                 </Grid>
@@ -257,7 +267,6 @@ const Fitting = () => {
                             paddingLeft: 10,
                         }}
                     >
-
                         {!openTable &&
                             <Grid item xs={12} sm={12} md={12} lg={12} >
                                 <LineProfileGraphVx data={plotData} ></LineProfileGraphVx>
@@ -266,7 +275,7 @@ const Fitting = () => {
 
                         {openTable &&
                             <Grid item xs={12} sm={12} md={12} lg={12}>
-                                <ImageTable setImageInfo={(updatedImageInfo: ImageInfo) => { console.log(updatedImageInfo); setImageInfo(updatedImageInfo)}} />
+                                <ImageTable setImageInfo={(updatedImageInfo: ImageInfo) => { console.log(updatedImageInfo); setImageInfo(updatedImageInfo) }} />
                             </Grid>
                         }
 

@@ -21,7 +21,13 @@ const ImageTable = (props: ImageTableProps) => {
   ]
 
   useEffect(() => {
-    fetch("/api/scatterstore/info")
+    fetch("/api/scatterstore/info", {
+      method: "GET",
+      headers: {
+          Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
+          Accept: "application/json",
+      },
+  })
       .then((data) => data.json())
       .then((data) => data.map(entry => {
         return {

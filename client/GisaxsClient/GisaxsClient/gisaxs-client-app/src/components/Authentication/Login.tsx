@@ -1,15 +1,8 @@
 
 import Button from "@mui/material/Button"
 import Card from "@mui/material/Card"
-import CardActions from "@mui/material/CardActions"
-import CardContent from "@mui/material/CardContent"
-import Collapse from "@mui/material/Collapse"
-import FormControl from "@mui/material/FormControl"
-import Grid from "@mui/material/Grid"
-import Typography from "@mui/material/Typography"
 import TextField from "@mui/material/TextField"
 import Stack from "@mui/material/Stack"
-import List from "@mui/material/List"
 import ListItem from "@mui/material/ListItem"
 import React from "react";
 
@@ -28,9 +21,15 @@ const Login = () => {
     };
 
     let url = "/api/auth/login";
-    fetch(url, requestOptions).then((response) => response.text()).then((token) => {
-        localStorage.setItem('apiToken', token)
-    })
+    fetch(url, requestOptions)
+      .then((response) => {
+        if (!response.ok) { throw new Error(response.status.toString()) }
+        return response.json();
+      })
+      .then((data) => {
+        localStorage.setItem('apiToken', data.token)
+        window.dispatchEvent(new Event("storage"));
+      })
   };
 
   return (

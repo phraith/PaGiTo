@@ -2,6 +2,7 @@
 using GisaxsClient.Core.RequestHandling;
 using GisaxsClient.Utility.HashComputer;
 using GisaxsClient.Utility.LineProfile;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using NetMQ;
@@ -14,7 +15,7 @@ using System.Text.Json.Nodes;
 namespace GisaxsClient.Hubs
 {
 
-    //[Authorize]
+    [Authorize]
     public class MessageHub : Hub
     {
         private readonly IRequestHandler requestHandler;

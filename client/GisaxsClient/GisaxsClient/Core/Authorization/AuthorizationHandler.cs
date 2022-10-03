@@ -19,37 +19,36 @@ namespace GisaxsClient.Core.Authorization
             this.authOptions = authOptions;
         }
 
-        public string CreateJwtToken(User user)
+        public AuthInfo CreateJwtToken(User user)
         {
             List<Claim> claims = new()
             {
                 new Claim(ClaimTypes.NameIdentifier, $"{user.UserId}")
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authOptions.CurrentValue.Token));
-            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+            SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(authOptions.CurrentValue.Token));
+            SigningCredentials cred = new(key, SecurityAlgorithms.HmacSha512Signature);
 
-            var token = new JwtSecurityToken
-            (
+            JwtSecurityToken token = new            (
                 claims: claims,
                 signingCredentials: cred,
                 expires: DateTime.Now.AddDays(1)
             );
 
-            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-            return jwt;
+            string jwt = new JwtSecurityTokenHandler().WriteToken(token);
+            return new AuthInfo(jwt);
         }
 
         public bool VerifyPasswordHash(User user, string password)
         {
-            using var hmac = new HMACSHA512(user.PasswordSalt);
-            var passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+            using HMACSHA512 hmac = new HMACSHA512(user.PasswordSalt);
+            byte[] passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
             return passwordHash.SequenceEqual(user.PasswordHash);
         }
 
         public (long userId, byte[] passwordHash, byte[] passwordSalt) CreatePasswordHash(string password, string username)
         {
-            using var hmac = new HMACSHA512();
+            using HMACSHA512 hmac = new HMACSHA512();
             return (CreateUserId(username), hmac.ComputeHash(Encoding.UTF8.GetBytes(password)), hmac.Key);
         }
 
