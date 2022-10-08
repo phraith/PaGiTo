@@ -18,7 +18,6 @@ namespace GisaxsClient.Controllers
             authorizationHandler = new AuthorizationHandler(authOptions);
         }
 
-        //[Authorize]
         [HttpPost("register")]
         public async Task<ActionResult<User>> Register(UserDto request)
         {

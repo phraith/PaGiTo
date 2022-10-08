@@ -190,17 +190,6 @@ namespace GisaxsTransformationContainer {
 
         auto detector_container = ConvertToDetector(detector);
         auto shapes_container = ConvertToFlatShapes(shapes);
-
-        Timer t;
-        t.Start();
-        json shapes_back;
-        shapes_back["shapes"] = shapes_container;
-        t.End();
-
-        spdlog::info("Recreating shapes took {} ms", t.Duration());
-
-        auto shape_str = shapes_back.dump();
-
         auto sample_container = ConvertToSample(sample);
         auto beam_container = ConvertToBeam(beam);
         auto unitcell_meta_container = ConvertToUnitcellMeta(unitcellMeta);

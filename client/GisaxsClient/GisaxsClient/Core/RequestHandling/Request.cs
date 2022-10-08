@@ -4,9 +4,15 @@ namespace GisaxsClient.Core.RequestHandling
 {
     public record Request
     {
-        public MetaInformation JobInformation { get; init; }
-        public string JobHash { get; init; }
+        public MetaInformation JobInformation { get; }
+        public string JobHash { get; }
+        public string Body { get; }
         public string InfoHash => $"{JobHash}:info";
-        public string Body { get; init; }
+        public Request(MetaInformation jobInformation, string jobHash, string body)
+        {
+            JobInformation = jobInformation;
+            JobHash = jobHash;
+            Body = body;
+        }
     }
 }

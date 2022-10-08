@@ -33,7 +33,7 @@ namespace GisaxsClient.Core.RequestHandling
             string hash = hashComputer.Hash(configJson);
 
             MetaInformation? metaInformation = JsonSerializer.Deserialize<MetaInformation>(info.ToString(), options);
-            return new Request { JobInformation = metaInformation, Body = configJson, JobHash = hash };
+            return new Request(metaInformation!, hash, configJson);
         }
     }
 }

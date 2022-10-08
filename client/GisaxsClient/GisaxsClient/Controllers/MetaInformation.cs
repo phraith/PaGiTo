@@ -2,9 +2,16 @@
 {
     public record MetaInformation
     {
-        public long ClientId { get; init; }
-        public string JobType { get; init; }
-        public long JobId { get; init; }
-        public string ColormapName { get; init; }
+        public long ClientId { get; }
+        public string JobType { get; }
+        public long JobId { get; }
+        public string ColormapName { get; }
+        public MetaInformation(long clientId, string jobType, long jobId, string colormapName)
+        {
+            ClientId = clientId;
+            JobType = jobType;
+            JobId = jobId;
+            ColormapName = colormapName;
+        }
     }
 }

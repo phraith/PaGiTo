@@ -2,104 +2,24 @@ import MiniDrawer from "../Drawer/MiniDrawer";
 import Box from "@mui/material/Box"
 import CssBaseline from "@mui/material/CssBaseline"
 import Grid from "@mui/material/Grid"
-import Select from "@mui/material/Select"
 import throttle from "lodash/throttle";
-
 import ScatterImage from "../ScatterImage/ScatterImage";
 import GisaxsShapes from "../GisaxsShapes/GisaxsShapes";
 import Instrumentation from "../Instrumentation/Instrumentation";
 import UnitcellMeta from "../UnitcellMeta/UnitcellMeta";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Sample from "../Sample/Sample";
-import {
-    HttpTransportType,
-    HubConnection,
-    HubConnectionBuilder,
-    HubConnectionState,
-    LogLevel,
-} from "@microsoft/signalr";
 import LineProfileWrapper from "../ScatterImage/LineProfileWrapper";
-import { Coordinate, LineProfile, LineProfileState, RelativeLineProfile } from "../../utility/LineProfile";
+import { Coordinate, LineProfileState, RelativeLineProfile } from "../../utility/LineProfile";
 import ImageTable from "./ImageTable";
-import MenuItem from "@mui/material/MenuItem";
-import { Button, Menu } from "@mui/material";
+import { Button } from "@mui/material";
 import LineProfileGraphVx from "./LineProfileGraphVx";
 import { ImageInfo } from "../../utility/ImageInfo";
+import { MessageHubConnectionProvider } from "../../utility/MessageHubConnectionProvider";
+import ColormapSelect from "../Colormap";
 
 
 const Fitting = () => {
-    const colors = [
-        "twilightShifted",
-        "twilight",
-        "autumn",
-        "parula",
-        "bone",
-        "cividis",
-        "cool",
-        "hot",
-        "hsv",
-        "inferno",
-        "jet",
-        "magma",
-        "ocean",
-        "pink",
-        "plasma",
-        "rainbow",
-        "spring",
-        "summer",
-        "viridis",
-        "winter",
-    ];
-
-    const [connection, _] = useState<HubConnection>(
-        new HubConnectionBuilder()
-            .withUrl("/message", {
-                skipNegotiation: true,
-                transport: HttpTransportType.WebSockets,
-                accessTokenFactory: () => {
-                    return `${localStorage.getItem("apiToken")}`;
-                },
-            })
-            .configureLogging(LogLevel.Information)
-            .withAutomaticReconnect()
-            .build()
-    );
-
-    const [intensities, setIntensities] = useState<string>();
-    const [refIntensities, setRefIntensities] = useState<string>();
-    const [currentInfoPath, setCurrentInfoPath] = useState<string>();
-    const [imgWidth, setImgWidth] = useState<number>();
-    const [imgHeight, setImgHeight] = useState<number>();
-    const [lineprofileState, setLineprofileState] = useState<LineProfileState>(new LineProfileState(false, [], new RelativeLineProfile(new Coordinate(0, 0), new Coordinate(0, 1), new Coordinate(0, 0))));
-    const [plotData, setPlotData] = React.useState([])
-
-    const [openTable, setOpenTable] = React.useState<boolean>(false)
-    const [imageInfo, setImageInfo] = React.useState<ImageInfo>(new ImageInfo(0, 0, 0))
-
-
-    useEffect(() => {
-        if (connection) {
-            connection
-                .start()
-                .then((result) => {
-                    console.log("Connected!");
-
-                    connection.on("ReceiveJobId", (message) => {
-                        receiveJobResult(message);
-                    });
-
-                    connection.on("ReceiveJobInfos", (message) => {
-                        receiveJobInfos(message);
-                    });
-
-                    connection.on("ProcessLineprofiles", (message) => {
-                        getLineprofiles(message)
-                    })
-                })
-                .catch((e) => console.log("Connection failed: ", e));
-        }
-    }, [connection]);
-
     const receiveJobInfos = (message: any) => {
         setCurrentInfoPath(message)
         setIsActive(true)
@@ -129,31 +49,48 @@ const Fitting = () => {
             .then((data) => handleData(data));
     };
 
+    const [hubConnection, _] = useState<MessageHubConnectionProvider>(
+        new MessageHubConnectionProvider(
+            `${localStorage.getItem("apiToken")}`,
+            receiveJobResult,
+            receiveJobInfos,
+            getLineprofiles
+        )
+    )
+
+    const [intensities, setIntensities] = useState<string>();
+    const [refIntensities, setRefIntensities] = useState<string>();
+    const [currentInfoPath, setCurrentInfoPath] = useState<string>();
+    const [imgWidth, setImgWidth] = useState<number>();
+    const [imgHeight, setImgHeight] = useState<number>();
+    const [lineprofileState, setLineprofileState] = useState<LineProfileState>(new LineProfileState(false, [], new RelativeLineProfile(new Coordinate(0, 0), new Coordinate(0, 1), new Coordinate(0, 0))));
+    const [plotData, setPlotData] = React.useState([])
+
+    const [openTable, setOpenTable] = React.useState<boolean>(false)
+    const [imageInfo, setImageInfo] = React.useState<ImageInfo>(new ImageInfo(0, 0, 0))
+
+    useEffect(() => {
+        hubConnection.connect()
+    }, [hubConnection]);
+
     const handleData = (input: any) => {
-        var startTime = performance.now();
+        let startTime = performance.now();
         let json = JSON.parse(input);
         setIntensities(json.data);
         setImgWidth(json.width);
         setImgHeight(Math.min(json.height, window.innerHeight));
-        var endTime = performance.now();
+        let endTime = performance.now();
         console.log(`Handling data took ${endTime - startTime} milliseconds`);
     };
 
     const [colormap, setColorMap] = React.useState("twilightShifted");
     const [jsonData, setJsonData] = React.useState({});
-    const [isActive, setIsActive] = React.useState(false)
-
-
-
-    const handleColorChange = (event) => {
-        setColorMap(event.target.value as string);
-    };
+    const [isActive, setIsActive] = React.useState(false);
 
     const jsonCallback = (value, key) => {
         jsonData[key] = value;
         setJsonData({ ...jsonData });
     };
-
 
     const sendLineprofileRequest = (data, lineprofiles) => {
         let jsonConfig = JSON.stringify({
@@ -165,10 +102,7 @@ const Fitting = () => {
             },
         });
 
-        if (connection?.state === HubConnectionState.Connected) {
-            connection?.send("GetProfiles", jsonConfig);
-            console.log("after profiles sent");
-        }
+        hubConnection.requestProfiles(jsonConfig);
     }
 
     const throttled = useRef(throttle((data, lineprofiles) => sendLineprofileRequest(data, lineprofiles), 500));
@@ -190,11 +124,8 @@ const Fitting = () => {
             },
         });
         localStorage.setItem("simulation_config", jsonConfig);
+        hubConnection.requestJob(jsonConfig);
 
-        if (connection?.state === HubConnectionState.Connected) {
-            connection?.send("IssueJob", jsonConfig);
-            console.log("after job sent");
-        }
     }, [jsonData, colormap]);
 
     useEffect(() => {
@@ -210,6 +141,29 @@ const Fitting = () => {
             .then((data) => setRefIntensities(data));
     }, [imageInfo.id, colormap]);
 
+    const sendJobInfo = () => {
+        let jsonConfig = JSON.stringify({
+            info: {
+                body: JSON.stringify(jsonData),
+                history: []
+            },
+            userId: 0
+        });
+
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
+                Accept: "application/json",
+                'Content-Type': 'application/json'
+            },
+            body: jsonConfig
+        };
+        console.log(jsonConfig)
+        let url = "/api/jobstore/push";
+        fetch(url, requestOptions)
+            .then(data => console.log(data));
+    }
 
     return (
         <React.Fragment>
@@ -223,10 +177,9 @@ const Fitting = () => {
                             paddingBottom: 10,
                             paddingLeft: 10
                         }}>
-                        <LineProfileWrapper key={"test2"} width={imgWidth} height={imgHeight} profileState={lineprofileState} setProfileState={(state) => {
-                            setLineprofileState(state)
-                        }}>
-                            <ScatterImage key={"test2"} intensities={intensities} width={imgWidth} height={imgHeight} />
+                        <LineProfileWrapper width={imgWidth} height={imgHeight} profileState={lineprofileState}
+                            setProfileState={setLineprofileState}>
+                            <ScatterImage intensities={intensities} width={imgWidth} height={imgHeight} />
                         </LineProfileWrapper>
                     </Box>
                     <Box
@@ -235,7 +188,7 @@ const Fitting = () => {
                             paddingBottom: 10,
                             paddingLeft: 10
                         }}>
-                        <Button>
+                        <Button onClick={() => sendJobInfo()}>
                             Create Job Description
                         </Button>
                     </Box>
@@ -248,10 +201,9 @@ const Fitting = () => {
                             paddingBottom: 10,
                             paddingLeft: 5
                         }}>
-                        <LineProfileWrapper width={imgWidth} height={imgHeight} profileState={lineprofileState} setProfileState={(state) => {
-                            setLineprofileState(state)
-                        }}>
-                            <ScatterImage intensities={refIntensities} width={imageInfo.width} height={imageInfo.height} />
+                        <LineProfileWrapper width={imgWidth} height={imgHeight} profileState={lineprofileState}
+                            setProfileState={setLineprofileState}>
+                            <ScatterImage intensities={refIntensities} width={imgWidth} height={imgHeight} />
                         </LineProfileWrapper>
                     </Box>
                 </Grid>
@@ -290,13 +242,7 @@ const Fitting = () => {
                                             <UnitcellMeta jsonCallback={jsonCallback} />
                                         </Grid>
                                         <Grid item xs={6}>
-                                            <Select value={colormap} onChange={handleColorChange}>
-                                                {colors.map((value) => (
-                                                    <MenuItem key={value} value={value}>
-                                                        {value}
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
+                                            <ColormapSelect colormap={colormap} setColormap={setColorMap} />
                                         </Grid>
                                         <Grid item xs={12} sm={12} md={12} lg={6} sx={{ justifyContent: "flex-end", display: 'flex' }}>
                                             <Button onClick={() => { setOpenTable(prevState => !prevState) }}>

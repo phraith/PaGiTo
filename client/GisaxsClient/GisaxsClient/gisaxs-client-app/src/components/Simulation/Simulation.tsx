@@ -11,74 +11,11 @@ import Instrumentation from "../Instrumentation/Instrumentation";
 import UnitcellMeta from "../UnitcellMeta/UnitcellMeta";
 import React, * as react from "react";
 import Sample from "../Sample/Sample";
-
-
-import {
-  HttpTransportType,
-  HubConnection,
-  HubConnectionBuilder,
-  HubConnectionState,
-  LogLevel,
-} from "@microsoft/signalr";
+import { MessageHubConnectionProvider } from "../../utility/MessageHubConnectionProvider";
+import { useEffect, useState } from "react";
+import ColormapSelect from "../Colormap";
 
 const Simulation = () => {
-  const colors = [
-    "twilightShifted",
-    "twilight",
-    "autumn",
-    "parula",
-    "bone",
-    "cividis",
-    "cool",
-    "hot",
-    "hsv",
-    "inferno",
-    "jet",
-    "magma",
-    "ocean",
-    "pink",
-    "plasma",
-    "rainbow",
-    "spring",
-    "summer",
-    "viridis",
-    "winter",
-  ];
-
-  const [connection, _] = react.useState<HubConnection>(
-    new HubConnectionBuilder()
-      .withUrl("/message", {
-        skipNegotiation: true,
-        transport: HttpTransportType.WebSockets,
-        accessTokenFactory: () => {
-          return `${localStorage.getItem("apiToken")}`;
-        },
-      })
-      .configureLogging(LogLevel.Information)
-      .withAutomaticReconnect()
-      .build()
-  );
-
-  const [intensities, setIntensities] = react.useState<string>();
-  const [imgWidth, setImgWidth] = react.useState<number>();
-  const [imgHeight, setImgHeight] = react.useState<number>();
-
-
-  react.useEffect(() => {
-    if (connection) {
-      connection
-        .start()
-        .then((result) => {
-          console.log("Connected!");
-
-          connection.on("ReceiveJobId", (message) => {
-            receiveJobResult(message);
-          });
-        })
-        .catch((e) => console.log("Connection failed: ", e));
-    }
-  }, [connection]);
-
   const receiveJobResult = (message: any) => {
     let url = "/api/redis/data?" + message;
     fetch(url, {
@@ -92,6 +29,23 @@ const Simulation = () => {
       .then((data) => handleData(data));
   };
 
+  const [hubConnection, _] = useState<MessageHubConnectionProvider>(
+    new MessageHubConnectionProvider(
+      `${localStorage.getItem("apiToken")}`,
+      receiveJobResult,
+      (message: string) => { },
+      (message: string) => { }
+    )
+  )
+
+  const [intensities, setIntensities] = react.useState<string>();
+  const [imgWidth, setImgWidth] = react.useState<number>();
+  const [imgHeight, setImgHeight] = react.useState<number>();
+
+  useEffect(() => {
+    hubConnection.connect()
+  }, [hubConnection]);
+
   const handleData = (input: any) => {
     var startTime = performance.now();
     let json = JSON.parse(input);
@@ -104,10 +58,6 @@ const Simulation = () => {
 
   const [colormap, setColorMap] = React.useState("twilightShifted");
   const [jsonData, setJsonData] = React.useState({});
-
-  const handleColorChange = (event) => {
-    setColorMap(event.target.value as string);
-  };
 
   const jsonCallback = (value, key) => {
     jsonData[key] = value;
@@ -128,16 +78,11 @@ const Simulation = () => {
     });
 
     localStorage.setItem("simulation_config", jsonConfig);
-
-    if (connection?.state === HubConnectionState.Connected) {
-      connection?.send("IssueJob", jsonConfig);
-      console.log("after job sent");
-    }
+    hubConnection.requestJob(jsonConfig);
   }, [jsonData, colormap]);
 
   return (
     <React.Fragment>
-
       <CssBaseline />
       <MiniDrawer />
       <Grid container spacing={2}>
@@ -148,10 +93,8 @@ const Simulation = () => {
               paddingRight: 5,
               paddingLeft: 10,
               paddingBottom: 10,
-            }}
-          >
+            }}>
             <ScatterImage intensities={intensities} width={imgWidth} height={imgHeight} />
-
           </Box>
         </Grid>
 
@@ -177,15 +120,7 @@ const Simulation = () => {
                       <UnitcellMeta jsonCallback={jsonCallback} />
                     </Grid>
                     <Grid item xs={12}>
-                      <FormControl fullWidth>
-                        <Select value={colormap} onChange={handleColorChange}>
-                          {colors.map((value) => (
-                            <MenuItem key={value} value={value}>
-                              {value}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                      <ColormapSelect colormap={colormap} setColormap={setColorMap} />
                     </Grid>
                   </Grid>
                 </Grid>

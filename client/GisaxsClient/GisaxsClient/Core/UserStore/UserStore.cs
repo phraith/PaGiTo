@@ -6,7 +6,6 @@ using System.Data;
 
 namespace GisaxsClient.Core.UserStore
 {
-
     public class UserStore
     {
         private readonly string connectionString;

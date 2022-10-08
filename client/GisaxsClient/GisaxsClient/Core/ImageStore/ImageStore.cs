@@ -1,7 +1,7 @@
 ﻿using Dapper;
+using GisaxsClient.Utility.Database;
 using ImageStoreClient.ImageUtility;
 using Npgsql;
-using NpgsqlTypes;
 using System.Data;
 using System.Text.Json;
 using static Dapper.SqlMapper;
@@ -10,26 +10,6 @@ using static Dapper.SqlMapper;
 
 namespace GisaxsClient.Core.ImageStore
 {
-    public class JsonParameter : ICustomQueryParameter
-    {
-        private readonly string value;
-
-        public JsonParameter(string value)
-        {
-            this.value = value;
-        }
-
-        public void AddParameter(IDbCommand command, string name)
-        {
-            var parameter = new NpgsqlParameter(name, NpgsqlDbType.Jsonb)
-            {
-                Value = value
-            };
-
-            command.Parameters.Add(parameter);
-        }
-    }
-
     public class ImageStore
     {
         private readonly string connectionString;
@@ -54,9 +34,9 @@ namespace GisaxsClient.Core.ImageStore
         public async Task<Image?> Get(long id)
         {
             using IDbConnection connection = new NpgsqlConnection(connectionString);
-            var images = await connection.QueryAsync(@$"SELECT info, data as id FROM images WHERE id = {id}", (string info, double[] data) => 
-            { 
-                return new Image(JsonSerializer.Deserialize<ImageInfo>(info)!, data); 
+            var images = await connection.QueryAsync(@$"SELECT info, data as id FROM images WHERE id = {id}", (string info, double[] data) =>
+            {
+                return new Image(JsonSerializer.Deserialize<ImageInfo>(info)!, data);
             });
             if (images.Count() != 1) { return null; }
             return images.First();
