@@ -35,6 +35,7 @@ const GisaxsShapes = (props: GisaxsShapesProps) => {
     let formattedShapes = Object.keys(jsonData).map((key) => jsonData[key]);
     props.jsonCallback(formattedShapes, configFieldName);
     SetLocalStorageEntity(formattedShapes, [], localStorageEntityName);
+    console.log(jsonData)
   }, [jsonData]);
 
   useEffect(() => {

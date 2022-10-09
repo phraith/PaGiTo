@@ -112,7 +112,7 @@ namespace GisaxsClient.Hubs
         {
             string accessor = DataAccessor(lpType, basicDataHash, invariantPixelPosition);
             if (!db.KeyExists(accessor)) { return null; }
-            byte[] data = await db.StringGetAsync(accessor)!;
+            byte[] data = await db.StringGetAsync(accessor);
 
             if (data.Length != sizeof(double) * axisDimension) { return null; }
             var profileData = new double[axisDimension];

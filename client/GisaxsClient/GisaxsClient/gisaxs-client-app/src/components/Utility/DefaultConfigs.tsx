@@ -31,6 +31,7 @@ export const UnitcellMetaConfig = {
 };
 
 export const SphereConfig = {
+  type: "sphere",
   radius: {
     mean: 5,
     stddev: 0,
@@ -49,6 +50,7 @@ export const SphereConfig = {
 };
 
 export const CylinderConfig = {
+  type: "cylinder",
   radius: {
     mean: 5,
     stddev: 0,
@@ -82,7 +84,6 @@ export const LayerConfig = {
 const isEqualsJson = (obj1,obj2)=>{
   let keys1 = Object.keys(obj1);
   let keys2 = Object.keys(obj2);
-
   return keys1.length === keys2.length && Object.keys(obj1).every(key=>obj1[key]==obj2[key]);
 }
 
