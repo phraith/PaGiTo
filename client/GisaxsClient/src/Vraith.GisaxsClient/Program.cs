@@ -11,7 +11,6 @@ using Vraith.GisaxsClient.Hubs;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 if (LaunchConfig.LaunchMode == LaunchMode.Kubernetes)
 {
     builder.WebHost.ConfigureAppConfiguration(webBuilder => 
