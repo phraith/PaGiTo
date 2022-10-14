@@ -7,18 +7,17 @@ namespace Vraith.GisaxsClient.Utility.Database
 {
     public class JsonParameter : ICustomQueryParameter
     {
-        private readonly string value;
-
+        private readonly string _value;
         public JsonParameter(string value)
         {
-            this.value = value;
+            _value = value;
         }
 
         public void AddParameter(IDbCommand command, string name)
         {
             var parameter = new NpgsqlParameter(name, NpgsqlDbType.Jsonb)
             {
-                Value = value
+                Value = _value
             };
 
             command.Parameters.Add(parameter);
