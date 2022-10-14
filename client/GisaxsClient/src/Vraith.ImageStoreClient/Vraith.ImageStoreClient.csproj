@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BitMiracle.LibTiff.NET" Version="2.4.649" />
+    <PackageReference Include="Spectre.Cli" Version="0.49.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+	  <InternalsVisibleTo Include="Vraith.ImageStoreClient.Tests" />
+  </ItemGroup>
+
+</Project>

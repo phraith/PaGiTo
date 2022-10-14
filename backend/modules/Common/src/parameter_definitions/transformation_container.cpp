@@ -31,11 +31,15 @@ namespace GisaxsTransformationContainer {
                 case ShapeTypeV2::sphere: {
                     shapes.shape_types.emplace_back(ShapeTypeV2::sphere);
                     shapes.parameter_indices.emplace_back(shapes.parameters.size());
-                    auto radiusMean = shape.at("radius").at("mean");
-                    auto radiusStddev = shape.at("radius").at("stddev");
-                    shapes.upper_bounds.emplace_back(Vector2<MyType>{radiusMean, radiusStddev});
-                    shapes.lower_bounds.emplace_back(Vector2<MyType>{radiusMean, radiusStddev});
-                    shapes.parameters.emplace_back(Vector2<MyType>{radiusMean, radiusStddev});
+                    auto radiusMeanUpper = shape.at("radius").at("meanUpper");
+                    auto radiusMeanLower = shape.at("radius").at("meanLower");
+
+                    auto radiusStddevUpper = shape.at("radius").at("stddevUpper");
+                    auto radiusStddevLower = shape.at("radius").at("stddevLower");
+
+                    shapes.upper_bounds.emplace_back(Vector2<MyType>{radiusMeanUpper, radiusStddevUpper});
+                    shapes.lower_bounds.emplace_back(Vector2<MyType>{radiusMeanLower, radiusStddevLower});
+                    shapes.parameters.emplace_back(Vector2<MyType>{radiusMeanUpper, radiusStddevUpper});
 
                     std::vector<Vector3<MyType>> positions;
                     shapes.position_indices.emplace_back(shapes.positions.size());
@@ -48,18 +52,27 @@ namespace GisaxsTransformationContainer {
                 case ShapeTypeV2::cylinder: {
                     shapes.shape_types.emplace_back(ShapeTypeV2::cylinder);
                     shapes.parameter_indices.emplace_back(shapes.parameters.size());
-                    auto radiusMean = shape.at("radius").at("mean");
-                    auto radiusStddev = shape.at("radius").at("stddev");
-                    shapes.upper_bounds.emplace_back(Vector2<MyType>{radiusMean, radiusStddev});
-                    shapes.lower_bounds.emplace_back(Vector2<MyType>{radiusMean, radiusStddev});
-                    shapes.parameters.emplace_back(Vector2<MyType>{radiusMean, radiusStddev});
+
+                    auto radiusMeanUpper = shape.at("radius").at("meanUpper");
+                    auto radiusMeanLower = shape.at("radius").at("meanLower");
+
+                    auto radiusStddevUpper = shape.at("radius").at("stddevUpper");
+                    auto radiusStddevLower = shape.at("radius").at("stddevLower");
+
+                    shapes.upper_bounds.emplace_back(Vector2<MyType>{radiusMeanUpper, radiusStddevUpper});
+                    shapes.lower_bounds.emplace_back(Vector2<MyType>{radiusMeanLower, radiusStddevLower});
+                    shapes.parameters.emplace_back(Vector2<MyType>{radiusMeanUpper, radiusStddevUpper});
 
                     shapes.parameter_indices.emplace_back(shapes.parameters.size());
-                    auto heightMean = shape.at("height").at("mean");
-                    auto heightStddev = shape.at("height").at("stddev");
-                    shapes.upper_bounds.emplace_back(Vector2<MyType>{heightMean, heightStddev});
-                    shapes.lower_bounds.emplace_back(Vector2<MyType>{heightMean, heightStddev});
-                    shapes.parameters.emplace_back(Vector2<MyType>{heightMean, heightStddev});
+                    auto heightMeanUpper = shape.at("radius").at("meanUpper");
+                    auto heightMeanLower = shape.at("radius").at("meanLower");
+
+                    auto heightStddevUpper = shape.at("height").at("stddevUpper");
+                    auto heightStddevLower = shape.at("height").at("stddevLower");
+
+                    shapes.upper_bounds.emplace_back(Vector2<MyType>{radiusMeanUpper, radiusStddevUpper});
+                    shapes.lower_bounds.emplace_back(Vector2<MyType>{radiusMeanLower, radiusStddevLower});
+                    shapes.parameters.emplace_back(Vector2<MyType>{radiusMeanUpper, radiusStddevUpper});
 
                     std::vector<Vector3<MyType>> positions;
                     shapes.position_indices.emplace_back(shapes.positions.size());

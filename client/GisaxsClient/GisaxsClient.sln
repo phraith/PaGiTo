@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GisaxsClient", "GisaxsClient\GisaxsClient.csproj", "{6C592AE0-E2AF-4B81-AC81-8D5942786857}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vraith.GisaxsClient", "src\Vraith.GisaxsClient\Vraith.GisaxsClient.csproj", "{5D6F46B4-B678-4FF0-A51C-1162CF8E0A23}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptimizationLibrary", "OptimizationLibrary\OptimizationLibrary.csproj", "{9235DD69-68E0-4F7E-A4A1-7E6B67949D92}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vraith.ImageStoreClient", "src\Vraith.ImageStoreClient\Vraith.ImageStoreClient.csproj", "{59FB23CF-DEC9-44A5-A866-0B34F09406A4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageStoreClient", "ImageStoreClient\ImageStoreClient.csproj", "{34ED3127-B7E3-44B9-8090-CA33476879AB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vraith.Optimization", "src\Vraith.Optimization\Vraith.Optimization.csproj", "{23E30BE9-E5A1-4732-9A4A-649F7373CF7C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageStoreClientTests", "ImageStoreClientTests\ImageStoreClientTests.csproj", "{4A2BD6E6-7ABD-4AD3-8880-E8EB3F284516}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vraith.ImageStoreClient.Tests", "tests\Vraith.ImageStoreClient.Tests\Vraith.ImageStoreClient.Tests.csproj", "{70990577-65C5-4EC1-AC5A-7A0F73365CBB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,22 +17,22 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6C592AE0-E2AF-4B81-AC81-8D5942786857}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6C592AE0-E2AF-4B81-AC81-8D5942786857}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6C592AE0-E2AF-4B81-AC81-8D5942786857}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6C592AE0-E2AF-4B81-AC81-8D5942786857}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9235DD69-68E0-4F7E-A4A1-7E6B67949D92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9235DD69-68E0-4F7E-A4A1-7E6B67949D92}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9235DD69-68E0-4F7E-A4A1-7E6B67949D92}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9235DD69-68E0-4F7E-A4A1-7E6B67949D92}.Release|Any CPU.Build.0 = Release|Any CPU
-		{34ED3127-B7E3-44B9-8090-CA33476879AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{34ED3127-B7E3-44B9-8090-CA33476879AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{34ED3127-B7E3-44B9-8090-CA33476879AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{34ED3127-B7E3-44B9-8090-CA33476879AB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4A2BD6E6-7ABD-4AD3-8880-E8EB3F284516}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4A2BD6E6-7ABD-4AD3-8880-E8EB3F284516}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4A2BD6E6-7ABD-4AD3-8880-E8EB3F284516}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4A2BD6E6-7ABD-4AD3-8880-E8EB3F284516}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D6F46B4-B678-4FF0-A51C-1162CF8E0A23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D6F46B4-B678-4FF0-A51C-1162CF8E0A23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D6F46B4-B678-4FF0-A51C-1162CF8E0A23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D6F46B4-B678-4FF0-A51C-1162CF8E0A23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59FB23CF-DEC9-44A5-A866-0B34F09406A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59FB23CF-DEC9-44A5-A866-0B34F09406A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59FB23CF-DEC9-44A5-A866-0B34F09406A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59FB23CF-DEC9-44A5-A866-0B34F09406A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70990577-65C5-4EC1-AC5A-7A0F73365CBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70990577-65C5-4EC1-AC5A-7A0F73365CBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70990577-65C5-4EC1-AC5A-7A0F73365CBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70990577-65C5-4EC1-AC5A-7A0F73365CBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23E30BE9-E5A1-4732-9A4A-649F7373CF7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23E30BE9-E5A1-4732-9A4A-649F7373CF7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23E30BE9-E5A1-4732-9A4A-649F7373CF7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23E30BE9-E5A1-4732-9A4A-649F7373CF7C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
