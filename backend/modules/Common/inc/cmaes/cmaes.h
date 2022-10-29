@@ -9,7 +9,7 @@
 
 class Cmaes {
 public:
-    Cmaes(std::vector<double> mean, double sigma, std::shared_ptr<Eigen::MatrixX<double>> bounds = nullptr,
+    Cmaes(std::vector<double> mean, double sigma, std::vector<double> upper, std::vector<double> lower,
           int n_max_resampling = 100, int seed = 0, double tol_sigma = 1e-4, double tol_C = 1e-4);
 
     std::tuple<std::shared_ptr<Eigen::MatrixX<double>>, std::shared_ptr<Eigen::VectorX<double>>> EigenDecomposition();
@@ -43,6 +43,7 @@ private:
     static double CalculateInitialCc(double mu_eff, int dim);
     static double CalculateInitialDSigma(double c_sigma, double mu_eff, int dim);
     static double CalculateInitialChiN(int dim);
+    static Eigen::MatrixXd CreateBoundsMatrix(int dim, std::vector<double> upper, std::vector<double> lower);
 
 
 
@@ -51,8 +52,8 @@ private:
     double tolx_;
     double tol_sigma_;
     double tol_C_;
-    std::shared_ptr<Eigen::MatrixX<double>> bounds_;
     int dim_;
+    Eigen::MatrixX<double> bounds_;
     int population_size_;
     int generation_;
     int mu_;

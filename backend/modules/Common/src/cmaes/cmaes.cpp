@@ -1,16 +1,16 @@
 #include "cmaes/cmaes.h"
 #include <cmath>
 
-Cmaes::Cmaes(std::vector<double> mean, double sigma, std::shared_ptr<Eigen::MatrixX<double>> bounds,
-             int n_max_resampling, int seed, double tol_sigma, double tol_C)
+Cmaes::Cmaes(std::vector<double> mean, double sigma, std::vector<double> upper,
+             std::vector<double> lower, int n_max_resampling, int seed, double tol_sigma, double tol_C)
         :
         sigma_(sigma),
         n_max_resampling_(n_max_resampling),
         tolx_(1e-12 * sigma_),
         tol_sigma_(tol_sigma),
         tol_C_(tol_C),
-        bounds_(bounds),
         dim_(mean.size()),
+        bounds_(CreateBoundsMatrix(dim_, upper, lower)),
         population_size_(4 + (int) std::floor(3.0 * std::log(dim_))), // # (eq. 48)
         generation_(0),
         mu_(population_size_ / 2),
@@ -34,10 +34,6 @@ Cmaes::Cmaes(std::vector<double> mean, double sigma, std::shared_ptr<Eigen::Matr
     }
 
     if (dim_ <= 1) {
-        throw std::exception();
-    }
-
-    if (!(bounds == nullptr || bounds->rows() == dim_ && bounds->cols() == 2)) {
         throw std::exception();
     }
 
@@ -155,12 +151,18 @@ bool Cmaes::IsConverged() {
     return sigma_ < tol_sigma_ && C_->norm() < tol_C_;
 }
 
-void Cmaes::SetBounds(std::shared_ptr<Eigen::MatrixX<double>> bounds) {
-    if (!(bounds == nullptr || bounds->cols() == dim_ && bounds->rows() == 2)) {
-        throw std::exception();
+Eigen::MatrixXd Cmaes::CreateBoundsMatrix(int dim, std::vector<double> upper, std::vector<double> lower) {
+    Eigen::MatrixX<double> bounds = Eigen::MatrixX<double>::Constant(2, dim, 0);
+    if (upper.empty() || lower.empty() || upper.size() != dim || lower.size() != dim)
+    {
+        return bounds;
     }
 
-    bounds_ = bounds;
+    bounds.row(0) = Eigen::Map<Eigen::VectorXd,
+            Eigen::Unaligned>(upper.data(), upper.size());
+    bounds.row(1) = Eigen::Map<Eigen::VectorXd,
+            Eigen::Unaligned>(lower.data(), lower.size());
+    return bounds;
 }
 
 Eigen::VectorX<double> Cmaes::Ask() {
@@ -209,26 +211,26 @@ Cmaes::PointwiseMultiplicationOnRows(Eigen::MatrixX<double> matrix, Eigen::Vecto
 }
 
 bool Cmaes::IsFeasable(Eigen::VectorX<double> param) {
-    if (bounds_ == nullptr) {
+    if (bounds_.isZero(0)) {
         return true;
     }
 
     bool isCorrectLower = true;
     bool isCorrectUpper = true;
     for (int i = 0; i < param.size(); i++) {
-        isCorrectLower &= param[i] >= bounds_->coeff(i, 0);
-        isCorrectUpper &= param[i] <= bounds_->coeff(i, 1);
+        isCorrectLower &= param[i] >= bounds_.coeff(i, 0);
+        isCorrectUpper &= param[i] <= bounds_.coeff(i, 1);
     }
     return isCorrectLower & isCorrectUpper;
 }
 
 Eigen::VectorX<double> Cmaes::RepairInfeasableParams(Eigen::VectorX<double> params) {
-    if (bounds_ == nullptr) {
+    if (bounds_.isZero(0)) {
         return params;
     }
 
-    Eigen::VectorX<double> newParam = params.cwiseMax(bounds_->col(0));
-    params = params.cwiseMin(bounds_->col(1));
+    Eigen::VectorX<double> newParam = params.cwiseMax(bounds_.col(0));
+    params = params.cwiseMin(bounds_.col(1));
     return newParam;
 }
 

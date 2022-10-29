@@ -9,7 +9,8 @@
 
 class CmaesOptimizer {
 public:
-    CmaesOptimizer(double (*function)(const std::vector<double> &), const std::vector<double> &initial, double sigma,
+    CmaesOptimizer(double (*function)(const std::vector<double> &), const std::vector<double> &initial,
+                   const std::vector<double> &lower, const std::vector<double> &upper, double sigma,
                    int max_iterations, int rand_seed = 0);
 
     std::shared_ptr<Solution> Optimize();
@@ -18,6 +19,7 @@ private:
     Cmaes cma_;
 
     double (*function_)(const std::vector<double> &);
+
     const std::vector<double> &initial_;
     int rand_seed_;
     int max_iterations_;

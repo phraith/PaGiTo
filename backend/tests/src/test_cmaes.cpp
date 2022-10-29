@@ -4,7 +4,6 @@
 
 #include "gtest/gtest.h"
 #include "cmaes/cmaes_optimizer.h"
-
 #include <vector>
 
 class CmaesTest : public ::testing::TestWithParam<int> {
@@ -24,7 +23,7 @@ double EllipsoidFunction(const std::vector<double> &parameters) {
 
     double sum = 0;
     for (int i = 0; i < parameters.size(); ++i) {
-        sum += std::pow(1000.0, i / (parameters.size() - 1)) * std::pow(parameters.at(i), 2);
+        sum += std::pow(1000.0, (double)i / (parameters.size() - 1)) * std::pow(parameters.at(i), 2);
     }
     return sum;
 }
@@ -32,7 +31,7 @@ double EllipsoidFunction(const std::vector<double> &parameters) {
 TEST(CmaesTest, EllipsoidFunction) {
     int dim = 5;
     std::vector<double> initial(dim, 3);
-    CmaesOptimizer o(EllipsoidFunction, initial, 2.0, 1000);
+    CmaesOptimizer o(EllipsoidFunction, initial, std::vector<double>(), std::vector<double>(), 2.0, 1000);
     std::shared_ptr<Solution> best_solution = o.Optimize();
 
     EXPECT_NE(nullptr, best_solution);
@@ -45,7 +44,7 @@ TEST(CmaesTest, QuadraticFunction) {
     std::vector<double> initial;
     initial.emplace_back(0);
     initial.emplace_back(0);
-    CmaesOptimizer o(QuadraticFunction, initial, 1.3, 1000);
+    CmaesOptimizer o(QuadraticFunction, initial, std::vector<double>(), std::vector<double>(), 1.3, 1000);
     std::shared_ptr<Solution> best_solution = o.Optimize();
 
     EXPECT_NE(nullptr, best_solution);

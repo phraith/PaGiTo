@@ -6,12 +6,14 @@
 #include <iostream>
 
 CmaesOptimizer::CmaesOptimizer(double (*function)(const std::vector<double> &),
-                               const std::vector<double> &initial, double sigma, int max_iterations, int rand_seed)
+                               const std::vector<double> &initial, const std::vector<double> &lower,
+                               const std::vector<double> &upper,
+                               double sigma, int max_iterations, int rand_seed)
         :
         function_(function),
         initial_(initial),
         rand_seed_(rand_seed),
-        cma_(initial, sigma),
+        cma_(initial, sigma, upper, lower),
         max_iterations_(max_iterations) {
 
 }
@@ -32,8 +34,7 @@ std::shared_ptr<Solution> CmaesOptimizer::Optimize() {
             const auto best_solution_it = std::min_element(std::begin(solutions), std::end(solutions));
             std::shared_ptr<Solution> best_solution = std::make_shared<Solution>(*best_solution_it);
 
-            if (best_solution != nullptr)
-            {
+            if (best_solution != nullptr) {
                 std::cout << "Fitness: " << (*best_solution_it).Fitness() << " Params: ";
                 std::string params;
                 for (auto parameter: (*best_solution_it).Parameters()) {
