@@ -7,7 +7,7 @@ find_package(OpenMP)
 file(GLOB_RECURSE COMMON_LIB_FILES "src/*.cpp" "inc/*.h")
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${COMMON_LIB_FILES})
 
-add_library(CommonLib STATIC inc/parameter_definitions/transformation_container.h src/common/propagation_coefficients.cpp inc/common/propagation_coefficients.h inc/parameter_definitions/data_containers.h inc/common/binary_serialization_utility.cpp inc/common/binary_serialization_utility.h)
+add_library(CommonLib STATIC inc/cmaes/solution.h src/cmaes/solution.cpp inc/cmaes/cmaes_optimizer.h src/cmaes/cmaes_optimizer.cpp inc/cmaes/weights_information.h src/cmaes/weights_information.cpp)
 
 target_sources(
         CommonLib
@@ -30,6 +30,14 @@ target_sources(
         src/common/job_meta_information.cpp
         src/common/experimental_data.cpp
         src/parameter_definitions/transformation_container.cpp
+        inc/parameter_definitions/transformation_container.h
+        src/common/propagation_coefficients.cpp
+        inc/common/propagation_coefficients.h
+        inc/parameter_definitions/data_containers.h
+        inc/common/binary_serialization_utility.cpp
+        inc/common/binary_serialization_utility.h
+        inc/cmaes/cmaes.h
+        src/cmaes/cmaes.cpp
         inc/parameter_definitions/transformation_container.h
         inc/common/job_meta_information.h
         inc/common/experimental_data.h
