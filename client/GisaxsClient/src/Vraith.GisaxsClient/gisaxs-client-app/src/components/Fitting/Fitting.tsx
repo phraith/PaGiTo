@@ -170,100 +170,49 @@ const Fitting = () => {
             <CssBaseline />
             <MiniDrawer />
             <Grid container spacing={2}>
-                <Grid item xs={6} sm={6} md={6} lg={4}>
-                    <Box
-                        sx={{
-                            paddingTop: 10,
-                            paddingBottom: 10,
-                            paddingLeft: 10
-                        }}>
+                <Grid item xs={6} sm={6} md={6} lg={8}>
+                    <Box display="flex" sx={{ gap: 2, padding: 10 }}>
                         <LineProfileWrapper width={imgWidth} height={imgHeight} profileState={lineprofileState}
                             setProfileState={setLineprofileState}>
                             <ScatterImage intensities={intensities} width={imgWidth} height={imgHeight} />
                         </LineProfileWrapper>
-                    </Box>
-                    <Box
-                        sx={{
-                            paddingTop: 10,
-                            paddingBottom: 10,
-                            paddingLeft: 10
-                        }}>
-                        <Button onClick={() => sendJobInfo()}>
-                            Create Job Description
-                        </Button>
-                    </Box>
-                </Grid>
-                <Grid item xs={6} sm={6} md={6} lg={4}>
-                    <Box
-                        sx={{
-                            paddingTop: 10,
-                            paddingRight: 5,
-                            paddingBottom: 10,
-                            paddingLeft: 5
-                        }}>
+
                         <LineProfileWrapper width={imgWidth} height={imgHeight} profileState={lineprofileState}
                             setProfileState={setLineprofileState}>
                             <ScatterImage intensities={refIntensities} width={imgWidth} height={imgHeight} />
                         </LineProfileWrapper>
                     </Box>
                 </Grid>
-
                 <Grid item xs={12} sm={12} md={12} lg={4}>
-                    <Grid
-                        container
-                        sx={{
-                            position: "sticky",
-                            top: 0,
-                            paddingTop: 10,
-                            paddingRight: 5,
-                            paddingLeft: 10,
-                        }}
-                    >
-                        {!openTable &&
-                            <Grid item xs={12} sm={12} md={12} lg={12} >
+                    <Box display="flex" sx={{ flexDirection: "column", gap: 2, padding: 10  }}>
+                        <Box display="flex" sx={{ paddingBottom: 1 }}>
+                            {!openTable &&
                                 <LineProfileGraphVx data={plotData} ></LineProfileGraphVx>
-                            </Grid>
-                        }
-
-                        {openTable &&
-                            <Grid item xs={12} sm={12} md={12} lg={12}>
+                            }
+                            {openTable &&
                                 <ImageTable setImageInfo={(updatedImageInfo: ImageInfo) => { console.log(updatedImageInfo); setImageInfo(updatedImageInfo) }} />
-                            </Grid>
-                        }
-
-                        <Grid item xs={12} sm={12} md={12} lg={12}>
-                            <Grid container spacing={2}>
-                                <Grid item xs={12} sm={7} md={7} lg={7}>
-                                    <Instrumentation jsonCallback={jsonCallback} initialResX={imageInfo.width} initialResY={imageInfo.height} />
-                                </Grid>
-                                <Grid item xs={12} sm={5} md={5} lg={5}>
-                                    <Grid container rowSpacing={2}>
-                                        <Grid item xs={12}>
-                                            <UnitcellMeta jsonCallback={jsonCallback} />
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <ColormapSelect colormap={colormap} setColormap={setColorMap} />
-                                        </Grid>
-                                        <Grid item xs={12} sm={12} md={12} lg={6} sx={{ justifyContent: "flex-end", display: 'flex' }}>
-                                            <Button onClick={() => { setOpenTable(prevState => !prevState) }}>
-                                                {openTable ? "Show graph" : "Show images"}
-                                            </Button>
-                                        </Grid>
-                                    </Grid>
-                                </Grid>
-
-                                <Grid item xs={12} sm={7} md={7} lg={7}>
-                                    <GisaxsShapes isSimulation={false} jsonCallback={jsonCallback} />
-                                </Grid>
-                                <Grid item xs={12} sm={5} md={5} lg={5}>
-                                    <Sample jsonCallback={jsonCallback} />
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                    </Grid>
+                            }
+                        </Box>
+                        <Box display="flex" sx={{ paddingBottom: 1 }}>
+                            <Instrumentation jsonCallback={jsonCallback} initialResX={imageInfo.width} initialResY={imageInfo.height} />
+                            <UnitcellMeta jsonCallback={jsonCallback} />
+                        </Box>
+                        <Box display="flex" sx={{ paddingBottom: 1 }}>
+                            <ColormapSelect colormap={colormap} setColormap={setColorMap} />
+                            <Button onClick={() => sendJobInfo()}>
+                                Create Job Description
+                            </Button>
+                            <Button onClick={() => { setOpenTable(prevState => !prevState) }}>
+                                {openTable ? "Show graph" : "Show images"}
+                            </Button>
+                        </Box>
+                        <Box display="flex" sx={{ paddingBottom: 1 }}>
+                            <GisaxsShapes isSimulation={false} jsonCallback={jsonCallback} />
+                            <Sample jsonCallback={jsonCallback} />
+                        </Box>
+                    </Box>
                 </Grid>
             </Grid>
-
         </React.Fragment>
     );
 };

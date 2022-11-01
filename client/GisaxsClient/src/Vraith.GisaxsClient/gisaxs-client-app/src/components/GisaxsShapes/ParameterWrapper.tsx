@@ -5,21 +5,29 @@ import { Dispatch, SetStateAction } from 'react'
 interface ParameterProps {
   parameterName: string
   defaultValue: number
-  valueSetter: Dispatch<SetStateAction<number>>;
+  valueSetter?: Dispatch<SetStateAction<number>>;
 }
 
 const ParameterWrapper = (props: ParameterProps) => {
+
+  const readOnly = props.valueSetter === undefined;
+  const valueSetter = readOnly ? (e: number) => { } : props.valueSetter
   return (
-    
-      <TextField
-        label={props.parameterName}
-        type="number"
-        onChange={(e) => {
-          props.valueSetter(Number(e.target.value));
-        }}
-        variant="outlined"
-        defaultValue={props.defaultValue}
-      />
+
+    <TextField
+      label={props.parameterName}
+      type="number"
+      inputProps={{
+        readOnly: readOnly,
+        disabled: readOnly
+      }}
+      onChange={(e) => {
+        valueSetter(Number(e.target.value));
+      }}
+      variant="outlined"
+      defaultValue={props.defaultValue}
+    />
+
   );
 }
 

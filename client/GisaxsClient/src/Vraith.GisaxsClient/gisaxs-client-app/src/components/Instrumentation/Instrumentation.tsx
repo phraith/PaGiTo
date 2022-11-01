@@ -13,6 +13,7 @@ import {
   InstrumentationConfig,
   SetLocalStorageEntity,
 } from "../Utility/DefaultConfigs";
+import Box from "@mui/material/Box/Box"
 
 interface InstrumentationProps {
   jsonCallback: any;
@@ -20,7 +21,7 @@ interface InstrumentationProps {
   initialResY: number;
 }
 
-const Instrumentation = ({initialResX=0, initialResY=0, ...props}) => {
+const Instrumentation = ({ initialResX = 0, initialResY = 0, ...props }) => {
   const [alphaI, setAlphaI] = React.useState(InstrumentationConfig.beam.alphai);
   const [photonEv, setPhotonEv] = React.useState(
     InstrumentationConfig.beam.photonEv
@@ -48,8 +49,8 @@ const Instrumentation = ({initialResX=0, initialResY=0, ...props}) => {
     InstrumentationConfig.detector.sampleDistance
   );
 
-  const localStorageEntityName : string = "instrumentationConfig"
-  const configFieldName : string = "instrumentation"
+  const localStorageEntityName: string = "instrumentationConfig"
+  const configFieldName: string = "instrumentation"
 
 
   useEffect(() => {
@@ -58,7 +59,7 @@ const Instrumentation = ({initialResX=0, initialResY=0, ...props}) => {
     let resHeight = initialResY == 0 ? InstrumentationConfig.detector.resolution.height : initialResY
     setResX(resWidth)
     setResY(resHeight)
-    }, [initialResX, initialResY]);
+  }, [initialResX, initialResY]);
 
   useEffect(() => {
     let currentConfig = {
@@ -105,11 +106,11 @@ const Instrumentation = ({initialResX=0, initialResY=0, ...props}) => {
   }, []);
 
   return (
-    <Card sx={{}}>
+    <Card>
       <CardContent>
         <Typography>Instrumentation</Typography>
-        <Grid container sx={{ paddingTop: 2 }} rowSpacing={2}>
-          <Grid item xs={6}>
+        <Box display="flex" sx={{ flexDirection: "column" }}>
+          <Box display="flex" sx={{ paddingBottom: 1 }}>
             <TextField
               InputProps={{
                 startAdornment: (
@@ -123,8 +124,6 @@ const Instrumentation = ({initialResX=0, initialResY=0, ...props}) => {
                 setAlphaI(Number(e.target.value));
               }}
             />
-          </Grid>
-          <Grid item xs={6}>
             <TextField
               InputProps={{
                 startAdornment: (
@@ -138,8 +137,8 @@ const Instrumentation = ({initialResX=0, initialResY=0, ...props}) => {
                 setPhotonEv(Number(e.target.value));
               }}
             />
-          </Grid>
-          <Grid item xs={3}>
+          </Box>
+          <Box display="flex" sx={{ paddingBottom: 1 }}>
             <TextField
               label="beamX"
               value={beamX}
@@ -148,8 +147,6 @@ const Instrumentation = ({initialResX=0, initialResY=0, ...props}) => {
                 setBeamX(Number(e.target.value));
               }}
             />
-          </Grid>
-          <Grid item xs={3}>
             <TextField
               label="beamY"
               value={beamY}
@@ -158,8 +155,7 @@ const Instrumentation = ({initialResX=0, initialResY=0, ...props}) => {
                 setBeamY(Number(e.target.value));
               }}
             />
-          </Grid>
-          <Grid item xs={3}>
+
             <TextField
               disabled={initialResX != 0}
               label="resX"
@@ -169,8 +165,6 @@ const Instrumentation = ({initialResX=0, initialResY=0, ...props}) => {
                 setResX(Number(e.target.value));
               }}
             />
-          </Grid>
-          <Grid item xs={3}>
             <TextField
               disabled={initialResY != 0}
               label="resY"
@@ -180,8 +174,8 @@ const Instrumentation = ({initialResX=0, initialResY=0, ...props}) => {
                 setResY(Number(e.target.value));
               }}
             />
-          </Grid>
-          <Grid item xs={6}>
+          </Box>
+          <Box display="flex" sx={{ paddingBottom: 1 }}>
             <TextField
               InputProps={{
                 startAdornment: (
@@ -195,8 +189,6 @@ const Instrumentation = ({initialResX=0, initialResY=0, ...props}) => {
                 setPixelsize(Number(e.target.value));
               }}
             />
-          </Grid>
-          <Grid item xs={6}>
             <TextField
               InputProps={{
                 startAdornment: (
@@ -210,8 +202,8 @@ const Instrumentation = ({initialResX=0, initialResY=0, ...props}) => {
                 setSampleDistance(Number(e.target.value));
               }}
             />
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </CardContent>
       <CardActions></CardActions>
     </Card>

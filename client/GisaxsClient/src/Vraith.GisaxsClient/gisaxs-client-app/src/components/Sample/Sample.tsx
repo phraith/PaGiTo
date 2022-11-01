@@ -1,51 +1,132 @@
+import Add from "@mui/icons-material/Add";
 import Button from "@mui/material/Button"
 import Card from "@mui/material/Card"
 import CardActions from "@mui/material/CardActions"
 import CardContent from "@mui/material/CardContent"
-import Collapse from "@mui/material/Collapse"
-import FormControl from "@mui/material/FormControl"
+import MenuItem from "@mui/material/MenuItem"
+import Menu from "@mui/material/Menu"
 import Grid from "@mui/material/Grid"
 import Typography from "@mui/material/Typography"
-import TextField from "@mui/material/TextField"
-import Stack from "@mui/material/Stack"
+import List from "@mui/material/List"
+import ListItem from "@mui/material/ListItem"
 import React, { useEffect } from "react";
-import Substrate from "./Substrate";
-import Layers from "./Layers";
+import { v4 as uuidv4 } from "uuid";
+import {
+  LayerConfig,
+  SampleConfig,
+  SetLocalStorageEntity,
+} from "../Utility/DefaultConfigs";
+import Box from "@mui/material/Box/Box";
+import Layer from "./Layer";
 
 interface SampleProps {
   jsonCallback: any;
 }
 
 const Sample = (props: SampleProps) => {
-  const [jsonData, setJsonData] = React.useState({
-    layers: {}
-  });
+  const [jsonData, setJsonData] = React.useState({});
+  const [layers, setLayers] = React.useState<any>([]);
 
+
+
+  const localStorageEntityName: string = "sampleConfig2";
   const configFieldName: string = "sample";
 
   useEffect(() => {
-    props.jsonCallback(jsonData, configFieldName);
+    let formattedShapes = Object.keys(jsonData).map((key) => jsonData[key]);
+    let substrate = formattedShapes[0]
+    // delete substrate["thickness"];
+
+    let formattedLayers = formattedShapes.slice(1)
+    let json = {
+      "substrate": substrate,
+      "layers": formattedLayers
+    }
+
+    props.jsonCallback(json, configFieldName);
+
+    SetLocalStorageEntity(formattedShapes, [], localStorageEntityName);
   }, [jsonData]);
 
-  const jsonCallback = (value, key) => {
-    jsonData[key] = value;
-    setJsonData({ ...jsonData });
+  useEffect(() => {
+    setLayers([<Layer
+      key={"0"}
+      id={"0"}
+      initialConfig={LayerConfig}
+      jsonCallback={createJsonForLayer}
+    />])
+
+    let data = localStorage.getItem(localStorageEntityName);
+    if (data !== null) {
+      let sampleConfig = JSON.parse(data);
+
+      let substrate = sampleConfig[0]
+      let cachedLayers: any = [<Layer
+        key={"0"}
+        id={"0"}
+        initialConfig={substrate}
+        jsonCallback={createJsonForLayer}
+      />];
+      let otherLayers = sampleConfig.slice(1)
+
+      for (var layer of otherLayers) {
+        cachedLayers = [...cachedLayers, createLayer(layer)];
+      }
+
+      setLayers(cachedLayers);
+    }
+  }, []);
+
+  const removeLayer = (id: string) => {
+    setLayers((layers) => layers.filter((layer) => layer.props.id !== id));
+    setJsonData((jsonData) => {
+      delete jsonData[id];
+      return { ...jsonData };
+    });
   };
+
+  const createJsonForLayer = (layerJson, layerId) => {
+    setJsonData((jsonData) => {
+      jsonData[layerId] = layerJson;
+      return { ...jsonData };
+    });
+  };
+
+  const createLayer = (layerConfig) => {
+    const myid = uuidv4();
+    return (
+      <Layer
+        key={myid}
+        id={myid}
+        removeCallback={() => removeLayer(myid)}
+        initialConfig={layerConfig}
+        jsonCallback={createJsonForLayer}
+      />
+    );
+  };
+
+  const addLayer = () => {
+    setLayers([...layers, createLayer(LayerConfig)]);
+  };
+
 
   return (
     <Card style={{ maxHeight: 700, overflow: "auto" }}>
-      <CardContent>
-        <Grid container rowSpacing={2}>
-          <Grid item xs={8}>
-            <Typography>Sample</Typography>
-          </Grid>
-          <Grid item xs={12}>
-            <Substrate jsonCallback={jsonCallback} />
-          </Grid>
-          <Grid item xs={12}>
-            <Layers jsonCallback={jsonCallback}/>
-          </Grid>
-        </Grid>
+      <CardContent >
+        <Box display="flex" sx={{ flexDirection: "column" }}>
+          <Box display="flex" justifyContent={"space-between"} sx={{ paddingBottom: 1 }}>
+            <Typography>GisaxsShapesConfig</Typography>
+            <Button size="small" onClick={addLayer}>
+              <Add />
+            </Button>
+          </Box >
+
+          <List>
+            {layers.map((value) => {
+              return <ListItem key={value.props.id}>{value}</ListItem>;
+            })}
+          </List>
+        </Box>
       </CardContent>
     </Card>
   );

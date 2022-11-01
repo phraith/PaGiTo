@@ -99,41 +99,19 @@ const Simulation = () => {
         </Grid>
 
         <Grid item xs={12} sm={12} md={12} lg={4}>
-          <Grid
-            container
-            sx={{
-              position: "sticky",
-              top: 0,
-              paddingTop: 10,
-              paddingRight: 5,
-              paddingLeft: 10,
-            }}
-          >
-            <Grid item xs={12} sm={12} md={12} lg={12}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={7} md={7} lg={7}>
-                  <Instrumentation jsonCallback={jsonCallback} />
-                </Grid>
-                <Grid item xs={12} sm={5} md={5} lg={5}>
-                  <Grid container rowSpacing={2}>
-                    <Grid item xs={12}>
-                      <UnitcellMeta jsonCallback={jsonCallback} />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <ColormapSelect colormap={colormap} setColormap={setColorMap} />
-                    </Grid>
-                  </Grid>
-                </Grid>
-
-                <Grid item xs={12} sm={7} md={7} lg={7}>
-                  <GisaxsShapes isSimulation={true} jsonCallback={jsonCallback} />
-                </Grid>
-                <Grid item xs={12} sm={5} md={5} lg={5}>
-                  <Sample jsonCallback={jsonCallback} />
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
+          <Box display="flex" sx={{ flexDirection: "column", gap: 2, padding: 10, position: "sticky", top: 0, paddingTop: 10 }}>
+            <Box display="flex" sx={{ paddingBottom: 1 }}>
+              <Instrumentation jsonCallback={jsonCallback}/>
+              <UnitcellMeta jsonCallback={jsonCallback} />
+            </Box>
+            <Box display="flex" sx={{ paddingBottom: 1 }}>
+              <ColormapSelect colormap={colormap} setColormap={setColorMap} />
+            </Box>
+            <Box display="flex" sx={{ paddingBottom: 1, flexGrow: 2 }}>
+              <GisaxsShapes isSimulation={false} jsonCallback={jsonCallback} />
+              <Sample jsonCallback={jsonCallback} />
+            </Box>
+          </Box>
         </Grid>
       </Grid>
     </React.Fragment >
