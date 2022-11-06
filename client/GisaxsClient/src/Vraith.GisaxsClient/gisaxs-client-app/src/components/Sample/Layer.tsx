@@ -4,18 +4,11 @@ import ExpandMore from "@mui/icons-material/ExpandMore"
 import Collapse from "@mui/material/Collapse";
 import Button from "@mui/material/Button"
 import Card from "@mui/material/Card"
-import CardActions from "@mui/material/CardActions"
 import CardContent from "@mui/material/CardContent"
-import FormControl from "@mui/material/FormControl"
-import TextField from "@mui/material/TextField"
-import Grid from "@mui/material/Grid"
 import Typography from "@mui/material/Typography"
-import List from "@mui/material/List"
-import ListItem from "@mui/material/ListItem"
 import { useEffect, useState } from "react";
 import ParameterWrapper from "../GisaxsShapes/ParameterWrapper";
 import RefractionParameterWrapper from "../GisaxsShapes/RefractionParameterWrapper";
-import { LayerConfig } from "../Utility/DefaultConfigs";
 import Box from "@mui/material/Box/Box";
 
 interface LayerProps {

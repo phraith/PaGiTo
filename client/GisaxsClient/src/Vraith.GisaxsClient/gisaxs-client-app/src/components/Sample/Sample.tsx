@@ -1,11 +1,7 @@
 import Add from "@mui/icons-material/Add";
 import Button from "@mui/material/Button"
 import Card from "@mui/material/Card"
-import CardActions from "@mui/material/CardActions"
 import CardContent from "@mui/material/CardContent"
-import MenuItem from "@mui/material/MenuItem"
-import Menu from "@mui/material/Menu"
-import Grid from "@mui/material/Grid"
 import Typography from "@mui/material/Typography"
 import List from "@mui/material/List"
 import ListItem from "@mui/material/ListItem"
@@ -13,7 +9,6 @@ import React, { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
   LayerConfig,
-  SampleConfig,
   SetLocalStorageEntity,
 } from "../Utility/DefaultConfigs";
 import Box from "@mui/material/Box/Box";
@@ -27,20 +22,22 @@ const Sample = (props: SampleProps) => {
   const [jsonData, setJsonData] = React.useState({});
   const [layers, setLayers] = React.useState<any>([]);
 
-
-
-  const localStorageEntityName: string = "sampleConfig2";
+  const localStorageEntityName: string = "sampleConfig";
   const configFieldName: string = "sample";
 
   useEffect(() => {
+
     let formattedShapes = Object.keys(jsonData).map((key) => jsonData[key]);
+    if (formattedShapes.length == 0) {return;}
+    
     let substrate = formattedShapes[0]
-    // delete substrate["thickness"];
+    delete substrate["thickness"];
 
     let formattedLayers = formattedShapes.slice(1)
+    let layersWithOrder = formattedLayers.map((layer, i) => {layer["order"] = i; return layer;})
     let json = {
       "substrate": substrate,
-      "layers": formattedLayers
+      "layers": layersWithOrder
     }
 
     props.jsonCallback(json, configFieldName);
@@ -49,13 +46,6 @@ const Sample = (props: SampleProps) => {
   }, [jsonData]);
 
   useEffect(() => {
-    setLayers([<Layer
-      key={"0"}
-      id={"0"}
-      initialConfig={LayerConfig}
-      jsonCallback={createJsonForLayer}
-    />])
-
     let data = localStorage.getItem(localStorageEntityName);
     if (data !== null) {
       let sampleConfig = JSON.parse(data);
@@ -74,6 +64,15 @@ const Sample = (props: SampleProps) => {
       }
 
       setLayers(cachedLayers);
+    }
+    else
+    {
+      setLayers([<Layer
+        key={"0"}
+        id={"0"}
+        initialConfig={LayerConfig}
+        jsonCallback={createJsonForLayer}
+      />])
     }
   }, []);
 
@@ -108,7 +107,6 @@ const Sample = (props: SampleProps) => {
   const addLayer = () => {
     setLayers([...layers, createLayer(LayerConfig)]);
   };
-
 
   return (
     <Card style={{ maxHeight: 700, overflow: "auto" }}>

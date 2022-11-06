@@ -1,8 +1,5 @@
 import MiniDrawer from "../Drawer/MiniDrawer";
-import MenuItem from "@mui/material/MenuItem"
-import FormControl from "@mui/material/FormControl"
 import Grid from "@mui/material/Grid"
-import Select from "@mui/material/Select"
 import Box from "@mui/material/Box"
 import CssBaseline from "@mui/material/CssBaseline"
 import ScatterImage from "../ScatterImage/ScatterImage";
@@ -100,17 +97,21 @@ const Simulation = () => {
 
         <Grid item xs={12} sm={12} md={12} lg={4}>
           <Box display="flex" sx={{ flexDirection: "column", gap: 2, padding: 10, position: "sticky", top: 0, paddingTop: 10 }}>
-            <Box display="flex" sx={{ paddingBottom: 1 }}>
-              <Instrumentation jsonCallback={jsonCallback}/>
+            <Box display="flex" sx={{ paddingBottom: 1, gap: 2 }}>
+              <Instrumentation jsonCallback={jsonCallback} />
               <UnitcellMeta jsonCallback={jsonCallback} />
             </Box>
             <Box display="flex" sx={{ paddingBottom: 1 }}>
               <ColormapSelect colormap={colormap} setColormap={setColorMap} />
             </Box>
-            <Box display="flex" sx={{ paddingBottom: 1, flexGrow: 2 }}>
-              <GisaxsShapes isSimulation={false} jsonCallback={jsonCallback} />
-              <Sample jsonCallback={jsonCallback} />
-            </Box>
+            <Grid container spacing={2}>
+              <Grid item xs={7} sm={7} md={7} lg={7}>
+                <GisaxsShapes isSimulation={false} jsonCallback={jsonCallback} />
+              </Grid>
+              <Grid item xs={5} sm={5} md={5} lg={5}>
+                <Sample jsonCallback={jsonCallback} />
+              </Grid>
+            </Grid>
           </Box>
         </Grid>
       </Grid>

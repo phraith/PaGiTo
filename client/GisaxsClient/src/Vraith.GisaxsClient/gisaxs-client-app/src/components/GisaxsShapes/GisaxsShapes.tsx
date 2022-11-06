@@ -1,11 +1,9 @@
 import Add from "@mui/icons-material/Add";
 import Button from "@mui/material/Button"
 import Card from "@mui/material/Card"
-import CardActions from "@mui/material/CardActions"
 import CardContent from "@mui/material/CardContent"
 import MenuItem from "@mui/material/MenuItem"
 import Menu from "@mui/material/Menu"
-import Grid from "@mui/material/Grid"
 import Typography from "@mui/material/Typography"
 import List from "@mui/material/List"
 import ListItem from "@mui/material/ListItem"
@@ -42,7 +40,6 @@ const GisaxsShapes = (props: GisaxsShapesProps) => {
 
   useEffect(() => {
     let data = localStorage.getItem(localStorageEntityName);
-    // let data = null
     if (data !== null) {
       let shapesConfig = JSON.parse(data);
       let cachedShapes: any = [];

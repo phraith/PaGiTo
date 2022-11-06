@@ -184,7 +184,7 @@ const Fitting = () => {
                     </Box>
                 </Grid>
                 <Grid item xs={12} sm={12} md={12} lg={4}>
-                    <Box display="flex" sx={{ flexDirection: "column", gap: 2, padding: 10  }}>
+                    <Box display="flex" sx={{ flexDirection: "column", gap: 2, padding: 10 }}>
                         <Box display="flex" sx={{ paddingBottom: 1 }}>
                             {!openTable &&
                                 <LineProfileGraphVx data={plotData} ></LineProfileGraphVx>
@@ -193,7 +193,7 @@ const Fitting = () => {
                                 <ImageTable setImageInfo={(updatedImageInfo: ImageInfo) => { console.log(updatedImageInfo); setImageInfo(updatedImageInfo) }} />
                             }
                         </Box>
-                        <Box display="flex" sx={{ paddingBottom: 1 }}>
+                        <Box display="flex" sx={{ paddingBottom: 1, gap: 2 }}>
                             <Instrumentation jsonCallback={jsonCallback} initialResX={imageInfo.width} initialResY={imageInfo.height} />
                             <UnitcellMeta jsonCallback={jsonCallback} />
                         </Box>
@@ -206,10 +206,14 @@ const Fitting = () => {
                                 {openTable ? "Show graph" : "Show images"}
                             </Button>
                         </Box>
-                        <Box display="flex" sx={{ paddingBottom: 1 }}>
-                            <GisaxsShapes isSimulation={false} jsonCallback={jsonCallback} />
-                            <Sample jsonCallback={jsonCallback} />
-                        </Box>
+                        <Grid container spacing={2}>
+                            <Grid item xs={7} sm={7} md={7} lg={7}>
+                                <GisaxsShapes isSimulation={false} jsonCallback={jsonCallback} />
+                            </Grid>
+                            <Grid item xs={5} sm={5} md={5} lg={5}>
+                                <Sample jsonCallback={jsonCallback} />
+                            </Grid>
+                        </Grid>
                     </Box>
                 </Grid>
             </Grid>
