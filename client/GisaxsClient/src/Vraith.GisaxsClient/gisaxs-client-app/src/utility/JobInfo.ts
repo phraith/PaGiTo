@@ -1,6 +1,6 @@
 class JobInfo {
     id: number;
-    info: {}
+    info: any
     constructor(id: number, info: any)
     {
         this.id = id;
