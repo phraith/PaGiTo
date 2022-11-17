@@ -18,13 +18,12 @@ COPY . .
 # RUN apt install cmake -y
 # RUN apt-get -y install curl zip git pkg-config
 
-RUN apk update && apk add build-base=0.4 cmake git zip ninja curl pkgconfig
+RUN apk update && apk add build-base cmake git zip ninja curl pkgconfig
 
 RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg
 WORKDIR /opt/vcpkg
-RUN ./bootstrap-vcpkg.sh && ./vcpkg integrate install
+RUN mkdir ~/.vcpkg && touch ~/.vcpkg/vcpkg.path.txt && ./bootstrap-vcpkg.sh && ./vcpkg integrate install
 RUN ./vcpkg update
-RUN apk add linux-headers
 #RUN ./vcpkg install pagmo2
 RUN ./vcpkg install cppzmq[draft] zeromq[draft]
 RUN ./vcpkg install gtest
