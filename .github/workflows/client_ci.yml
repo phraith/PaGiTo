@@ -2,9 +2,9 @@ name: Gisaxs Client Image Ci
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "develop" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "develop" ]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,7 +23,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: ./client/GisaxsClient
-          file: client/GisaxsClient/src/Vraith.GisaxsClient/Dockerfile
+          file: client/GisaxsClient/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:latest, ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:${{github.ref_name}}
       - name: Build and push backend docker image
