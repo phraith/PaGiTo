@@ -3,6 +3,7 @@ check_language(CUDA)
 
 find_package(nlohmann_json REQUIRED)
 find_package(OpenMP)
+find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
 file(GLOB_RECURSE COMMON_LIB_FILES "src/*.cpp" "inc/*.h")
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${COMMON_LIB_FILES})
@@ -64,4 +65,4 @@ target_sources(
 
 target_include_directories(CommonLib PUBLIC inc)
 
-target_link_libraries(CommonLib PUBLIC nlohmann_json nlohmann_json::nlohmann_json PRIVATE OpenMP::OpenMP_CXX)
+target_link_libraries(CommonLib PUBLIC nlohmann_json nlohmann_json::nlohmann_json PRIVATE OpenMP::OpenMP_CXX Eigen3::Eigen)

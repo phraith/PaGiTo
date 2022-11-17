@@ -48,7 +48,6 @@ SimData CpuDevice::RunGISAXS(const SimJob &description, const ImageData *real_im
     spdlog::info(max_val);
     MyType logmax = std::log(max_val);
     MyType logmin = std::log(std::max(2.f, 1e-10f * max_val));
-    //MyType logmin = 0;
 
     std::vector<unsigned char> normalized_intensities(intensities.size());
     for (int i = 0; i < intensities.size(); ++i) {

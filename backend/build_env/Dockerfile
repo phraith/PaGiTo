@@ -12,20 +12,17 @@ RUN apt-get -y update && apt-get -y install openssh-server gcc cmake git zip cur
 
 RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg
 WORKDIR /opt/vcpkg
-RUN ./bootstrap-vcpkg.sh && ./vcpkg integrate install
+RUN mkdir ~/.vcpkg && touch ~/.vcpkg/vcpkg.path.txt && ./bootstrap-vcpkg.sh && ./vcpkg integrate install
 RUN ./vcpkg update
-#RUN apt-get -y install linux-headers
-RUN ./vcpkg install pagmo2
 RUN ./vcpkg install cppzmq[draft] zeromq[draft]
 RUN ./vcpkg install gtest
 RUN ./vcpkg install nlohmann-json
 RUN ./vcpkg install spdlog
+RUN ./vcpkg install eigen3
 
 RUN apt-get -y install  gdb
 
 WORKDIR /root
-
-RUN echo 'root:docker' | chpasswd
 
 RUN ( \
     echo 'LogLevel DEBUG2'; \
@@ -35,8 +32,12 @@ RUN ( \
   ) > /etc/ssh/sshd_config_test_clion \
   && mkdir /run/sshd
 
-COPY ./docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
-ENTRYPOINT ["/docker-entrypoint.sh"]
+RUN useradd -m user \
+  && yes password | passwd user
+
+RUN usermod -s /bin/bash user
+RUN sed -i '1iexport PATH="/usr/local/cuda/bin:$PATH"' /home/user/.bashrc
+
+CMD ["/usr/sbin/sshd", "-D", "-e", "-f", "/etc/ssh/sshd_config_test_clion"]
 
 #docker run --gpus all --cap-add=SYS_PTRACE --security-opt seccomp=unconfined -p5555:5555 -p2222:22 --name gisaxs_remote_dev cuda_dev:0.3

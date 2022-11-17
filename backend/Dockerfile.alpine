@@ -1,5 +1,5 @@
 # FROM nvidia/cuda:11.7.0-runtime-ubuntu22.04 AS base
-FROM nvidia/cuda:11.7.1-runtime-ubuntu22.04 AS base
+FROM alpine:latest AS base
 
 ENV VCPKG_FORCE_SYSTEM_BINARIES="1"
 
@@ -7,7 +7,7 @@ WORKDIR /app
 EXPOSE 5555
 
 # FROM nvidia/cuda:11.7.0-devel-ubuntu22.04 AS build
-FROM nvidia/cuda:11.7.1-devel-ubuntu22.04 AS build
+FROM alpine:latest AS build
 
 ENV VCPKG_FORCE_SYSTEM_BINARIES="1"
 
@@ -18,13 +18,13 @@ COPY . .
 # RUN apt install cmake -y
 # RUN apt-get -y install curl zip git pkg-config
 
-RUN apt-get -y update && apt-get -y install gcc cmake git zip curl ninja-build pkg-config
+RUN apk update && apk add build-base=0.4 cmake git zip ninja curl pkgconfig
 
 RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg
 WORKDIR /opt/vcpkg
 RUN ./bootstrap-vcpkg.sh && ./vcpkg integrate install
 RUN ./vcpkg update
-#RUN apt-get -y install linux-headers
+RUN apk add linux-headers
 #RUN ./vcpkg install pagmo2
 RUN ./vcpkg install cppzmq[draft] zeromq[draft]
 RUN ./vcpkg install gtest
@@ -37,8 +37,7 @@ RUN cmake -DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake -B.
 
 FROM base AS final
 # RUN apt update -y && apt install -y build-essential
-# RUN apt-get update && apt-get install build-base
-RUN apt-get -y update && apt-get -y install libgomp1
+RUN apk update && apk add build-base
 WORKDIR /app
 COPY --from=build /src/build .
 ENTRYPOINT ["./apps/ModelingFramework/ModelingFramework"]

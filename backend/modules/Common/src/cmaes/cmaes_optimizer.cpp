@@ -5,7 +5,7 @@
 #include "cmaes/cmaes_optimizer.h"
 #include <iostream>
 
-CmaesOptimizer::CmaesOptimizer(double (*function)(const std::vector<double> &),
+CmaesOptimizer::CmaesOptimizer(std::function<double(const std::vector<double> &dv)> function,
                                const std::vector<double> &initial, const std::vector<double> &lower,
                                const std::vector<double> &upper,
                                double sigma, int max_iterations, int rand_seed)

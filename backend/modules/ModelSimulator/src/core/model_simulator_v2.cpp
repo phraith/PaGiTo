@@ -3,7 +3,6 @@
 #include "common/unitcell_utility.h"
 #include "common/timer.h"
 #include "spdlog/spdlog.h"
-#include <thread>
 #include <algorithm>
 
 using json = nlohmann::json;

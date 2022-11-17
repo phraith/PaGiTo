@@ -12,7 +12,7 @@ public:
     Cmaes(std::vector<double> mean, double sigma, std::vector<double> upper, std::vector<double> lower,
           int n_max_resampling = 100, int seed = 0, double tol_sigma = 1e-4, double tol_C = 1e-4);
 
-    std::tuple<std::shared_ptr<Eigen::MatrixX<double>>, std::shared_ptr<Eigen::VectorX<double>>> EigenDecomposition();
+    void EigenDecomposition();
 
     [[nodiscard]] int PopulationSize() const;
 
@@ -20,23 +20,22 @@ public:
 
     bool IsConverged();
 
-    void SetBounds(std::shared_ptr<Eigen::MatrixX<double>> bounds = nullptr);
 
-    Eigen::VectorX<double> Ask();
+    Eigen::VectorX<double> Ask() const;
 
     void Tell(std::vector<Solution> &solutions);
 
 private:
     [[nodiscard]] static double RootTemp(double input);
 
-    Eigen::VectorX<double> SampleSolution();
+    Eigen::VectorX<double> SampleSolution() const;
 
     static Eigen::VectorX<double>
     PointwiseMultiplicationOnRows(Eigen::MatrixX<double> matrix, Eigen::VectorX<double> vector);
 
-    bool IsFeasable(Eigen::VectorX<double> param);
+    bool IsFeasable(Eigen::VectorX<double> param) const;
 
-    Eigen::VectorX<double> RepairInfeasableParams(Eigen::VectorX<double> params);
+    Eigen::VectorX<double> RepairInfeasableParams(Eigen::VectorX<double> params) const;
 
     static WeightsInformation CreateInitialWeights(int population_size, int mu, int dim);
     static double CalculateInitialCSigma(double mu_eff, int dim);
@@ -58,8 +57,6 @@ private:
     int generation_;
     int mu_;
     int cm_;
-    std::mt19937 gen_;
-    std::normal_distribution<> normal_distribution_;
     WeightsInformation weights_information_;
     double c_sigma_;
     double cc_;

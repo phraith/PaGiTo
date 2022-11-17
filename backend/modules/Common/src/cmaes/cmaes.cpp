@@ -15,8 +15,6 @@ Cmaes::Cmaes(std::vector<double> mean, double sigma, std::vector<double> upper,
         generation_(0),
         mu_(population_size_ / 2),
         cm_(1),
-        gen_(std::mt19937{std::random_device{}()}),
-        normal_distribution_(std::normal_distribution(0.0, 1.0)),
         weights_information_(CreateInitialWeights(population_size_, mu_, dim_)),
         c_sigma_(CalculateInitialCSigma(weights_information_.MuEff(), dim_)),
         cc_(CalculateInitialCc(weights_information_.MuEff(), dim_)),
@@ -44,15 +42,13 @@ Cmaes::Cmaes(std::vector<double> mean, double sigma, std::vector<double> upper,
     if (cc_ > 1) {
         throw std::exception();
     }
+
+    EigenDecomposition();
 }
 
 
-std::tuple<std::shared_ptr<Eigen::MatrixX<double>>, std::shared_ptr<Eigen::VectorX<double>>>
+void
 Cmaes::EigenDecomposition() {
-    if (B_ != nullptr && D_ != nullptr) {
-        return {B_, D_};
-    }
-
     *C_ = (*C_ + C_->transpose()) / 2;
 
     Eigen::EigenSolver<Eigen::MatrixX<double>> solver(*C_, true);
@@ -64,17 +60,16 @@ Cmaes::EigenDecomposition() {
         extracted_eigenvalues[i] = rooted_real;
     }
 
-    std::shared_ptr<Eigen::VectorXd> D = std::make_shared<Eigen::VectorXd>(Eigen::Map<Eigen::VectorXd,
+     D_ = std::make_shared<Eigen::VectorXd>(Eigen::Map<Eigen::VectorXd,
             Eigen::Unaligned>(extracted_eigenvalues.data(), extracted_eigenvalues.size()));
 
-    Eigen::MatrixXd diag_squared_d = D->cwiseProduct(*D).asDiagonal();
-    std::shared_ptr<Eigen::MatrixX<double>> B = std::make_shared<Eigen::MatrixX<double>>(
+    Eigen::MatrixXd diag_squared_d = D_->cwiseProduct(*D_).asDiagonal();
+    B_ = std::make_shared<Eigen::MatrixX<double>>(
             solver.eigenvectors().real());
-    Eigen::MatrixXd b_times_diag_squared_d = *B * diag_squared_d;
-    Eigen::MatrixXd b_times_diag_squared_d_times_bt = b_times_diag_squared_d * B->transpose();
+    Eigen::MatrixXd b_times_diag_squared_d = *B_ * diag_squared_d;
+    Eigen::MatrixXd b_times_diag_squared_d_times_bt = b_times_diag_squared_d * B_->transpose();
 
     *C_ = b_times_diag_squared_d_times_bt;
-    return {B, D};
 }
 
 double Cmaes::RootTemp(double input) {
@@ -82,9 +77,7 @@ double Cmaes::RootTemp(double input) {
 }
 
 bool Cmaes::ShouldStop() {
-    std::tuple<std::shared_ptr<Eigen::MatrixX<double>>, std::shared_ptr<Eigen::VectorX<double>>> bd_tuple = EigenDecomposition();
-    auto B = std::get<std::shared_ptr<Eigen::MatrixX<double>>>(bd_tuple);
-    auto D = std::get<std::shared_ptr<Eigen::VectorX<double>>>(bd_tuple);
+//    EigenDecomposition();
     auto dC = C_->asDiagonal();
 
     const auto [min, max] = std::minmax_element(std::begin(function_history_), std::end(function_history_));
@@ -114,7 +107,7 @@ bool Cmaes::ShouldStop() {
 //        return true;
 //    }
 
-    if (sigma_ * D->maxCoeff() > tolxup_) {
+    if (sigma_ * D_->maxCoeff() > tolxup_) {
         return true;
     }
 
@@ -127,9 +120,9 @@ bool Cmaes::ShouldStop() {
 
     int factor = generation_ % dim_;
     bool should_stop = true;
-    double d_value = D->array()[factor];
-    for (size_t i = 0; i < B->col(factor).size(); i++) {
-        double value = B->col(factor)[i];
+    double d_value = D_->array()[factor];
+    for (size_t i = 0; i < B_->col(factor).size(); i++) {
+        double value = B_->col(factor)[i];
         if (!mean_.array().isApprox(mean_.array() + 0.1 * sigma_ * value * d_value)) {
             should_stop = false;
             break;
@@ -140,7 +133,7 @@ bool Cmaes::ShouldStop() {
         return true;
     }
 
-    double condition_cov = D->maxCoeff() / D->minCoeff();
+    double condition_cov = D_->maxCoeff() / D_->minCoeff();
     if (condition_cov > tolconditioncov_) {
         return true;
     }
@@ -165,7 +158,7 @@ Eigen::MatrixXd Cmaes::CreateBoundsMatrix(int dim, std::vector<double> upper, st
     return bounds;
 }
 
-Eigen::VectorX<double> Cmaes::Ask() {
+Eigen::VectorX<double> Cmaes::Ask() const{
     for (int i = 0; i < n_max_resampling_; i++) {
         auto x = SampleSolution();
         if (IsFeasable(x)) { return x; }
@@ -175,20 +168,22 @@ Eigen::VectorX<double> Cmaes::Ask() {
     return x_new;
 }
 
-Eigen::VectorX<double> Cmaes::SampleSolution() {
-    std::tuple<std::shared_ptr<Eigen::MatrixX<double>>, std::shared_ptr<Eigen::VectorX<double>>> bd_tuple = EigenDecomposition();
-    auto B = std::get<std::shared_ptr<Eigen::MatrixX<double>>>(bd_tuple);
-    auto D = std::get<std::shared_ptr<Eigen::VectorX<double>>>(bd_tuple);
+Eigen::VectorX<double> Cmaes::SampleSolution() const{
+//    std::tuple<std::shared_ptr<Eigen::MatrixX<double>>, std::shared_ptr<Eigen::VectorX<double>>> bd_tuple = EigenDecomposition();
+//    auto B = std::get<std::shared_ptr<Eigen::MatrixX<double>>>(bd_tuple);
+//    auto D = std::get<std::shared_ptr<Eigen::VectorX<double>>>(bd_tuple);
 
     std::vector<double> vector_data(dim_);
+    static thread_local std::mt19937 gen = std::mt19937{std::random_device{}()};
+    std::normal_distribution distribution(0.0, 1.0);
     for (int i = 0; i < dim_; ++i) {
-        vector_data[i] = normal_distribution_(gen_);
+        vector_data[i] = distribution(gen);
     }
 
     Eigen::VectorX<double> z = Eigen::Map<Eigen::VectorXd,
             Eigen::Unaligned>(vector_data.data(), vector_data.size());
 
-    auto h = *B * D->asDiagonal();
+    auto h = *B_ * D_->asDiagonal();
     auto y = PointwiseMultiplicationOnRows(h, z);
     auto x = mean_ + sigma_ * y;
     return x;
@@ -210,7 +205,7 @@ Cmaes::PointwiseMultiplicationOnRows(Eigen::MatrixX<double> matrix, Eigen::Vecto
     return z;
 }
 
-bool Cmaes::IsFeasable(Eigen::VectorX<double> param) {
+bool Cmaes::IsFeasable(Eigen::VectorX<double> param) const{
     if (bounds_.isZero(0)) {
         return true;
     }
@@ -224,7 +219,7 @@ bool Cmaes::IsFeasable(Eigen::VectorX<double> param) {
     return isCorrectLower & isCorrectUpper;
 }
 
-Eigen::VectorX<double> Cmaes::RepairInfeasableParams(Eigen::VectorX<double> params) {
+Eigen::VectorX<double> Cmaes::RepairInfeasableParams(Eigen::VectorX<double> params) const{
     if (bounds_.isZero(0)) {
         return params;
     }
@@ -245,12 +240,7 @@ void Cmaes::Tell(std::vector<Solution> &solutions) {
     function_history_[function_history_idx] = solutions[0].Fitness();
     function_history_[function_history_idx + 1] = solutions[solutions.size() - 1].Fitness();
 
-    std::tuple<std::shared_ptr<Eigen::MatrixX<double>>, std::shared_ptr<Eigen::VectorX<double>>> bd_tuple = EigenDecomposition();
-    auto B = std::get<std::shared_ptr<Eigen::MatrixX<double>>>(bd_tuple);
-    auto D = std::get<std::shared_ptr<Eigen::VectorX<double>>>(bd_tuple);
-
-    B_ = nullptr;
-    D_ = nullptr;
+    EigenDecomposition();
 
     Eigen::MatrixX<double> x_k = Eigen::MatrixX<double>::Ones(solutions.size(), solutions[0].Parameters().size());
     for (int i = 0; i < solutions.size(); ++i) {
@@ -272,8 +262,8 @@ void Cmaes::Tell(std::vector<Solution> &solutions) {
     auto y_w = PointwiseMultiplicationOnRows(y_k.block(0, 0, mu_, dim_).transpose(),
                                              weights_information_.Weights().block(0, 0, mu_, 1));
     mean_ += cm_ * sigma_ * y_w;
-    auto diag = (1.0 / D->array()).matrix().asDiagonal();
-    auto C_2 = *B * diag * B->transpose();
+    auto diag = (1.0 / D_->array()).matrix().asDiagonal();
+    auto C_2 = *B_ * diag * B_->transpose();
     double sqrt_factor = std::sqrt(c_sigma_ * (2.0 - c_sigma_) * weights_information_.MuEff());
 
     p_sigma_ = (1.0 - c_sigma_) * p_sigma_ + sqrt_factor * (C_2 * y_w);
