@@ -28,7 +28,6 @@ jobs:
       - name: Build and push backend docker image
         uses: docker/build-push-action@v3
         with:
-          context: ./backend
-          file: Dockerfile.alpine
+          file: backend/Dockerfile.alpine
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/backend:latest, ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/backend:${{github.ref_name}}
