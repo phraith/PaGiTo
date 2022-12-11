@@ -35,7 +35,6 @@ const GisaxsShapes = (props: GisaxsShapesProps) => {
     let formattedShapes = Object.keys(jsonData).map((key) => jsonData[key]);
     props.jsonCallback(formattedShapes, configFieldName);
     SetLocalStorageEntity(formattedShapes, [], localStorageEntityName);
-    console.log(jsonData)
   }, [jsonData]);
 
   useEffect(() => {
@@ -122,7 +121,7 @@ const GisaxsShapes = (props: GisaxsShapesProps) => {
       <CardContent >
         <Box display="flex" sx={{ flexDirection: "column" }}>
           <Box display="flex" justifyContent={"space-between"} sx={{ paddingBottom: 1 }}>
-            <Typography>GisaxsShapesConfig</Typography>
+            <Typography>Shapes</Typography>
 
             <Button size="small" onClick={addShape}>
               <Add />

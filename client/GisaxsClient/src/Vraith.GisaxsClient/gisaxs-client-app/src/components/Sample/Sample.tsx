@@ -113,7 +113,7 @@ const Sample = (props: SampleProps) => {
       <CardContent >
         <Box display="flex" sx={{ flexDirection: "column" }}>
           <Box display="flex" justifyContent={"space-between"} sx={{ paddingBottom: 1 }}>
-            <Typography>GisaxsShapesConfig</Typography>
+            <Typography>Sample</Typography>
             <Button size="small" onClick={addLayer}>
               <Add />
             </Button>

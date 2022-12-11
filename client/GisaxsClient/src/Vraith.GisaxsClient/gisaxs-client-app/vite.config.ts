@@ -19,7 +19,7 @@ export default defineConfig({
     }
   },
   server: {
-    // https: true,
+    https: true,
     proxy: {
       '/api': { target: 'https://localhost:9999', secure: false },
       '/message': {

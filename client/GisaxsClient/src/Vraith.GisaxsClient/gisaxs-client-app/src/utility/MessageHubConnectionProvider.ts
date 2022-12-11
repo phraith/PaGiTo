@@ -3,12 +3,12 @@ import { HttpTransportType, HubConnection, HubConnectionBuilder, HubConnectionSt
 class MessageHubConnectionProvider {
     connection: HubConnection;
     apiKey: string;
-    receiveJobResult: (message: string) => void;
+    receiveJobResult: (message: string, colormap: string) => void;
     receiveJobInfos: (message: string) => void;
     getLineprofiles: (message: string) => void;
     constructor(
         apiKey: string,
-        receiveJobResult: (message: string) => void,
+        receiveJobResult: (message: string, colormap: string) => void,
         receiveJobInfos: (message: string) => void,
         getLineprofiles: (message: string) => void) {
 
@@ -34,8 +34,8 @@ class MessageHubConnectionProvider {
             .start()
             .then((result) => {
                 console.log("Connected!");
-                this.connection.on("ReceiveJobId", (message) => {
-                    this.receiveJobResult(message);
+                this.connection.on("ReceiveJobId", (message, colormap) => {
+                    this.receiveJobResult(message, colormap);
                 });
 
                 this.connection.on("ReceiveJobInfos", (message) => {
@@ -52,14 +52,13 @@ class MessageHubConnectionProvider {
     requestProfiles(jsonConfig: any): any {
         if (this.connection?.state === HubConnectionState.Connected) {
             this.connection?.send("GetProfiles", jsonConfig);
-            console.log("after profilessss sent");
         }
     }
 
-    requestJob(jsonConfig: any): any  {
+    requestJob(jsonConfig: any, colormap: string): any  {
         if (this.connection?.state === HubConnectionState.Connected) {
-            this.connection?.send("IssueJob", jsonConfig);
-            console.log("after jobbbb sent");
+            console.log("send job")
+            this.connection?.send("IssueJob", jsonConfig, colormap);
         }
     }
 }

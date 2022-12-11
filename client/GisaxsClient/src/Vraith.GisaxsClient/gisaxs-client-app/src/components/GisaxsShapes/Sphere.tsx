@@ -42,7 +42,6 @@ const Sphere = (props: SphereProps) => {
   };
 
   useEffect(() => {
-    console.log(jsonData)
     props.jsonCallback(
       jsonData,
       props.id

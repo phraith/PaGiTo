@@ -1,37 +1,48 @@
 import MiniDrawer from "../Drawer/MiniDrawer";
 import CssBaseline from "@mui/material/CssBaseline"
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Grid from "@mui/material/Grid/Grid";
 import JobsTable from "./JobsTable";
 import { JobInfo } from "../../utility/JobInfo";
-import { JsonViewer, NamedColorspace } from '@textea/json-viewer'
+import { JsonViewer } from '@textea/json-viewer'
 import Box from "@mui/material/Box/Box";
-import Paper from "@mui/material/Paper/Paper";
-
-export const ocean: NamedColorspace = {
-    scheme: 'Ocean',
-    author: 'Chris Kempson (http://chriskempson.com)',
-    base00: '#2b303b',
-    base01: '#343d46',
-    base02: '#4f5b66',
-    base03: '#65737e',
-    base04: '#a7adba',
-    base05: '#c0c5ce',
-    base06: '#dfe1e8',
-    base07: '#eff1f5',
-    base08: '#bf616a',
-    base09: '#d08770',
-    base0A: '#ebcb8b',
-    base0B: '#a3be8c',
-    base0C: '#96b5b4',
-    base0D: '#8fa1b3',
-    base0E: '#b48ead',
-    base0F: '#ab7967'
-}
+import Button from "@mui/material/Button/Button";
+import { MessageHubConnectionProvider } from "../../utility/MessageHubConnectionProvider";
 
 const Jobs = () => {
     const [jobInfo, setJobInfo] = React.useState<JobInfo>(new JobInfo(0, { body: "{}" }))
+
+    const receiveJobResult = (message: any) => {
+        console.log(message)
+    };
+
+    const [hubConnection, _] = useState<MessageHubConnectionProvider>(
+        new MessageHubConnectionProvider(
+            `${localStorage.getItem("apiToken")}`,
+            receiveJobResult,
+            (message: string) => { },
+            (message: string) => { }
+        )
+    )
+
+    useEffect(() => {
+        hubConnection.connect()
+      }, [hubConnection]);
+
+    const sendJob = () => {
+        let jsonConfig = JSON.stringify({
+            info: {
+                clientId: 0,
+                jobId: 0,
+                jobType: "fit"
+            },
+            config: JSON.parse(jobInfo.info.body)
+
+        });
+        hubConnection.requestJob(jsonConfig, "");
+    };
+
     return (
         <React.Fragment>
             <CssBaseline />
@@ -45,6 +56,9 @@ const Jobs = () => {
                                 <JsonViewer value={JSON.parse(jobInfo.info.body)} />
                             </Box>
                         </Box>
+                        <Button onClick={sendJob}>
+                            Send selected job
+                        </Button>
                     </Box>
                 </Grid>
             </Grid>

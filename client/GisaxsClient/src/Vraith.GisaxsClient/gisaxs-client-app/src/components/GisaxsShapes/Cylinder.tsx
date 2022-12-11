@@ -44,7 +44,6 @@ const Cylinder = (props: CylinderProps) => {
   };
 
   useEffect(() => {
-    console.log(jsonData)
     props.jsonCallback(
       jsonData,
       props.id

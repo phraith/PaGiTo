@@ -54,7 +54,6 @@ const Instrumentation = ({ initialResX = 0, initialResY = 0, ...props }) => {
 
 
   useEffect(() => {
-    console.log(initialResX, initialResY)
     let resWidth = initialResX == 0 ? InstrumentationConfig.detector.resolution.width : initialResX
     let resHeight = initialResY == 0 ? InstrumentationConfig.detector.resolution.height : initialResY
     setResX(resWidth)
