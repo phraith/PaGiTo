@@ -28,17 +28,24 @@ SimData CpuDevice::RunGISAXS(const SimJob &description, const ImageData *real_im
     auto dConfig = eConfig.DetectorConfig();
     auto bConfig = eConfig.BeamConfig();
 
-    auto qgrid = QGrid(dConfig, std::vector<int>(),
-                       bConfig, 0);
+    bool isFull = description.JobInfo().SimulationTargets().size() == 0;
+
+    auto qgrid = isFull ? QGrid(dConfig, std::vector<Vector2<int>>(), bConfig, 0) : QGrid(dConfig,
+                                                                                          description.DetectorPositions(),
+                                                                                          bConfig, 0);
 
     std::vector<std::complex<MyType>> sfs = GisaxsCpuCore::CalculateStructureFactors(qgrid.QPointsXY(),
                                                                                      qgrid.QPointsZCoeffs(),
                                                                                      flat_unitcell.Translation(),
                                                                                      flat_unitcell.Repetitions());
 
-    auto prop_coefficients = PropagationCoefficientsCpu::PropagationCoeffsTopBuried(
+    auto prop_coefficients = isFull ? PropagationCoefficientsCpu::PropagationCoeffsTopBuriedFull(
             description.ExperimentInfo().SampleConfig(), description.ExperimentInfo().DetectorConfig(),
+            description.ExperimentInfo().BeamConfig()) : PropagationCoefficientsCpu::PropagationCoeffsTopBuried(
+            description.ExperimentInfo().SampleConfig(), description.DetectorPositions(),
+            description.ExperimentInfo().DetectorConfig(),
             description.ExperimentInfo().BeamConfig());
+
     auto intensities = GisaxsCpuCore::CalculateIntensities(qgrid.QPar(), qgrid.Q(), qgrid.QPointsXY(),
                                                            qgrid.QPointsZCoeffs(),
                                                            prop_coefficients,
@@ -59,8 +66,9 @@ SimData CpuDevice::RunGISAXS(const SimJob &description, const ImageData *real_im
         normalized_intensities[i] = (unsigned char) (log_val * 255.0);
     }
 
-    return {0, std::vector<double> (intensities.begin(), intensities.end()), normalized_intensities, std::vector<float>(),
-            std::vector<float>(), std::vector<float>(), description.ExperimentInfo().DetectorConfig().Resolution(), 0};
+    return {0, std::vector<double>(intensities.begin(), intensities.end()), normalized_intensities,
+            std::vector<float>(),
+            std::vector<float>(), std::vector<float>(), 0};
 }
 
 void CpuDevice::SetStatus(WorkStatus status) const {
@@ -69,8 +77,7 @@ void CpuDevice::SetStatus(WorkStatus status) const {
 }
 
 std::string CpuDevice::WorkStatusToStr(WorkStatus status) const {
-    switch(status)
-    {
+    switch (status) {
         case WorkStatus::kIdle:
             return "idle";
         case WorkStatus::kWorking:

@@ -101,7 +101,7 @@ void SampleConfiguration::InsertLayer(MyType delta, MyType beta, int order, MyTy
 //	return trans_refs;
 //}
 //
-//std::vector<MyComplex> SampleConfiguration::PropagationCoeffsTopBuried(const DetectorConfiguration &detector, const BeamConfiguration &beam_config) const
+//std::vector<MyComplex> SampleConfiguration::PropagationCoeffsTopBuriedFull(const DetectorConfiguration &detector, const BeamConfiguration &beam_config) const
 //{
 //    int qcount = detector.Resolution().x * detector.Resolution().y;
 //

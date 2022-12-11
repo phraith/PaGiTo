@@ -13,7 +13,7 @@
 class QGrid
 {
 public:
-	QGrid(const DetectorConfiguration& detector, const std::vector<int>& position_offsets, const BeamConfiguration& beam_config, std::complex<MyType> refractive_index);
+	QGrid(const DetectorConfiguration& detector, const std::vector<Vector2<int>>& position_offsets, const BeamConfiguration& beam_config, std::complex<MyType> refractive_index);
 
 	[[nodiscard]] const std::vector<std::complex<MyType>> &QPointsXY() const;
 	[[nodiscard]] const std::vector<std::complex<MyType>> &QPointsZCoeffs() const;
@@ -42,7 +42,7 @@ private:
 	const Vector2<int>&direct_beam_location_;
 
 	MyType pixel_size_{};
-	const std::vector<int>& position_offsets_;
+	const std::vector<Vector2<int>>& position_offsets_;
 
 	int qcount_;
 	MyType alpha_i_{};

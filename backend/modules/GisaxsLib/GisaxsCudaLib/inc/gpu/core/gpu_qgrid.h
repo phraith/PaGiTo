@@ -24,7 +24,7 @@ namespace GpuQGrid {
         MyType *dev_qz;
     };
 
-    void CreateQGrid(MyType alpha_i, MyType k0, MyType pixelsize, MyType sample_distance, MyType2I *real_positions,
+    void CreateQGrid(MyType alpha_i, MyType k0, MyType pixelsize, MyType sample_distance, MyType2I *detector_positions,
                      MyType2I beam_pos, int detector_width, int qcount, GpuQGrid::GpuQGridContainer qgrid_container,
                      cudaStream_t work_stream);
 

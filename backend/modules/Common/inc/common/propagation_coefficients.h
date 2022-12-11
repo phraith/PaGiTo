@@ -12,7 +12,14 @@
 
 namespace PropagationCoefficientsCpu {
     std::vector<std::complex<MyType>>
-    PropagationCoeffsTopBuried(const SampleConfiguration &sample_config, const DetectorConfiguration &detector,
+    PropagationCoeffsTopBuriedFull(const SampleConfiguration &sample_config, const DetectorConfiguration &detector,
+                                   const BeamConfiguration &beam_config);
+
+
+    std::vector<std::complex<MyType>>
+    PropagationCoeffsTopBuried(const SampleConfiguration &sample_config,
+                               const std::vector<Vector2<int>> &detector_positions,
+                               const DetectorConfiguration &detector,
                                const BeamConfiguration &beam_config);
 }
 

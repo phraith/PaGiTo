@@ -3,7 +3,7 @@
 struct SerializedSimulationDescription
 {
 	timestamp @0 :UInt32;
-	clientId @1 :Text;
+	client_id @1 :Text;
 	configData @2 :Text;
 	instrumentationData @3 :Text;
 
@@ -13,7 +13,7 @@ struct SerializedSimulationDescription
 struct SerializedSimResult
 {
 	timestamp @0 :UInt32;
-	clientId @1 :Text;
+	client_id @1 :Text;
 	simulatedIntensities @2 :List(Float32);
 	simulatedQx @3 :List(Float32);
 	simulatedQy @4 :List(Float32);

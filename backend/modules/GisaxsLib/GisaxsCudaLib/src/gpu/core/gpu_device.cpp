@@ -53,7 +53,7 @@ SimData GpuDevice::RunGISAXS(const SimJob &descr, const ImageData *real_img, boo
 
     auto unitcell = descr.ExperimentInfo().Unitcell();
 
-    const auto coefficients = GpuConversionHelper::Convert(PropagationCoefficientsCpu::PropagationCoeffsTopBuried(
+    const auto coefficients = GpuConversionHelper::Convert(PropagationCoefficientsCpu::PropagationCoeffsTopBuriedFull(
             descr.ExperimentInfo().SampleConfig(), descr.ExperimentInfo().DetectorConfig(),
             descr.ExperimentInfo().BeamConfig()));
     const auto &current_params = unitcell.Parameters();
@@ -194,12 +194,11 @@ SimData GpuDevice::RunGISAXS(const SimJob &descr, const ImageData *real_img, boo
 
         return {fitness_, {copied_intensities.begin(), copied_intensities.end()}, copied_normalized_intensities,
                 container_qx.CopyToHost(),
-                container_qy.CopyToHost(), container_qz.CopyToHost(),
-                descr.ExperimentInfo().DetectorConfig().Resolution(), scale};
+                container_qy.CopyToHost(), container_qz.CopyToHost(), scale};
     }
 
     memoryProviderV2.UnlockAll();
-    return {fitness_, {}, std::vector<unsigned char>(), {}, {}, {}, {0, 0}, scale};
+    return {fitness_, {}, std::vector<unsigned char>(), {}, {}, {}, scale};
 }
 
 int GpuDevice::Bind() const {

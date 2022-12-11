@@ -91,7 +91,7 @@ ModelFitterV2::ModelFitterV2(const std::string &broker_address)
 ModelFitterV2::~ModelFitterV2() = default;
 
 std::string ModelFitterV2::ServiceName() const {
-    return "fit";
+    return "fitting";
 }
 
 std::vector<std::byte>

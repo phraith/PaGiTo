@@ -3,7 +3,6 @@
 //
 
 #include "parameter_definitions/detector_setup.h"
-#include "parameter_definitions/transformation_container.h"
 
 using namespace GisaxsTransformationContainer;
 

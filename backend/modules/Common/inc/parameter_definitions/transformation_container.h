@@ -12,23 +12,44 @@
 
 using json = nlohmann::json;
 
-void from_json (const json &j, Vector3<MyType> &vector);
-void to_json (json &j, const Vector3<MyType> &vector);
+void from_json(const json &j, Vector3<MyType> &vector);
+
+void to_json(json &j, const Vector3<MyType> &vector);
 
 namespace GisaxsTransformationContainer {
 
     FlatShapeContainer ConvertToFlatShapes(const json &json);
+
     void from_json(const json &j, FlatShapeContainer &shapes);
+
     SampleContainer ConvertToSample(const json &json);
+
     void from_json(const json &j, SampleContainer &sample);
+
     BeamContainer ConvertToBeam(const json &json);
+
     void from_json(const json &j, BeamContainer &beam);
+
     UnitcellMetaContainer ConvertToUnitcellMeta(const json &json);
+
     void from_json(const json &j, UnitcellMetaContainer &unitcellMeta);
+
     DetectorContainer ConvertToDetector(const json &json);
+
     void from_json(const json &j, DetectorContainer &detector);
+
+    SimulationTargetDefinition ConvertToSimulationTargetDefinition(const json &json);
+
+    void from_json(const json &j, SimulationTargetDefinition &lineprofile);
+
+    JobMetaInformationContainer ConvertToJobMetaInformation(const json &json);
+
+    void from_json(const json &j, JobMetaInformationContainer &job_meta_information);
+
     json UpdateShapes(const json &input, const FlatShapeContainer &shape_container);
+
     SimJob CreateSimJobFromRequest(const std::string &request);
+
     SimJob CreateSimJobFromRequest(json request);
 
 

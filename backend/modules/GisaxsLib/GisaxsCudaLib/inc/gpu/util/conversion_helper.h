@@ -14,6 +14,7 @@ namespace GpuConversionHelper {
     std::vector<MyComplex> Convert(const std::vector<std::complex<MyType>> &input);
 
     std::vector<MyType2> Convert(const std::vector<Vector2<MyType>> &input);
+    std::vector<MyType2I> Convert(const std::vector<Vector2<int>> &input);
 
     std::vector<MyType3> Convert(const std::vector<Vector3<MyType>> &input);
 
