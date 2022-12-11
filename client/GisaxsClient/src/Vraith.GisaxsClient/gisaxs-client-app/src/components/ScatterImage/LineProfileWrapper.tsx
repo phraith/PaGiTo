@@ -1,6 +1,6 @@
 import Box from '@mui/material/Box/Box';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { LineProfile, Coordinate, LineProfileState, RelativeLineProfile } from '../../utility/LineProfile';
+import { useEffect, useRef } from 'react';
+import { LineProfile, Coordinate, LineProfileState, LineMode } from '../../utility/LineProfile';
 
 interface LineprofileWrapperProps {
     width: any;
@@ -36,17 +36,16 @@ const LineProfileWrapper : React.FC<LineprofileWrapperProps> = (props: Lineprofi
         return canvas;
     }
 
-    const createLineProfile = (width: number, height: number, x: number, y: number) => {
-        let dim: Coordinate = new Coordinate(width, height);
-        if (props.profileState.lineMode) {
-            let start: Coordinate = new Coordinate(x, 0);
-            let end: Coordinate = new Coordinate(x, height);
-            return new RelativeLineProfile(start, end, dim);
+    const createLineProfile = (canvasWidth: number, canvasHeight: number, x: number, y: number) => {
+        if (props.profileState.lineMode === LineMode.Vertical) {
+            let start: Coordinate = new Coordinate((x / canvasWidth) * props.width, 0.0);
+            let end: Coordinate = new Coordinate((x / canvasWidth) * props.width, props.height);
+            return new LineProfile(start, end);
         }
 
-        let start: Coordinate = new Coordinate(0, y);
-        let end: Coordinate = new Coordinate(width, y);
-        return new RelativeLineProfile(start, end, dim);
+        let start: Coordinate = new Coordinate(0.0, (y / canvasHeight) * props.height);
+        let end: Coordinate = new Coordinate(props.width, (y / canvasHeight) * props.height);
+        return new LineProfile(start, end);
     }
 
     const draw = () => {
@@ -57,9 +56,14 @@ const LineProfileWrapper : React.FC<LineprofileWrapperProps> = (props: Lineprofi
         {
             let ctxSafe: CanvasRenderingContext2D = ctx;
             props.profileState.lineProfiles.forEach(staticLp => {
-                drawLine(staticLp.toLineProfile(canvas.width, canvas.height), ctxSafe);
+                let canvasStart = new Coordinate((staticLp.start.x / props.width) * canvas.width, (staticLp.start.y / props.height) * canvas.height)
+                let canvasEnd = new Coordinate((staticLp.end.x / props.width) * canvas.width, (staticLp.end.y / props.height) * canvas.height)
+                drawLine(new LineProfile(canvasStart, canvasEnd), ctxSafe);
             })
-            drawLine(props.profileState.currentLineProfile.toLineProfile(canvas.width, canvas.height), ctxSafe);
+
+            let canvasStart = new Coordinate((props.profileState.currentLineProfile.start.x / props.width) * canvas.width, (props.profileState.currentLineProfile.start.y / props.height) * canvas.height)
+            let canvasEnd = new Coordinate((props.profileState.currentLineProfile.end.x / props.width) * canvas.width, (props.profileState.currentLineProfile.end.y / props.height) * canvas.height)
+            drawLine(new LineProfile(canvasStart, canvasEnd), ctxSafe);
         }
     }
 
@@ -75,7 +79,7 @@ const LineProfileWrapper : React.FC<LineprofileWrapperProps> = (props: Lineprofi
     const handleMouseMove = (e) => {
         let canvas: HTMLCanvasElement = canvasRef.current
         let pos = getMousePos(canvas, e)
-        let lp: RelativeLineProfile = createLineProfile(canvas.offsetWidth, canvas.offsetHeight, pos.x, pos.y)
+        let lp: LineProfile = createLineProfile(canvas.offsetWidth, canvas.offsetHeight, pos.x, pos.y)
         props.setProfileState(new LineProfileState(props.profileState.lineMode, props.profileState.lineProfiles, lp))
     }
 
@@ -87,13 +91,14 @@ const LineProfileWrapper : React.FC<LineprofileWrapperProps> = (props: Lineprofi
         
         let canvas: HTMLCanvasElement = canvasRef.current
         let pos = getMousePos(canvas, e)
-        let lp: RelativeLineProfile = createLineProfile(canvas.offsetWidth, canvas.offsetHeight, pos.x, pos.y)
+        let lp: LineProfile = createLineProfile(canvas.offsetWidth, canvas.offsetHeight, pos.x, pos.y)
         props.setProfileState(new LineProfileState(props.profileState.lineMode, [...props.profileState.lineProfiles, lp], props.profileState.currentLineProfile))
     }
 
     const handleKeyDown = (event: any): void => {
         if (event.code === "KeyE") {
-            props.setProfileState(new LineProfileState(!props.profileState.lineMode, props.profileState.lineProfiles, props.profileState.currentLineProfile))
+            let newLineMode = props.profileState.lineMode === LineMode.Horizontal ? LineMode.Vertical : LineMode.Horizontal; 
+            props.setProfileState(new LineProfileState(newLineMode, props.profileState.lineProfiles, props.profileState.currentLineProfile))
         }
     };
     return (

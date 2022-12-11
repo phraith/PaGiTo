@@ -1,11 +1,9 @@
 import Add from "@mui/icons-material/Add";
 import Button from "@mui/material/Button"
 import Card from "@mui/material/Card"
-import CardActions from "@mui/material/CardActions"
 import CardContent from "@mui/material/CardContent"
 import MenuItem from "@mui/material/MenuItem"
 import Menu from "@mui/material/Menu"
-import Grid from "@mui/material/Grid"
 import Typography from "@mui/material/Typography"
 import List from "@mui/material/List"
 import ListItem from "@mui/material/ListItem"
@@ -18,6 +16,7 @@ import {
   SetLocalStorageEntity,
   SphereConfig,
 } from "../Utility/DefaultConfigs";
+import Box from "@mui/material/Box/Box";
 
 interface GisaxsShapesProps {
   jsonCallback: any;
@@ -36,12 +35,10 @@ const GisaxsShapes = (props: GisaxsShapesProps) => {
     let formattedShapes = Object.keys(jsonData).map((key) => jsonData[key]);
     props.jsonCallback(formattedShapes, configFieldName);
     SetLocalStorageEntity(formattedShapes, [], localStorageEntityName);
-    console.log(jsonData)
   }, [jsonData]);
 
   useEffect(() => {
     let data = localStorage.getItem(localStorageEntityName);
-
     if (data !== null) {
       let shapesConfig = JSON.parse(data);
       let cachedShapes: any = [];
@@ -67,7 +64,7 @@ const GisaxsShapes = (props: GisaxsShapesProps) => {
     });
   };
 
-  const createJsonForSphere = (sphereJson, shapeId) => {
+  const createJsonForShape = (sphereJson, shapeId) => {
     setJsonData((jsonData) => {
       jsonData[shapeId] = sphereJson;
       return { ...jsonData };
@@ -91,7 +88,7 @@ const GisaxsShapes = (props: GisaxsShapesProps) => {
         id={myid}
         isSimulation={props.isSimulation}
         removeCallback={() => removeShape(myid)}
-        jsonCallback={createJsonForSphere}
+        jsonCallback={createJsonForShape}
         initialConfig={sphereConfig}
       />
     );
@@ -109,7 +106,7 @@ const GisaxsShapes = (props: GisaxsShapesProps) => {
         id={myid}
         isSimulation={props.isSimulation}
         removeCallback={() => removeShape(myid)}
-        jsonCallback={createJsonForSphere}
+        jsonCallback={createJsonForShape}
         initialConfig={cylinderConfig}
       />
     );
@@ -121,31 +118,32 @@ const GisaxsShapes = (props: GisaxsShapesProps) => {
 
   return (
     <Card style={{ maxHeight: 700, overflow: "auto" }}>
-      <CardContent sx={{ p:0, '&:last-child': { pb: 0 }}}>
-        <Grid container>
-          <Grid item xs={8}>
-            <Typography>GisaxsShapesConfig</Typography>
-          </Grid>
-          <Grid item xs={4}>
+      <CardContent >
+        <Box display="flex" sx={{ flexDirection: "column" }}>
+          <Box display="flex" justifyContent={"space-between"} sx={{ paddingBottom: 1 }}>
+            <Typography>Shapes</Typography>
+
             <Button size="small" onClick={addShape}>
               <Add />
             </Button>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-            >
-              <MenuItem onClick={addSphere}>Sphere</MenuItem>
-              <MenuItem onClick={addCylinder}>Cylinder</MenuItem>
-            </Menu>
-          </Grid>
-        </Grid>
-        <List>
-          {shapes.map((value) => {
-            return <ListItem key={value.props.id}>{value}</ListItem>;
-          })}
-        </List>
+
+          </Box >
+          <Menu
+            anchorEl={anchorEl}
+            keepMounted
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+          >
+            <MenuItem onClick={addSphere}>Sphere</MenuItem>
+            <MenuItem onClick={addCylinder}>Cylinder</MenuItem>
+          </Menu>
+
+          <List>
+            {shapes.map((value) => {
+              return <ListItem key={value.props.id}>{value}</ListItem>;
+            })}
+          </List>
+        </Box>
       </CardContent>
     </Card>
   );

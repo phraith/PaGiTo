@@ -42,7 +42,6 @@ const Sphere = (props: SphereProps) => {
   };
 
   useEffect(() => {
-    console.log(jsonData)
     props.jsonCallback(
       jsonData,
       props.id
@@ -52,34 +51,25 @@ const Sphere = (props: SphereProps) => {
   return (
     <Card key={props.id} sx={{}}>
       <CardContent>
-        <Grid container sx={{ paddingBottom: collapsed ? 0 : 2 }}>
-          <Grid item xs={12}>
-            <Box display="flex" sx={{ justifyContent: "space-between" }}>
-              <Button size="small" onClick={handleButtonClick}>
-                {collapsed ? <ExpandMore /> : <ExpandLess />}
-              </Button>
-              <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                Sphere {collapsed ? `[${jsonData.radius.meanUpper}, ${jsonData.radius.stddevUpper}]` : ""}
-              </Typography>
-              <Button size="small" onClick={handleRemove}>
-                <DeleteForever />
-              </Button>
-            </Box>
-          </Grid>
-        </Grid>
+
+        <Box display="flex" sx={{ justifyContent: "space-between" }}>
+          <Button size="small" onClick={handleButtonClick}>
+            {collapsed ? <ExpandMore /> : <ExpandLess />}
+          </Button>
+          <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+            Sphere {collapsed ? `[${jsonData.radius.meanUpper}, ${jsonData.radius.stddevUpper}]` : ""}
+          </Typography>
+          <Button size="small" onClick={handleRemove}>
+            <DeleteForever />
+          </Button>
+        </Box>
+
         <Collapse in={!collapsed}>
-          <FormControl>
-            <Grid container direction={"row"} rowSpacing={1}>
-              <Grid item xs={12}>
-                  <ShapeParameterWrapper isSimulation={props.isSimulation} initialParameterConfig={props.initialConfig.radius} jsonCallback={jsonCallback} parameterName="radius" />
-                  <RefractionParameterWrapper initialRefractionConfig={props.initialConfig.refraction} jsonCallback={jsonCallback} />
-                  <LocationParameterWrapper initialLocationsConfig={props.initialConfig.locations[0]} jsonCallback={jsonCallback} />
-              </Grid>
-            </Grid>
-          </FormControl>
+          <ShapeParameterWrapper isSimulation={props.isSimulation} initialParameterConfig={props.initialConfig.radius} jsonCallback={jsonCallback} parameterName="radius" />
+          <RefractionParameterWrapper initialRefractionConfig={props.initialConfig.refraction} jsonCallback={jsonCallback} />
+          <LocationParameterWrapper initialLocationsConfig={props.initialConfig.locations[0]} jsonCallback={jsonCallback} />
         </Collapse>
       </CardContent>
-      <CardActions></CardActions>
     </Card>
   );
 };

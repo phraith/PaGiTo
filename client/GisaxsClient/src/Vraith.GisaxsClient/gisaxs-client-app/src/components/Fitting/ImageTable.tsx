@@ -24,10 +24,10 @@ const ImageTable = (props: ImageTableProps) => {
     fetch("/api/scatterstore/info", {
       method: "GET",
       headers: {
-          Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
-          Accept: "application/json",
+        Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
+        Accept: "application/json",
       },
-  })
+    })
       .then((data) => data.json())
       .then((data) => data.map(entry => {
         return {
@@ -43,18 +43,10 @@ const ImageTable = (props: ImageTableProps) => {
   }, [])
 
   return (
-    <Box style={{
-      display: 'flex', paddingTop: 10,
-      paddingRight: 5,
-      paddingLeft: 10,
-      paddingBottom: 10,
-      height: 500
-    }}>
-      <DataGrid rows={tableData}
+      <DataGrid sx={{height: 500}} rows={tableData}
         columns={columns}
         onRowClick={(e) => { console.log(e); props.setImageInfo(new ImageInfo(e.row.id, e.row.width, e.row.height)) }}
       />
-    </Box>
 
   );
 }

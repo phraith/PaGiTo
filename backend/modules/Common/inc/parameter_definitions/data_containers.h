@@ -15,6 +15,11 @@ namespace GisaxsTransformationContainer {
         std::vector<int> offsets;
     };
 
+    typedef struct SimulationTargetDefinition {
+        Vector2<int> start;
+        Vector2<int> end;
+    } SimulationTargetDefinition;
+
     struct DetectorContainer {
         Vector2<int> beamImpact;
         Vector2<int> resolution;
@@ -30,6 +35,13 @@ namespace GisaxsTransformationContainer {
         std::vector <Vector3<MyType>> positions;
         std::vector<int> position_indices;
         std::vector <ShapeTypeV2> shape_types;
+    };
+
+    struct JobMetaInformationContainer {
+        long client_id;
+        long job_id;
+        IntensityFormat intensity_format;
+        std::vector<SimulationTargetDefinition> simulationTargets;
     };
 
     struct SampleContainer {

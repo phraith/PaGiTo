@@ -18,7 +18,7 @@ public:
     [[nodiscard]] std::vector<std::byte> HandleRequest(const std::string &request, std::vector<std::byte> image_data, const std::string &origin) override;
     static std::vector<double> ConvertFlat(const std::vector<Vector2<MyType>> &input);
 private:
-
+    static double Fitness(const std::vector<double> &parameters);
 
     std::shared_ptr<majordomo::Client> client_;
     const std::string &broker_address_;

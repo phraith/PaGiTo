@@ -1,46 +1,39 @@
-class RelativeLineProfile {
-    startRel: Coordinate;
-    endRel: Coordinate;
-
-    constructor(start: Coordinate, end: Coordinate, dim: Coordinate) {
-        this.startRel = new Coordinate(start.x / dim.x, start.y / dim.y);
-        this.endRel = new Coordinate(end.x / dim.x, end.y / dim.y);
-    }
-
-    toLineProfile(width: number, height: number): LineProfile
-    {
-        let start =  new Coordinate(this.startRel.x * width, this.startRel.y * height);
-        let end = new Coordinate(this.endRel.x * width, this.endRel.y * height);
-        return new LineProfile(start, end)
-    }
-}
-
 class LineProfile {
-    start:  Coordinate;
-    end: Coordinate;
-
-    constructor(start: Coordinate, end: Coordinate) {
+    start:  IntCoordinate;
+    end: IntCoordinate;
+    constructor(start: IntCoordinate, end: IntCoordinate) {
         this.start = start;
         this.end = end;
     }
+
+    inverseHeight(height: number): LineProfile
+    {
+        let startWithInverseHeight = new IntCoordinate(this.start.x, height - this.start.y);
+        let endWithInverseHeight = new IntCoordinate(this.end.x, height - this.end.y);
+        return new LineProfile(startWithInverseHeight, endWithInverseHeight)
+    }
 }
 
+enum LineMode {
+    Vertical,
+    Horizontal
+  }
 
-class Coordinate {
+class IntCoordinate {
     x: number;
     y: number;
 
     constructor(x: number, y: number) {
-        this.x = x;
-        this.y = y;
+        this.x = Math.ceil(x);
+        this.y = Math.ceil(y);
     }
 }
 
 class LineProfileState {
-    lineMode: boolean;
-    lineProfiles: RelativeLineProfile[];
-    currentLineProfile: RelativeLineProfile;
-    constructor(lineMode: boolean, lineProfiles: RelativeLineProfile[], currentLineProfile: RelativeLineProfile)
+    lineMode: LineMode;
+    lineProfiles: LineProfile[];
+    currentLineProfile: LineProfile;
+    constructor(lineMode: LineMode, lineProfiles: LineProfile[], currentLineProfile: LineProfile)
     {
         this.lineMode = lineMode;
         this.lineProfiles = lineProfiles;
@@ -49,4 +42,4 @@ class LineProfileState {
 }
 
 
-export { RelativeLineProfile, LineProfile, Coordinate, LineProfileState }
+export { LineProfile, IntCoordinate as Coordinate, LineProfileState, LineMode }

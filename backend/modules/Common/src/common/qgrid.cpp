@@ -7,7 +7,7 @@
 #include "common/standard_defs.h"
 #include "common/timer.h"
 
-QGrid::QGrid(const DetectorConfiguration &detector, const std::vector<int> &position_offsets,
+QGrid::QGrid(const DetectorConfiguration &detector, const std::vector<Vector2<int>> &position_offsets,
              const BeamConfiguration &beam_config, std::complex<MyType> refractive_index)
         :
         resolution_(detector.Resolution()),
@@ -95,12 +95,8 @@ Vector2<int> QGrid::Resolution() const {
 void QGrid::InitializeQGrid() {
     if (!position_offsets_.empty()) {
         for (int i = 0; i < position_offsets_.size(); ++i) {
-            int position_offset = position_offsets_.at(i);
-
-            int pixel_y = position_offset / resolution_.x;
-            int pixel_x = position_offset % resolution_.x;
-
-            RealSpaceToQ(pixel_x, pixel_y, i);
+            auto cell = position_offsets_.at(i);
+            RealSpaceToQ(cell.x, cell.y, i);
         }
     } else {
         Timer t;

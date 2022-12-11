@@ -66,9 +66,6 @@ target_compile_options(GisaxsCudaLib PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
         --generate-line-info
         >)
 
-
-# target_compile_definitions(GisaxsCudaLib PUBLIC CUDA_GPUS_AVAILABLE=1)
-
 file(GLOB_RECURSE GISAXS_CUDA_FILES "${CMAKE_CURRENT_LIST_DIR}/src/*.cu" "${CMAKE_CURRENT_LIST_DIR}/inc/*.h" "${CMAKE_CURRENT_LIST_DIR}/src/*.cpp")
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${GISAXS_CUDA_FILES})
 

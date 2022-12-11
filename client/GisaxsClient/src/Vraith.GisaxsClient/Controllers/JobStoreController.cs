@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Vraith.GisaxsClient.Core.JobStore;
+using Vraith.Gisaxs.Core.JobStore;
 
 namespace Vraith.GisaxsClient.Controllers
 {

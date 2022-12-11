@@ -1,8 +1,11 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Vraith.GisaxsClient.Core.ImageStore;
-using Vraith.GisaxsClient.Utility.ImageTransformations;
-using Vraith.ImageStoreClient.ImageUtility;
+using Vraith.Gisaxs.Configuration;
+using Vraith.Gisaxs.Core.ImageStore;
+using Vraith.Gisaxs.Utility.Images;
+using Vraith.Gisaxs.Utility.ImageTransformations;
+using Vraith.Gisaxs.Utility.LineProfile;
 
 namespace Vraith.GisaxsClient.Controllers
 {
@@ -26,18 +29,55 @@ namespace Vraith.GisaxsClient.Controllers
             return await imageStore.Get();
         }
 
+
+        [Authorize]
+        [HttpPost("profile")]
+        public async Task<IActionResult> Profile(SimulationTargetWithId targetWithId)
+        {
+            var id = targetWithId.Id;
+            var target = targetWithId.Target;
+            
+            var start = target.Start;
+            var end = target.End;
+            
+            if (start.X == 0 && start.Y == end.Y)
+            {
+                double[] horizontalProfile = await imageStore.GetHorizonalProfile(id, start.X, end.X, start.Y);
+                var horizontalLogData = horizontalProfile.Select(x => Math.Log(x + 1)).Reverse().ToArray();
+                // var horizontalLogData = horizontalProfile.Reverse().ToArray();
+                return Ok(JsonSerializer.Serialize(
+                    new NumericResult(horizontalLogData, horizontalLogData.Length, 1), new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                    }));
+            }
+            
+            double[] verticalProfile = await imageStore.GetVerticalProfile(id, start.Y, end.Y, start.X);
+            var verticalLogData = verticalProfile.Select(x => Math.Log(x + 1)).Reverse().ToArray();
+            // var verticalLogData = verticalProfile.Reverse().ToArray();
+            
+            return Ok(JsonSerializer.Serialize(
+                new NumericResult(verticalLogData, 1, verticalLogData.Length), new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                }));
+        }
+
         [Authorize]
         [HttpGet("get")]
         public async Task<string> Get(int id, string colormap)
         {
             var image = await imageStore.Get(id);
+            if (image == null)
+            {
+                return string.Empty;
+            }
 
-            if (image == null) { return string.Empty; }
-
-            var maxIntensity = image.Data.Max();
+            var maxIntensity = image.RowWiseData.Max();
             Console.WriteLine($"BornAgain {maxIntensity}");
-            byte[] normalizedImage = image.Data.Select(x => Normalize(x, maxIntensity)).ToArray();
-            var base64 = AppearanceModifier.ApplyColorMap(normalizedImage, image.Info.Width, image.Info.Height, false, colormap);
+            byte[] normalizedImage = image.RowWiseData.Select(x => Normalize(x, maxIntensity)).ToArray();
+            var base64 = AppearanceModifier.ApplyColorMap(normalizedImage, image.Info.Width, image.Info.Height, false,
+                colormap);
             return base64;
         }
 

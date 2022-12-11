@@ -12,6 +12,15 @@ enum class ShapeTypeV2 {
     sphere=0, cylinder=1
 };
 
+enum class IntensityFormat {
+    greyscale=0, double_precision=1
+};
+
+NLOHMANN_JSON_SERIALIZE_ENUM(IntensityFormat, {
+    { IntensityFormat::greyscale, "greyscale" },
+    { IntensityFormat::double_precision, "doublePrecision" }
+})
+
 template <typename T>
 struct Vector2{
     T x;
@@ -52,8 +61,6 @@ typedef struct SimData
     std::vector<MyType> qx;
     std::vector<MyType> qy;
     std::vector<MyType> qz;
-
-    Vector2<int> resolution;
 
     float scale;
 } SimData;

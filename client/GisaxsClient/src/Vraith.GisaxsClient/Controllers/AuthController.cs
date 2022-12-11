@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Vraith.GisaxsClient.Configuration;
-using Vraith.GisaxsClient.Core.Authorization;
-using Vraith.GisaxsClient.Core.UserStore;
+using Vraith.Gisaxs.Configuration;
+using Vraith.Gisaxs.Core.Authorization;
+using Vraith.Gisaxs.Core.UserStore;
 
 namespace Vraith.GisaxsClient.Controllers
 {
@@ -16,7 +16,7 @@ namespace Vraith.GisaxsClient.Controllers
         public AuthController(IOptionsMonitor<ConnectionStrings> connectionStrings, IOptionsMonitor<AuthConfig> authOptions)
         {
             userStore = new UserStore(connectionStrings.CurrentValue.Default);
-            authorizationHandler = new AuthorizationHandler(authOptions);
+            authorizationHandler = AuthorizationHandlerFactory.CreateDefaultAuthorizationHandler(authOptions);
         }
 
         [HttpPost("register")]

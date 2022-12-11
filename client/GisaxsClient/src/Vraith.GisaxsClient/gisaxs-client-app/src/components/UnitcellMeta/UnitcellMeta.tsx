@@ -13,6 +13,7 @@ import {
   SetLocalStorageEntity,
   UnitcellMetaConfig,
 } from "../Utility/DefaultConfigs";
+import Box from "@mui/material/Box/Box"
 
 interface UnitcellMetaProps {
   jsonCallback: any;
@@ -70,8 +71,8 @@ const UnitcellMeta = (props: UnitcellMetaProps) => {
     <Card sx={{}}>
       <CardContent>
         <Typography>UnitcellMeta</Typography>
-        <Grid container sx={{ paddingTop: 2 }} rowSpacing={2}>
-          <Grid item xs={4}>
+        <Box display="flex" sx={{ flexDirection: "column" }}>
+          <Box display="flex" sx={{ paddingBottom: 1 }}>
             <TextField
               label="repX"
               value={repX}
@@ -80,8 +81,7 @@ const UnitcellMeta = (props: UnitcellMetaProps) => {
                 setRepX(Number(e.target.value));
               }}
             />
-          </Grid>
-          <Grid item xs={4}>
+
             <TextField
               label="repY"
               value={repY}
@@ -90,8 +90,7 @@ const UnitcellMeta = (props: UnitcellMetaProps) => {
                 setRepY(Number(e.target.value));
               }}
             />
-          </Grid>
-          <Grid item xs={4}>
+
             <TextField
               label="repZ"
               value={repZ}
@@ -100,8 +99,8 @@ const UnitcellMeta = (props: UnitcellMetaProps) => {
                 setRepZ(Number(e.target.value));
               }}
             />
-          </Grid>
-          <Grid item xs={4}>
+          </Box>
+          <Box display="flex" sx={{ paddingBottom: 1 }}>
             <TextField
               label="posX"
               value={posX}
@@ -110,8 +109,7 @@ const UnitcellMeta = (props: UnitcellMetaProps) => {
                 setPosX(Number(e.target.value));
               }}
             />
-          </Grid>
-          <Grid item xs={4}>
+
             <TextField
               label="posY"
               value={posY}
@@ -120,8 +118,7 @@ const UnitcellMeta = (props: UnitcellMetaProps) => {
                 setPosY(Number(e.target.value));
               }}
             />
-          </Grid>
-          <Grid item xs={4}>
+
             <TextField
               label="posZ"
               value={posZ}
@@ -130,10 +127,9 @@ const UnitcellMeta = (props: UnitcellMetaProps) => {
                 setPosZ(Number(e.target.value));
               }}
             />
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </CardContent>
-      <CardActions></CardActions>
     </Card>
   );
 };

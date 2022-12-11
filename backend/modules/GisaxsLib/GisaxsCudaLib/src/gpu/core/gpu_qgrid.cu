@@ -66,15 +66,14 @@ __device__ void real_space_to_q(MyType alpha_i, MyType k0, MyType pixelsize, MyT
 }
 
 __global__ void
-create_qgrid(MyType alpha_i, MyType k0, MyType pixelsize, MyType sample_distance, MyType2I *real_positions,
+create_qgrid(MyType alpha_i, MyType k0, MyType pixelsize, MyType sample_distance, MyType2I *detector_positions,
              MyType2I beam_pos, int detector_width, int qcount, GpuQGrid::GpuQGridContainer qgrid_container) {
     int tid = threadIdx.x + blockDim.x * blockIdx.x;
 
-    for (int i = tid; i < qcount; i += blockDim.x * gridDim.x) { ;
-        MyType2I real_pos = real_positions[i];
+    for (int i = tid; i < qcount; i += blockDim.x * gridDim.x) {
+        MyType2I real_pos = detector_positions[i];
         real_space_to_q(alpha_i, k0, pixelsize, sample_distance, real_pos, beam_pos,
-                        real_pos.y * detector_width + real_pos.x,
-                        qcount, qgrid_container);
+                        i, qcount, qgrid_container);
     }
 }
 
@@ -90,21 +89,20 @@ create_qgrid_full_detector(MyType alpha_i, MyType k0, MyType pixelsize, MyType s
         int x = i % detector_width;
 
         real_space_to_q(alpha_i, k0, pixelsize, sample_distance, MyType2I{x, y}, beam_pos,
-                        y * detector_width + x,
-                        qcount, qgrid_container);
+                        i, qcount, qgrid_container);
     }
 }
 
 
 void
-GpuQGrid::CreateQGrid(MyType alpha_i, MyType k0, MyType pixelsize, MyType sample_distance, MyType2I *real_positions,
+GpuQGrid::CreateQGrid(MyType alpha_i, MyType k0, MyType pixelsize, MyType sample_distance, MyType2I *detector_positions,
                       MyType2I beam_pos, int detector_width, int qcount, GpuQGrid::GpuQGridContainer qgrid_container,
                       cudaStream_t work_stream) {
 
     int threads = 128;
     int blocks = qcount / threads + 1;
 
-    create_qgrid<<<blocks, threads, 0, work_stream>>>(alpha_i, k0, pixelsize, sample_distance, real_positions, beam_pos,
+    create_qgrid<<<blocks, threads, 0, work_stream>>>(alpha_i, k0, pixelsize, sample_distance, detector_positions, beam_pos,
                                                       detector_width, qcount, qgrid_container);
 }
 

@@ -7,7 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 include(CheckLanguage)
 check_language(CUDA)
 
-
+#add_compile_options(-fsanitize=address)
+#add_link_options(-fsanitize=address)
 
 #print_all_variables()
 

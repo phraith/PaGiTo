@@ -1,11 +1,12 @@
 find_package(GTest REQUIRED)
 
-add_executable(GisaxsTests)
+add_executable(GisaxsTests src/test_cmaes.cpp)
 
 target_sources(GisaxsTests
                     PRIVATE
                         main.cpp
-                        src/test_model_simulator.cpp)
+                        src/test_model_simulator.cpp
+                        src/test_cmaes.cpp)
 
 target_link_libraries(GisaxsTests
                             PRIVATE

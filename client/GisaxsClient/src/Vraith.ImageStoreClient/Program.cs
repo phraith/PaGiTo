@@ -1,4 +1,5 @@
 ﻿using Spectre.Cli;
+
 using Vraith.ImageStoreClient.CommandLineInterface.Commands;
 
 var app = new CommandApp();
@@ -13,6 +14,7 @@ app.Configure(config =>
 
         store.AddCommand<StorePushCommand>("push")
         .WithDescription("Pushes an image into a image store");
+        
     });
 });
 return app.Run(args);

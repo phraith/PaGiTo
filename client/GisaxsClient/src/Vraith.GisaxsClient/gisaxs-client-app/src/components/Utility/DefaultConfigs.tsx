@@ -83,8 +83,7 @@ export const LayerConfig = {
     delta: 6e-6,
     beta: 2e-8,
   },
-  thickness: 0.01,
-  order: -1,
+  thickness: 0.01
 };
 
 const isEqualsJson = (obj1,obj2)=>{
