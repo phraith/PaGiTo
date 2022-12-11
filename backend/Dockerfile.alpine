@@ -32,6 +32,7 @@ RUN ./vcpkg install spdlog
 RUN ./vcpkg install eigen3
 
 WORKDIR /src
+RUN file="$(ls)" && echo $file
 RUN cmake -DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake -B./build -S. && cmake --build ./build
 
 FROM base AS final
