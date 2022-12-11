@@ -11,13 +11,13 @@ namespace Vraith.Gisaxs.Core.Authorization
 {
     internal class AuthorizationHandler : IAuthorizationHandler
     {
-        private readonly HMACSHA512 userIdGenerator;
-        private readonly IOptionsMonitor<AuthConfig> authOptions;
+        private readonly HMACSHA512 _userIdGenerator;
+        private readonly IOptionsMonitor<AuthConfig> _authOptions;
 
         public AuthorizationHandler(IOptionsMonitor<AuthConfig> authOptions)
         {
-            userIdGenerator = new HMACSHA512(Encoding.UTF8.GetBytes("MySecretKey"));
-            this.authOptions = authOptions;
+            _userIdGenerator = new HMACSHA512("MySecretKey"u8.ToArray());
+            this._authOptions = authOptions;
         }
 
         public AuthInfo CreateJwtToken(User user)
@@ -27,7 +27,7 @@ namespace Vraith.Gisaxs.Core.Authorization
                 new Claim(ClaimTypes.NameIdentifier, $"{user.UserId}")
             };
 
-            SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(authOptions.CurrentValue.Token));
+            SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_authOptions.CurrentValue.Token));
             SigningCredentials cred = new(key, SecurityAlgorithms.HmacSha512Signature);
 
             JwtSecurityToken token = new            (
@@ -42,7 +42,7 @@ namespace Vraith.Gisaxs.Core.Authorization
 
         public bool VerifyPasswordHash(User user, string password)
         {
-            using HMACSHA512 hmac = new HMACSHA512(user.PasswordSalt);
+            using HMACSHA512 hmac = new HMACSHA512(user.PasswordSalt.ToArray());
             byte[] passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
             return passwordHash.SequenceEqual(user.PasswordHash);
         }
@@ -55,7 +55,7 @@ namespace Vraith.Gisaxs.Core.Authorization
 
         public long CreateUserId(string username)
         {
-            var hash = userIdGenerator.ComputeHash(Encoding.UTF8.GetBytes(username));
+            var hash = _userIdGenerator.ComputeHash(Encoding.UTF8.GetBytes(username));
             return BitConverter.ToInt64(hash);
         }
     }

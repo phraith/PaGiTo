@@ -10,29 +10,29 @@ namespace Vraith.Optimization.Cmaes
 
     }
 
-    public class CMAESOptimizer
+    public class CmaesOptimizer
     {
-        private readonly CMA cma;
-        private readonly Func<double[], double> function;
-        private readonly int maxIteration;
+        private readonly Cma _cma;
+        private readonly Func<double[], double> _function;
+        private readonly int _maxIteration;
 
 
         public double[] ResultVector { get; private set; }
 
         public double ResultValue { get; private set; }
 
-        public CMAESOptimizer(Func<double[], double> function, double[] initial, double sigma, int randSeed = 0)
+        public CmaesOptimizer(Func<double[], double> function, double[] initial, double sigma, int randSeed = 0)
         {
-            this.function = function;
-            maxIteration = initial.Length * 200;
+            this._function = function;
+            _maxIteration = initial.Length * 200;
 
-            cma = new CMA(initial, sigma, seed: randSeed);
+            _cma = new Cma(initial, sigma, seed: randSeed);
 
             ResultValue = double.MaxValue;
         }
 
 
-        public CMAESOptimizer(Func<double[], double> function, double[] initial, double sigma, double[] lowerBounds, double[] upperBounds, int randSeed = 0)
+        public CmaesOptimizer(Func<double[], double> function, double[] initial, double sigma, double[] lowerBounds, double[] upperBounds, int randSeed = 0)
         {
             if (initial.Length != lowerBounds.Length)
             {
@@ -43,8 +43,8 @@ namespace Vraith.Optimization.Cmaes
                 throw new ArgumentException("Length of upperBounds must be equal to that of initial");
             }
 
-            this.function = function;
-            maxIteration = initial.Length * 2000;
+            this._function = function;
+            _maxIteration = initial.Length * 2000;
 
             Matrix<double> bounds = Matrix<double>.Build.Dense(initial.Length, 2);
             bounds.SetColumn(0, lowerBounds.ToArray());
@@ -61,15 +61,15 @@ namespace Vraith.Optimization.Cmaes
             while (true)
             {
                 var solutions = new List<Solution>();
-                for (int i = 0; i < cma.PopulationSize; i++)
+                for (int i = 0; i < _cma.PopulationSize; i++)
                 {
-                    Vector<double> parameterVector = cma.Ask();
-                    double fitness = function(parameterVector.AsArray());
+                    Vector<double> parameterVector = _cma.Ask();
+                    double fitness = _function(parameterVector.AsArray());
                     solutions.Add(new Solution { Parameters = parameterVector, Fitness = fitness });
                 }
 
-                cma.Tell(solutions);
-                if (cma.ShouldStop())
+                _cma.Tell(solutions);
+                if (_cma.ShouldStop())
                 {
                     foreach (var solution in solutions)
                     {

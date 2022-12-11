@@ -17,7 +17,7 @@ namespace Vraith.Gisaxs.Utility.ImageTransformations
             { "cividis", (Cividis.R, Cividis.G, Cividis.B) },
             { "cool", (Cool.R, Cool.G, Cool.B) },
             { "hot", (Hot.R, Hot.G, Hot.B) },
-            { "hsv", (HSV.R, HSV.G, HSV.B) },
+            { "hsv", (Hsv.R, Hsv.G, Hsv.B) },
             { "inferno", (Inferno.R, Inferno.G, Inferno.B) },
             { "jet", (Jet.R, Jet.G, Jet.B) },
             { "magma", (Magma.R, Magma.G, Magma.B) },

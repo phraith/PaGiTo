@@ -5,7 +5,6 @@ using Vraith.Gisaxs.Configuration;
 using Vraith.Gisaxs.Core.ImageStore;
 using Vraith.Gisaxs.Utility.Images;
 using Vraith.Gisaxs.Utility.ImageTransformations;
-using Vraith.Gisaxs.Utility.LineProfile;
 
 namespace Vraith.GisaxsClient.Controllers
 {
@@ -13,20 +12,20 @@ namespace Vraith.GisaxsClient.Controllers
     [Route("api/[controller]")]
     public class ScatterStoreController : ControllerBase
     {
-        private readonly ILogger<ScatterStoreController> logger;
-        private readonly ImageStore imageStore;
+        private readonly ILogger<ScatterStoreController> _logger;
+        private readonly ImageStore _imageStore;
 
         public ScatterStoreController(ILogger<ScatterStoreController> logger, IConfiguration configuration)
         {
-            this.logger = logger;
-            imageStore = new ImageStore(configuration);
+            this._logger = logger;
+            _imageStore = new ImageStore(configuration);
         }
 
         [Authorize]
         [HttpGet("info")]
         public async Task<IEnumerable<ImageInfoDto>> Get()
         {
-            return await imageStore.Get();
+            return await _imageStore.Get();
         }
 
 
@@ -42,7 +41,7 @@ namespace Vraith.GisaxsClient.Controllers
             
             if (start.X == 0 && start.Y == end.Y)
             {
-                double[] horizontalProfile = await imageStore.GetHorizonalProfile(id, start.X, end.X, start.Y);
+                double[] horizontalProfile = await _imageStore.GetHorizonalProfile(id, start.X, end.X, start.Y);
                 var horizontalLogData = horizontalProfile.Select(x => Math.Log(x + 1)).Reverse().ToArray();
                 // var horizontalLogData = horizontalProfile.Reverse().ToArray();
                 return Ok(JsonSerializer.Serialize(
@@ -52,7 +51,7 @@ namespace Vraith.GisaxsClient.Controllers
                     }));
             }
             
-            double[] verticalProfile = await imageStore.GetVerticalProfile(id, start.Y, end.Y, start.X);
+            double[] verticalProfile = await _imageStore.GetVerticalProfile(id, start.Y, end.Y, start.X);
             var verticalLogData = verticalProfile.Select(x => Math.Log(x + 1)).Reverse().ToArray();
             // var verticalLogData = verticalProfile.Reverse().ToArray();
             
@@ -67,7 +66,7 @@ namespace Vraith.GisaxsClient.Controllers
         [HttpGet("get")]
         public async Task<string> Get(int id, string colormap)
         {
-            var image = await imageStore.Get(id);
+            var image = await _imageStore.Get(id);
             if (image == null)
             {
                 return string.Empty;
@@ -85,7 +84,7 @@ namespace Vraith.GisaxsClient.Controllers
         [RequestSizeLimit(100_000_000)]
         public void Push(Image image)
         {
-            imageStore.Insert(image);
+            _imageStore.Insert(image);
         }
 
         private static byte Normalize(double intensity, double max)

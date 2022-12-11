@@ -10,6 +10,7 @@ namespace Vraith.Gisaxs.Core.RequestHandling
     public class RequestFactory : IRequestFactory
     {
         private readonly IHashComputer _hashComputer;
+
         public RequestFactory(IHashComputer hashComputer)
         {
             _hashComputer = hashComputer;
@@ -23,27 +24,39 @@ namespace Vraith.Gisaxs.Core.RequestHandling
             };
 
             JsonNode? jsonNode = JsonNode.Parse(request);
-            if (jsonNode == null) { return null; }
-
-
-            var clientInfo = jsonNode["clientInfo"];
-            var jobInfo = jsonNode["jobInfo"];
-            
-            var payload = jsonNode as JsonObject;
-            if (payload == null || !payload.Remove("clientInfo"))
+            if (jsonNode == null)
             {
-                throw new ArgumentException("Couldnt remove client info!");
+                return null;
             }
 
-            if (payload == null || clientInfo == null) { return null; }
+
+            JsonNode? clientInfoNode = jsonNode["clientInfo"];
+            JsonNode? jobInfoNode = jsonNode["jobInfo"];
+
+            if (jsonNode is not JsonObject payload || !payload.Remove("clientInfo"))
+            {
+                throw new ArgumentException("Couldn't remove client info!");
+            }
+
+            if (clientInfoNode == null || jobInfoNode == null)
+            {
+                return null;
+            }
 
             var payloadString = payload.ToJsonString();
             string hash = _hashComputer.Hash(payloadString);
 
-            var c = JsonSerializer.Deserialize<ClientInformation>(clientInfo.ToJsonString(), options);
-            var j = JsonSerializer.Deserialize<JobInformation>(jobInfo.ToJsonString(), options);
-            
-            return new Request(new RequestInformation(j, c), dataAccessor, hash, request);
+            ClientInformation? clientInformation =
+                JsonSerializer.Deserialize<ClientInformation>(clientInfoNode.ToJsonString(), options);
+            JobInformation? jobInformation =
+                JsonSerializer.Deserialize<JobInformation>(jobInfoNode.ToJsonString(), options);
+
+            if (clientInformation == null || jobInformation == null)
+            {
+                return null;
+            }
+
+            return new Request(new RequestInformation(jobInformation, clientInformation), dataAccessor, hash, request);
         }
     }
 }
