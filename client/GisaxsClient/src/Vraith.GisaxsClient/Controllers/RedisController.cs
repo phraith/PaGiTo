@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
-using Vraith.GisaxsClient.Utility.ImageTransformations;
+using Vraith.Gisaxs.Configuration;
+using Vraith.Gisaxs.Core.ImageStore;
+using Vraith.Gisaxs.Utility.ImageTransformations;
 
 namespace Vraith.GisaxsClient.Controllers
 {
@@ -30,28 +32,71 @@ namespace Vraith.GisaxsClient.Controllers
             {
                 return NotFound();
             }
-            string data = await db.StringGetAsync(hash);
+
+            string? data = await db.StringGetAsync(hash);
+            if (data == null)
+            {
+                logger.LogError("$data is null", data);
+                return NoContent();
+            }
+
             return Ok(data);
         }
 
         [HttpGet("data")]
-        public async Task<IActionResult> GetData(string hash, string colormapName)
+        public async Task<IActionResult> GetData(string hash)
         {
-            var keyData = $"{hash}-simple";
-            var keyWidth = $"{hash}-width";
-            var keyHeight = $"{hash}-height";
-
             IDatabase db = connection.GetDatabase();
-            if (!db.KeyExists(keyData) || !db.KeyExists(keyWidth) || !db.KeyExists(keyHeight)) { return NotFound(); }
-            byte[] data = await db.StringGetAsync(keyData);
-            string heightAsString = await db.StringGetAsync(keyHeight);
-            string widthAsString = await db.StringGetAsync(keyWidth);
+            if (!db.KeyExists(hash))
+            {
+                return NotFound();
+            }
 
-            int height = int.Parse(heightAsString);
-            int width = int.Parse(widthAsString);
+            byte[]? dim = await db.StringGetRangeAsync(hash, 0, 2 * sizeof(int));
+
+            int width = BitConverter.ToInt32(dim, 0);
+            int height = BitConverter.ToInt32(dim, sizeof(int));
+
+            int start = 2 * sizeof(int);
+            int end = 2 * sizeof(int) + width * height * sizeof(double);
+            byte[]? data = await db.StringGetRangeAsync(hash, start, end);
+
+            double[] modifiedData = new double[data.Length / 8];
+            Buffer.BlockCopy(data, 0, modifiedData, 0, modifiedData.Length * 8);
+            var logData = modifiedData.Select(x => Math.Log(x + 1)).Reverse().ToArray();
+            return Ok(JsonSerializer.Serialize(
+                new NumericResult(logData, width, height), new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                }));
+        }
+        
+        [HttpGet("image")]
+        public async Task<IActionResult> GetImage(string hash, string colormapName)
+        {
+            IDatabase db = connection.GetDatabase();
+            if (!db.KeyExists(hash))
+            {
+                return NotFound();
+            }
+
+            byte[]? dim = await db.StringGetRangeAsync(hash, 0, 2 * sizeof(int));
+
+            int width = BitConverter.ToInt32(dim, 0);
+            int height = BitConverter.ToInt32(dim, sizeof(int));
+
+            int start = 2 * sizeof(int);
+            int end = 2 * sizeof(int) + width * height;
+            byte[]? data = await db.StringGetRangeAsync(hash, start, end);
 
             string modifiedData = AppearanceModifier.ApplyColorMap(data, width, height, true, colormapName);
-            return Ok(JsonSerializer.Serialize(new FinalResult() { data = modifiedData, width = width, height = height }));
+            return Ok(JsonSerializer.Serialize(
+                new JpegResult(modifiedData, width, height), new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                }));
         }
     }
+
+    public record NumericResult(double[] ModifiedData, int Width, int Height);
 }

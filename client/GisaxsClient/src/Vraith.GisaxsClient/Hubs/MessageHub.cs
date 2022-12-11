@@ -6,15 +6,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
+using Vraith.Gisaxs.Configuration;
+using Vraith.Gisaxs.Core.RequestHandling;
+using Vraith.Gisaxs.Utility.HashComputer;
+using Vraith.Gisaxs.Utility.LineProfile;
 using Vraith.GisaxsClient.Controllers;
-using Vraith.GisaxsClient.Core.RequestHandling;
-using Vraith.GisaxsClient.Utility.HashComputer;
-using Vraith.GisaxsClient.Utility.LineProfile;
 
 namespace Vraith.GisaxsClient.Hubs
 {
-
-    [Authorize]
     public class MessageHub : Hub
     {
         private readonly IRequestHandler requestHandler;
@@ -23,103 +22,79 @@ namespace Vraith.GisaxsClient.Hubs
 
         public MessageHub(IOptionsMonitor<ConnectionStrings> connectionStrings)
         {
-            requestHandler = new MajordomoRequestHandler(connectionStrings);
-            hashComputer = new Sha256HashComputer();
+            requestHandler = RequestHandlerFactory.CreateMajordomoRequestHandler(connectionStrings);
+            hashComputer = HashComputerFactory.CreateSha256HashComputer();
             this.connection = ConnectionMultiplexer.Connect(connectionStrings.CurrentValue.Redis);
         }
 
-        public async Task IssueJob(string stringRequest)
+        [Authorize]
+        public async Task IssueJob(string stringRequest, string colormap)
         {
             IRequestFactory factory = new RequestFactory(hashComputer);
-            Request? request = factory.CreateRequest(stringRequest);
+            Request? request = factory.CreateRequest(stringRequest, "ReceiveJobId");
 
-            if (request == null) { return; }
+            if (request == null)
+            {
+                return;
+            }
 
             await Clients.All.SendAsync("ReceiveJobInfos", $"hash={request.InfoHash}");
 
             RequestResult? result = requestHandler.HandleRequest(request);
-            if (result == null) { return; }
+            if (result == null)
+            {
+                return;
+            }
 
-            await Clients.Caller.SendAsync(result.Command, result.Body);
+            await Clients.Caller.SendAsync(result.SignalREndpoint, result.DataAccessor, colormap);
         }
 
+        [Authorize]
         public async Task GetProfiles(string stringRequest)
         {
-            var options = new JsonSerializerOptions
+            IRequestFactory factory = new RequestFactory(hashComputer);
+            Request? request = factory.CreateRequest(stringRequest, "ProcessLineprofiles");
+
+            if (request == null)
             {
-                PropertyNameCaseInsensitive = true
-            };
-
-            JsonNode? jsonNode = JsonNode.Parse(stringRequest);
-            if (jsonNode == null) { return; }
-
-            var info = jsonNode["profiles"];
-
-            var config = jsonNode["config"];
-            if (config == null || info == null) { return; }
-
-            var profileInfos = new List<LineProfileInfo>();
-            foreach (KeyValuePair<string, JsonNode?> node in info.AsObject())
-            {
-                LineProfileInfo? profile = node.Value.Deserialize<LineProfileInfo>(options);
-                if (profile != null) { profileInfos.Add(profile); }
+                return;
             }
 
-            var hash = hashComputer.Hash(config.ToString());
-            IDatabase db = connection.GetDatabase();
+            await Clients.All.SendAsync("ReceiveJobInfos", $"hash={request.InfoHash}");
 
-            var keyWidth = $"{hash}-width";
-            var keyHeight = $"{hash}-height";
+            RequestResult? result = requestHandler.HandleRequest(request);
 
-
-            if (!db.KeyExists(keyWidth) || !db.KeyExists(keyHeight)) { return; }
-
-            string heightAsString = await db.StringGetAsync(keyHeight);
-            string widthAsString = await db.StringGetAsync(keyWidth);
-
-            int height = int.Parse(heightAsString);
-            int width = int.Parse(widthAsString);
-
-            var profiles = new List<LineProfile>();
-            foreach (var profileInfo in profileInfos)
+            if (result == null)
             {
-                var start = profileInfo.AbsoluteStart(width, height);
-                var end = profileInfo.AbsoluteEnd(width, height);
-
-                if ((int)start.X == (int)end.X)
-                {
-                    var verticalLp = await GetLineprofile(db, LineprofileType.Vertical, hash, (int)start.X, height);
-                    if (verticalLp != null)
-                    {
-                        profiles.Add(verticalLp);
-                    }
-                }
-                else if ((int)start.Y == (int)end.Y)
-                {
-                    var horizontalLp = await GetLineprofile(db, LineprofileType.Horizontal, hash, (int)start.Y, width);
-                    if (horizontalLp != null)
-                    {
-                        profiles.Add(horizontalLp);
-                    }
-                }
+                return;
             }
 
-            await Clients.Caller.SendAsync("ProcessLineprofiles", $"{{\"profiles\": {JsonSerializer.Serialize(profiles)}}}");
+            await Clients.Caller.SendAsync(result.SignalREndpoint, result.DataAccessor);
         }
 
-        private static async Task<LineProfile?> GetLineprofile(IDatabase db, LineprofileType lpType, string basicDataHash, int invariantPixelPosition, int axisDimension)
+        private static async Task<LineProfile?> GetLineprofile(IDatabase db, LineprofileType lpType,
+            string basicDataHash, int invariantPixelPosition, int axisDimension)
         {
             string accessor = DataAccessor(lpType, basicDataHash, invariantPixelPosition);
-            if (!db.KeyExists(accessor)) { return null; }
+            if (!db.KeyExists(accessor))
+            {
+                return null;
+            }
+
             byte[] data = await db.StringGetAsync(accessor);
 
-            if (data.Length != sizeof(double) * axisDimension) { return null; }
+            if (data.Length != sizeof(double) * axisDimension)
+            {
+                return null;
+            }
+
             var profileData = new double[axisDimension];
             for (int i = 0; i < axisDimension; ++i)
             {
                 int startIndex = i * sizeof(double);
                 profileData[i] = Math.Log(BitConverter.ToDouble(data, startIndex));
             }
+
             return new LineProfile(profileData);
         }
 

@@ -3,8 +3,8 @@ using System.Text;
 using System.Text.Json;
 using Spectre.Cli;
 using Spectre.Console;
-using Vraith.ImageStoreClient.ImageUtility;
-using Vraith.ImageStoreClient.ImageUtility.ImageLoaders;
+using Vraith.Gisaxs.Utility.Images;
+using Vraith.Gisaxs.Utility.Images.ImageLoaders;
 
 namespace Vraith.ImageStoreClient.CommandLineInterface.Commands
 {

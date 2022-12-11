@@ -1,4 +1,4 @@
-using Vraith.ImageStoreClient.ImageUtility.ImageLoaders;
+using Vraith.Gisaxs.Utility.Images.ImageLoaders;
 
 namespace Vraith.ImageStoreClient.Tests
 {

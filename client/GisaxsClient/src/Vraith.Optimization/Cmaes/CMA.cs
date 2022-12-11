@@ -46,10 +46,9 @@ namespace Vraith.Optimization.Cmaes
         public int Generation { get; private set; }
 
 
-        public CMA(IList<double> mean, double sigma, Matrix<double> bounds = null, int nMaxResampling = 100, int seed = 0, double tol_sigma = 1e-4, double tol_C = 1e-4)
+        public CMA(IList<double> mean, double sigma, Matrix<double> bounds = null, int nMaxResampling = 100,
+            int seed = 0, double tol_sigma = 1e-4, double tol_C = 1e-4)
         {
-
-
             if (!(sigma > 0))
             {
                 throw new ArgumentOutOfRangeException("sigma must be non-zero positive value");
@@ -61,7 +60,7 @@ namespace Vraith.Optimization.Cmaes
                 throw new ArgumentOutOfRangeException("The dimension of mean must be larger than 1");
             }
 
-            int populationSize = 4 + (int)Math.Floor(3 * Math.Log(nDim));  // # (eq. 48)
+            int populationSize = 4 + (int)Math.Floor(3 * Math.Log(nDim)); // # (eq. 48)
 
             int mu = populationSize / 2;
 
@@ -74,21 +73,25 @@ namespace Vraith.Optimization.Cmaes
             Vector<double> weightsPrimeMuEff = Vector<double>.Build.Dense(weightsPrime.Take(mu).ToArray());
             double mu_eff = Math.Pow(weightsPrimeMuEff.Sum(), 2) / Math.Pow(weightsPrimeMuEff.L2Norm(), 2);
             Vector<double> weightsPrimeMuEffMinus = Vector<double>.Build.Dense(weightsPrime.Skip(mu).ToArray());
-            double muEffMinus = Math.Pow(weightsPrimeMuEffMinus.Sum(), 2) / Math.Pow(weightsPrimeMuEffMinus.L2Norm(), 2);
+            double muEffMinus = Math.Pow(weightsPrimeMuEffMinus.Sum(), 2) /
+                                Math.Pow(weightsPrimeMuEffMinus.L2Norm(), 2);
 
             int alphacCov = 2;
             double c1 = alphacCov / (Math.Pow(nDim + 1.3, 2) + mu_eff);
-            double cmu = Math.Min(1 - c1, alphacCov * (mu_eff - 2 + 1 / mu_eff) / (Math.Pow(nDim + 2, 2) + alphacCov * mu_eff / 2));
+            double cmu = Math.Min(1 - c1,
+                alphacCov * (mu_eff - 2 + 1 / mu_eff) / (Math.Pow(nDim + 2, 2) + alphacCov * mu_eff / 2));
             if (!(c1 <= 1 - cmu))
             {
                 throw new Exception("invalid learning rate for the rank-one update");
             }
+
             if (!(cmu <= 1 - c1))
             {
                 throw new Exception("invalid learning rate for the rank-μ update");
             }
 
-            double minAlpha = Math.Min(1 + c1 / cmu, Math.Min(1 + 2 * muEffMinus / (mu_eff + 2), (1 - c1 - cmu) / (nDim * cmu)));
+            double minAlpha = Math.Min(1 + c1 / cmu,
+                Math.Min(1 + 2 * muEffMinus / (mu_eff + 2), (1 - c1 - cmu) / (nDim * cmu)));
 
             double positiveSum = weightsPrime.Where(x => x > 0).Sum();
             double negativeSum = Math.Abs(weightsPrime.Where(x => x < 0).Sum());
@@ -98,8 +101,11 @@ namespace Vraith.Optimization.Cmaes
             bool[] weightsIsNotNegative = weightsPrime.Select(x => x >= 0).ToArray();
             for (int i = 0; i < weights.Count; i++)
             {
-                weights[i] = weightsIsNotNegative[i] ? 1 / positiveSum * weightsPrime[i] : minAlpha / negativeSum * weightsPrime[i];
+                weights[i] = weightsIsNotNegative[i]
+                    ? 1 / positiveSum * weightsPrime[i]
+                    : minAlpha / negativeSum * weightsPrime[i];
             }
+
             int cm = 1;
 
             double c_sigma = (mu_eff + 2) / (nDim + mu_eff + 5);
@@ -142,6 +148,7 @@ namespace Vraith.Optimization.Cmaes
             {
                 throw new Exception("bounds should be (n_dim, 2)-dim matrix");
             }
+
             _bounds = bounds;
             _n_max_resampling = nMaxResampling;
 
@@ -168,7 +175,8 @@ namespace Vraith.Optimization.Cmaes
             _C = (_C + _C.Transpose()) / 2;
             Evd<double> evd_C = _C.Evd();
             Matrix<double> B = evd_C.EigenVectors;
-            Vector<double> D = Vector<double>.Build.DenseOfArray(evd_C.EigenValues.Select(x => RootTemp(x.Real)).ToArray());
+            Vector<double> D =
+                Vector<double>.Build.DenseOfArray(evd_C.EigenValues.Select(x => RootTemp(x.Real)).ToArray());
 
             var diagSquaredD = Matrix<double>.Build.DiagonalOfDiagonalArray(D.AsArray().Select(x => x * x).ToArray());
             var bTimesDiagSquaredD = B * diagSquaredD;
@@ -179,11 +187,11 @@ namespace Vraith.Optimization.Cmaes
 
         public static (Matrix<double> B, Vector<double> D) EigenDecomposition2(Matrix<double> C)
         {
-
             C = (C + C.Transpose()) / 2;
             Evd<double> evd_C = C.Evd();
             Matrix<double> B = evd_C.EigenVectors;
-            Vector<double> D = Vector<double>.Build.DenseOfArray(evd_C.EigenValues.Select(x => RootTemp(x.Real)).ToArray());
+            Vector<double> D =
+                Vector<double>.Build.DenseOfArray(evd_C.EigenValues.Select(x => RootTemp(x.Real)).ToArray());
 
             var diagSquaredD = Matrix<double>.Build.DiagonalOfDiagonalArray(D.AsArray().Select(x => x * x).ToArray());
             var bTimesDiagSquaredD = B * diagSquaredD;
@@ -199,7 +207,6 @@ namespace Vraith.Optimization.Cmaes
 
         public bool ShouldStop()
         {
-
             (Matrix<double> B, Vector<double> D) = EigenDecomposition();
 
             var dC = _C.Diagonal();
@@ -224,8 +231,9 @@ namespace Vraith.Optimization.Cmaes
                 return true;
             }
 
-            int i = Generation / Dim;
-            if (D.Select((x, i) => (x, i)).All(entry => _mean == _mean + 0.1 * _sigma * entry.x * B.Row(entry.i)))
+            int i = Generation % Dim;
+
+            if (B.Column(i).All(b => _mean == _mean + 0.1 * _sigma * D[i] * b))
             {
                 return true;
             }
@@ -250,6 +258,7 @@ namespace Vraith.Optimization.Cmaes
             {
                 throw new Exception("bounds should be (n_dim, 2)-dim matrix");
             }
+
             _bounds = bounds;
         }
 
@@ -258,8 +267,12 @@ namespace Vraith.Optimization.Cmaes
             for (int i = 0; i < _n_max_resampling; i++)
             {
                 Vector<double> x = SampleSolution();
-                if (IsFeasible(x)) { return x; }
+                if (IsFeasible(x))
+                {
+                    return x;
+                }
             }
+
             Vector<double> xNew = SampleSolution();
             xNew = RepairInfeasibleParams(xNew);
             return xNew;
@@ -291,7 +304,8 @@ namespace Vraith.Optimization.Cmaes
             Matrix<double> y_k = Matrix<double>.Build.DenseOfRowVectors(yKRows);
 
             // Selection and recombination
-            Vector<double> y_w = PointwiseMultiplicationOnRows(y_k.SubMatrix(0, _mu, 0, Dim).Transpose(), _weights.SubVector(0, _mu));
+            Vector<double> y_w = PointwiseMultiplicationOnRows(y_k.SubMatrix(0, _mu, 0, Dim).Transpose(),
+                _weights.SubVector(0, _mu));
             _mean += _cm * _sigma * y_w;
 
             var diag = Matrix<double>.Build.DenseOfDiagonalArray((1.0 / D).AsArray());
@@ -337,16 +351,17 @@ namespace Vraith.Optimization.Cmaes
             {
                 rank_mu += w_io[i] * y_k.Row(i).OuterProduct(y_k.Row(i));
             }
+
             _C =
-                    (
+                (
                     1
                     + _c1 * delta_h_sigma
                     - _c1
                     - _cmu * _weights.Sum()
-                    )
-                    * _C
-                    + _c1 * rank_one
-                    + _cmu * rank_mu
+                )
+                * _C
+                + _c1 * rank_one
+                + _cmu * rank_mu
                 ;
         }
 
@@ -356,6 +371,7 @@ namespace Vraith.Optimization.Cmaes
             {
                 return param;
             }
+
             Vector<double> newParam = param.PointwiseMaximum(_bounds.Column(0));
             newParam = newParam.PointwiseMinimum(_bounds.Column(1));
             return newParam;
@@ -367,6 +383,7 @@ namespace Vraith.Optimization.Cmaes
             {
                 return true;
             }
+
             bool isCorrectLower = true;
             bool isCorrectUpper = true;
             for (int i = 0; i < param.Count; i++)
@@ -374,6 +391,7 @@ namespace Vraith.Optimization.Cmaes
                 isCorrectLower &= param[i] >= _bounds[i, 0];
                 isCorrectUpper &= param[i] <= _bounds[i, 1];
             }
+
             return isCorrectLower & isCorrectUpper;
         }
 
@@ -386,6 +404,7 @@ namespace Vraith.Optimization.Cmaes
             {
                 z[i] = _normalDistribution.Sample();
             }
+
             var h = B * Matrix<double>.Build.DenseOfDiagonalArray(D.AsArray());
             var y = PointwiseMultiplicationOnRows(h, z);
             Vector<double> x = _mean + _sigma * y;

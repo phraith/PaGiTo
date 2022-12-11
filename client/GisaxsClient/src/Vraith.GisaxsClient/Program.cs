@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Http.Json;
+using Vraith.Gisaxs.Configuration;
 using Vraith.GisaxsClient.Configuration;
 using Vraith.GisaxsClient.Controllers;
 using Vraith.GisaxsClient.Hubs;
@@ -65,6 +67,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 builder.Services.AddSpaStaticFiles(configuration =>
 {
     configuration.RootPath = "gisaxs-client-app/dist";
+});
+
+builder.Services.Configure<JsonOptions>(options =>
+{
+    options.SerializerOptions.PropertyNameCaseInsensitive = true;
 });
 
 var app = builder.Build();
