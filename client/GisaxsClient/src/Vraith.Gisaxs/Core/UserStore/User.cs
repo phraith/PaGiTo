@@ -1,9 +1,4 @@
 ﻿namespace Vraith.Gisaxs.Core.UserStore
 {
-    public class User
-    {
-        public long UserId { get; set; }
-        public byte[] PasswordHash { get; set; }
-        public byte[] PasswordSalt { get; set; }
-    }
+    public record User(long UserId, IReadOnlyList<byte> PasswordHash, IReadOnlyList<byte> PasswordSalt);
 }

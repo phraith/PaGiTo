@@ -8,20 +8,20 @@ namespace Vraith.Gisaxs.Core.Connection
 {
     public class MajordomoClient : IDisposable
     {
-        private readonly string ip;
-        private DealerSocket client;
-        private readonly TimeSpan timeout;
+        private readonly string _ip;
+        private DealerSocket _client;
+        private readonly TimeSpan _timeout;
 
         public MajordomoClient(string connectionString)
         {
-            ip = connectionString;
-            client = new DealerSocket(connectionString);
-            timeout = TimeSpan.FromMilliseconds(50000);
+            _ip = connectionString;
+            _client = new DealerSocket(connectionString);
+            _timeout = TimeSpan.FromMilliseconds(50000);
         }
 
         public void Dispose()
         {
-            client.Dispose();
+            _client.Dispose();
         }
 
         public void Send(string serviceName, NetMQMessage message)
@@ -29,13 +29,13 @@ namespace Vraith.Gisaxs.Core.Connection
             message.Push(serviceName);
             message.Push("MDPC01");
             message.PushEmptyFrame();
-            client.SendMultipartMessage(message);
+            _client.SendMultipartMessage(message);
         }
 
         public NetMQMessage? Receive(string serviceName)
         {
             NetMQMessage? reply = null;
-            if (!client.TryReceiveMultipartMessage(timeout, ref reply))
+            if (!_client.TryReceiveMultipartMessage(_timeout, ref reply))
             {
                 return reply;
             }

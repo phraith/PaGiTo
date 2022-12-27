@@ -1,4 +1,3 @@
-using Dapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
@@ -6,7 +5,6 @@ using System.Text;
 using Microsoft.AspNetCore.Http.Json;
 using Vraith.Gisaxs.Configuration;
 using Vraith.GisaxsClient.Configuration;
-using Vraith.GisaxsClient.Controllers;
 using Vraith.GisaxsClient.Hubs;
 
 
@@ -15,10 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 if (LaunchConfig.LaunchMode == LaunchMode.Kubernetes)
 {
-    builder.WebHost.ConfigureAppConfiguration(webBuilder => 
-    {
-        webBuilder.SetBasePath("/vault/secrets/").AddJsonFile("appsettings.json", false, true);
-    });
+    builder.Configuration.SetBasePath("/vault/secrets/").AddJsonFile("appsettings.json", false, true);
 }
 
 builder.Services.AddControllersWithViews();
@@ -37,10 +32,18 @@ builder.Services.AddAuthorization(auth =>
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
+    string? authOptionsToken = builder.Configuration.GetSection("AuthOptions:Token").Value;
+    if (authOptionsToken == null)
+    {
+        throw new ArgumentNullException(nameof(authOptionsToken));
+    }
+
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("AuthOptions:Token").Value)),
+        IssuerSigningKey =
+            new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(authOptionsToken)),
         ValidateIssuer = false,
         ValidateAudience = false
     };
@@ -49,8 +52,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     {
         OnMessageReceived = context =>
         {
-
-            string accessToken = context.Request.Query["access_token"];
+            string? accessToken = context.Request.Query["access_token"];
             // If the request is for our hub...
             var path = context.HttpContext.Request.Path;
             if (!string.IsNullOrEmpty(accessToken) &&
@@ -59,20 +61,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
                 // Read the token out of the query string
                 context.Token = accessToken;
             }
+
             return Task.CompletedTask;
         }
     };
 });
 
-builder.Services.AddSpaStaticFiles(configuration =>
-{
-    configuration.RootPath = "gisaxs-client-app/dist";
-});
+builder.Services.AddSpaStaticFiles(configuration => { configuration.RootPath = "gisaxs-client-app/dist"; });
 
-builder.Services.Configure<JsonOptions>(options =>
-{
-    options.SerializerOptions.PropertyNameCaseInsensitive = true;
-});
+builder.Services.Configure<JsonOptions>(options => { options.SerializerOptions.PropertyNameCaseInsensitive = true; });
 
 var app = builder.Build();
 
@@ -91,16 +88,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseSpaStaticFiles();
-app.UseSpa(spa =>
-{
-    spa.Options.SourcePath = "gisaxs-client-app";
-});
+app.UseSpa(spa => { spa.Options.SourcePath = "gisaxs-client-app"; });
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllerRoute(
-        name: "default",
-        pattern: "{controller}/{action=Index}/{id?}");
-});
+app.MapControllerRoute(name: "default",
+    pattern: "{controller}/{action=Index}/{id?}");
+
 app.MapHub<MessageHub>("/message");
 app.Run();

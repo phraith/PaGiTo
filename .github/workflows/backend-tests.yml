@@ -1,0 +1,36 @@
+name: Gisaxs Backend Tests
+
+on: push
+jobs:
+  test:
+    name: Run test suite
+    runs-on: ubuntu-latest
+    env:
+      COMPOSE_FILE: docker-compose.yml
+      DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{secrets.REGISTRY}}
+          username: ${{secrets.DOCKER_USER}}
+          password: ${{secrets.DOCKER_TOKEN}}
+
+      - name: Build docker images
+        run: docker-compose build backend_tests
+
+      - name: Run tests
+        run: docker-compose run backend_tests
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: Client Tests
+          path: "/reports/backend/test-results.xml"
+          reporter: java-junit

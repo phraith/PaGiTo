@@ -31,4 +31,3 @@ FROM base AS final
 RUN apk update && apk add build-base
 WORKDIR /app
 COPY --from=build /src/build .
-ENTRYPOINT ["./apps/ModelingFramework/ModelingFramework"]

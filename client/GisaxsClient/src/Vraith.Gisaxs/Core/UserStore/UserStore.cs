@@ -8,10 +8,10 @@ namespace Vraith.Gisaxs.Core.UserStore
 {
     public class UserStore
     {
-        private readonly string connectionString;
+        private readonly string _connectionString;
         public UserStore(string connectionString)
         {
-            this.connectionString = connectionString;
+            this._connectionString = connectionString;
             using IDbConnection connection = new NpgsqlConnection(connectionString);
             connection.Execute(
                 @$"CREATE TABLE IF NOT EXISTS users (
@@ -23,25 +23,25 @@ namespace Vraith.Gisaxs.Core.UserStore
 
         public async Task<IEnumerable<User>> Get()
         {
-            using IDbConnection connection = new NpgsqlConnection(connectionString);
+            using IDbConnection connection = new NpgsqlConnection(_connectionString);
             return await connection.QueryAsync<User>(@"SELECT * FROM users");
         }
 
         public async Task<IEnumerable<User>> Get(long id)
         {
-            using IDbConnection connection = new NpgsqlConnection(connectionString);
+            using IDbConnection connection = new NpgsqlConnection(_connectionString);
             return await connection.QueryAsync<User>(@$"SELECT * FROM users WHERE Id = {id}");
         }
 
         public async void Delete(long id)
         {
-            using IDbConnection connection = new NpgsqlConnection(connectionString);
+            using IDbConnection connection = new NpgsqlConnection(_connectionString);
             await connection.ExecuteAsync($@"DELETE * FROM users WHERE Id = {id}");
         }
 
         public async void Insert(User user)
         {
-            using IDbConnection connection = new NpgsqlConnection(connectionString);
+            using IDbConnection connection = new NpgsqlConnection(_connectionString);
             await connection.ExecuteAsync($@"
                     INSERT INTO users (userid, passwordsalt, passwordhash)
                     VALUES ({user.UserId}, @salt, @hash)",

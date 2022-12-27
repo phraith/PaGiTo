@@ -29,7 +29,7 @@ const JobsTable = (props: JobsTableProps) => {
       .then((data) => data.map(entry => {
         return {
           id: entry.id,
-          info: entry.info,
+          info: entry.jobInfo,
         }
       })
       )
