@@ -1,7 +1,0 @@
-version: "2"
-services:
- device:
-  build: .
-  command: bash -c "cd source && ./build.sh && ./build/apps/ModelSimulator/ModelSimulator"
-  volumes:
-      - C:/temp/source:/source

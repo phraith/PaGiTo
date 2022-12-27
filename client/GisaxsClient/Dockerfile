@@ -17,12 +17,13 @@ FROM build AS publish
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash
 RUN apt-get update 
 RUN apt-get install -y nodejs
-
 RUN dotnet publish "Vraith.GisaxsClient.csproj" -c Release -o /app/publish
 
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS tests
+COPY . .
+RUN  for i in `find . -name "*.Tests.csproj" -type f`; do dotnet add $i package JUnitTestLogger; dotnet add $i package coverlet.collector; done
 
 FROM base AS final
-# RUN apt-get update && apt-get install -y redis-tools
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Vraith.GisaxsClient.dll"]
