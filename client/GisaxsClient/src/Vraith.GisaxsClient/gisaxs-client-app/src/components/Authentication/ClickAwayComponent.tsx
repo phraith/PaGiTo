@@ -1,7 +1,7 @@
 import ClickAwayListener from "@mui/base/ClickAwayListener/ClickAwayListener";
 import Box from "@mui/material/Box/Box";
 import Button from "@mui/material/Button/Button";
-import React from "react";
+import * as React from "react";
 
 interface ClickAwayComponentProps {
     description: string;

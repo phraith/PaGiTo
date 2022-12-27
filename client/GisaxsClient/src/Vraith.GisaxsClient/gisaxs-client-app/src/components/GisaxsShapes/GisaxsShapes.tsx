@@ -7,7 +7,7 @@ import Menu from "@mui/material/Menu"
 import Typography from "@mui/material/Typography"
 import List from "@mui/material/List"
 import ListItem from "@mui/material/ListItem"
-import React, { useEffect } from "react";
+import { useState, useEffect } from "react";
 import Cylinder from "./Cylinder";
 import Sphere from "./Sphere";
 import { v4 as uuidv4 } from "uuid";
@@ -24,9 +24,9 @@ interface GisaxsShapesProps {
 }
 
 const GisaxsShapes = (props: GisaxsShapesProps) => {
-  const [shapes, setShapes] = React.useState<any>([]);
-  const [anchorEl, setAnchor] = React.useState(null);
-  const [jsonData, setJsonData] = React.useState({});
+  const [shapes, setShapes] = useState<any>([]);
+  const [anchorEl, setAnchor] = useState(null);
+  const [jsonData, setJsonData] = useState({});
 
   const localStorageEntityName: string = "shapesConfig";
   const configFieldName: string = "shapes";

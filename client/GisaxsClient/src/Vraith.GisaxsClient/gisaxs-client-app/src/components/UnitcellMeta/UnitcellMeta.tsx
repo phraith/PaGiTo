@@ -8,7 +8,7 @@ import Grid from "@mui/material/Grid"
 import Typography from "@mui/material/Typography"
 import TextField from "@mui/material/TextField"
 import Stack from "@mui/material/Stack"
-import React, { useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   SetLocalStorageEntity,
   UnitcellMetaConfig,
@@ -20,12 +20,12 @@ interface UnitcellMetaProps {
 }
 
 const UnitcellMeta = (props: UnitcellMetaProps) => {
-  const [repX, setRepX] = React.useState(UnitcellMetaConfig.repetitions.x);
-  const [repY, setRepY] = React.useState(UnitcellMetaConfig.repetitions.y);
-  const [repZ, setRepZ] = React.useState(UnitcellMetaConfig.repetitions.z);
-  const [posX, setPosX] = React.useState(UnitcellMetaConfig.translation.x);
-  const [posY, setPosY] = React.useState(UnitcellMetaConfig.translation.y);
-  const [posZ, setPosZ] = React.useState(UnitcellMetaConfig.translation.z);
+  const [repX, setRepX] = useState(UnitcellMetaConfig.repetitions.x);
+  const [repY, setRepY] = useState(UnitcellMetaConfig.repetitions.y);
+  const [repZ, setRepZ] = useState(UnitcellMetaConfig.repetitions.z);
+  const [posX, setPosX] = useState(UnitcellMetaConfig.translation.x);
+  const [posY, setPosY] = useState(UnitcellMetaConfig.translation.y);
+  const [posZ, setPosZ] = useState(UnitcellMetaConfig.translation.z);
 
   const localStorageEntityName: string = "unitcellMetaConfig";
   const configFieldName: string = "unitcellMeta";

@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid/DataGrid';
 import { Box } from '@mui/material';
-import React from 'react';
+import { memo, useState, useEffect } from 'react';
 import { ImageInfo } from '../../utility/ImageInfo';
 import { JobInfo } from '../../utility/JobInfo';
 
@@ -45,4 +44,4 @@ const JobsTable = (props: JobsTableProps) => {
   );
 }
 
-export default React.memo(JobsTable)
+export default memo(JobsTable)

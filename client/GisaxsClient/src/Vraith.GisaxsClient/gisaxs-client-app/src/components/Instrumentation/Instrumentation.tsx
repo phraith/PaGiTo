@@ -8,7 +8,7 @@ import Grid from "@mui/material/Grid"
 import Typography from "@mui/material/Typography"
 import TextField from "@mui/material/TextField"
 
-import React, { useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   InstrumentationConfig,
   SetLocalStorageEntity,
@@ -22,30 +22,30 @@ interface InstrumentationProps {
 }
 
 const Instrumentation = ({ initialResX = 0, initialResY = 0, ...props }) => {
-  const [alphaI, setAlphaI] = React.useState(InstrumentationConfig.beam.alphai);
-  const [photonEv, setPhotonEv] = React.useState(
+  const [alphaI, setAlphaI] = useState(InstrumentationConfig.beam.alphai);
+  const [photonEv, setPhotonEv] = useState(
     InstrumentationConfig.beam.photonEv
   );
-  const [beamX, setBeamX] = React.useState(
+  const [beamX, setBeamX] = useState(
     InstrumentationConfig.detector.beamImpact.x
   );
-  const [beamY, setBeamY] = React.useState(
+  const [beamY, setBeamY] = useState(
     InstrumentationConfig.detector.beamImpact.y
   );
 
   let resWidth = initialResX == 0 ? InstrumentationConfig.detector.resolution.width : initialResX
   let resHeight = initialResY == 0 ? InstrumentationConfig.detector.resolution.height : initialResY
 
-  const [resX, setResX] = React.useState(
+  const [resX, setResX] = useState(
     resWidth
   );
-  const [resY, setResY] = React.useState(
+  const [resY, setResY] = useState(
     resHeight
   );
-  const [pixelsize, setPixelsize] = React.useState(
+  const [pixelsize, setPixelsize] = useState(
     InstrumentationConfig.detector.pixelsize
   );
-  const [sampleDistance, setSampleDistance] = React.useState(
+  const [sampleDistance, setSampleDistance] = useState(
     InstrumentationConfig.detector.sampleDistance
   );
 

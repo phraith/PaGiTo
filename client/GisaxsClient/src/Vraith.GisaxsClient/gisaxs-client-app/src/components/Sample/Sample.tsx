@@ -5,7 +5,7 @@ import CardContent from "@mui/material/CardContent"
 import Typography from "@mui/material/Typography"
 import List from "@mui/material/List"
 import ListItem from "@mui/material/ListItem"
-import React, { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
   LayerConfig,
@@ -19,8 +19,8 @@ interface SampleProps {
 }
 
 const Sample = (props: SampleProps) => {
-  const [jsonData, setJsonData] = React.useState({});
-  const [layers, setLayers] = React.useState<any>([]);
+  const [jsonData, setJsonData] = useState({});
+  const [layers, setLayers] = useState<any>([]);
 
   const localStorageEntityName: string = "sampleConfig";
   const configFieldName: string = "sample";

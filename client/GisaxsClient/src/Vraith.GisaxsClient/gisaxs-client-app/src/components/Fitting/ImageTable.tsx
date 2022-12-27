@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid/DataGrid';
 import { Box } from '@mui/material';
-import React from 'react';
+import { memo, useState, useEffect } from 'react';
 import { ImageInfo } from '../../utility/ImageInfo';
 
 interface ImageTableProps {
@@ -51,4 +50,4 @@ const ImageTable = (props: ImageTableProps) => {
   );
 }
 
-export default React.memo(ImageTable)
+export default memo(ImageTable)

@@ -4,11 +4,11 @@ import Card from "@mui/material/Card"
 import TextField from "@mui/material/TextField"
 import Stack from "@mui/material/Stack"
 import ListItem from "@mui/material/ListItem"
-import React from "react";
+import { useState } from "react";
 
 const Register = () => {
-  const [currentPassword, setCurrentPassword] = React.useState("");
-  const [currentUsername, setCurrentUsername] = React.useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [currentUsername, setCurrentUsername] = useState("");
 
   const handleRegister = () => {
     const requestOptions = {

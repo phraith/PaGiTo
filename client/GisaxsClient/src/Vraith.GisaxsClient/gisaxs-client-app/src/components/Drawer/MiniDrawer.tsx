@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState, forwardRef, useEffect } from "react";
 import { styled, useTheme, Theme, CSSObject } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
@@ -19,7 +19,6 @@ import Login from "../Authentication/Login";
 import { Link, LinkProps } from "react-router-dom";
 import Register from "../Authentication/Register";
 import ClickAwayComponent from "../Authentication/ClickAwayComponent";
-import { useEffect } from "react";
 import Logout from "../Authentication/Logout";
 import DrawerLink from "./DrawerLink";
 
@@ -96,8 +95,8 @@ const Drawer = styled(MuiDrawer, {
 
 export default function MiniDrawer() {
   const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
-  const [authenticated, setAuthenticated] = React.useState(false)
+  const [open, setOpen] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false)
 
   useEffect(() => {
     window.addEventListener("storage", () => {
@@ -114,15 +113,15 @@ export default function MiniDrawer() {
 
 
 
-  const FittingLink = React.forwardRef<any, Omit<LinkProps, "to">>(
+  const FittingLink = forwardRef<any, Omit<LinkProps, "to">>(
     (props, ref) => <Link ref={ref} to="/fitting" {...props} />
   );
 
-  const SimulationLink = React.forwardRef<any, Omit<LinkProps, "to">>(
+  const SimulationLink = forwardRef<any, Omit<LinkProps, "to">>(
     (props, ref) => <Link ref={ref} to="/simulation" {...props} />
   );
 
-  const JobsLink = React.forwardRef<any, Omit<LinkProps, "to">>(
+  const JobsLink = forwardRef<any, Omit<LinkProps, "to">>(
     (props, ref) => <Link ref={ref} to="/jobs" {...props} />
   );
 
