@@ -6,11 +6,11 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 include(CodeCoverage)
 append_coverage_compiler_flags()
-setup_target_for_coverage_lcov(
+setup_target_for_coverage_gcovr_xml(
             NAME "GisaxsCoverage"
             DEPENDENCIES GisaxsTests  
             EXECUTABLE ./tests/GisaxsTests
-            BASE_DIRECTORY "${PROJECT_SOURCE_DIR}/src"
+            BASE_DIRECTORY "${PROJECT_SOURCE_DIR}"
             EXCLUDE "/usr*" "/opt*" "/src/tests*") 
 
 set(CMAKE_CXX_STANDARD 20)
@@ -18,11 +18,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 include(CheckLanguage)
 check_language(CUDA)
 enable_language(CXX)
-get_property(LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
-message("ALL LANGUAGES: ${LANGUAGES}")
-foreach(LANG ${LANGUAGES})
-    message("${LANG} compiler is \"${CMAKE_${LANG}_COMPILER_ID}\"")
-endforeach()
+
 
 #add_compile_options(-fsanitize=address)
 #add_link_options(-fsanitize=address)
