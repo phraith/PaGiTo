@@ -34,8 +34,6 @@ jobs:
           name: Client Tests
           path: "/reports/client/test-results.trx"
           reporter: dotnet-trx
-      - name: Test
-        run: cat /reports/client/coverage.cobertura.xml
       - name: Run codacy-coverage-reporter
         uses: codacy/codacy-coverage-reporter-action@v1
         with:

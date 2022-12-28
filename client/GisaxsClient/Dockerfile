@@ -10,13 +10,12 @@ WORKDIR /src
 
 COPY . .
 
-WORKDIR "/src/src/Vraith.GisaxsClient"
+WORKDIR /src/src/Vraith.GisaxsClient
 RUN dotnet build "Vraith.GisaxsClient.csproj" -c Release -o /app/build
 
 FROM build AS publish
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash
-RUN apt-get update 
-RUN apt-get install -y nodejs
+RUN apt-get update && apt-get install -y --no-install-recommends nodejs
 RUN dotnet publish "Vraith.GisaxsClient.csproj" -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS tests

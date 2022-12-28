@@ -29,7 +29,13 @@ services:
       context: backend
       dockerfile: Dockerfile.alpine
     # command: tail -f /dev/null
-    command: ./tests/GisaxsTests --gtest_output=xml:/reports/backend/test-results.xml
+    command: 
+      - /bin/sh
+      - -c
+      - |
+        ./tests/GisaxsTests --gtest_output=xml:/reports/backend/test-results.xml
+        make GisaxsCoverage
+        cp -r GisaxsCoverage* /reports/backend
     volumes:
       - /reports:/reports
 

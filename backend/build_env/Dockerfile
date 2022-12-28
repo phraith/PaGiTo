@@ -5,11 +5,9 @@ ENV ASAN_OPTIONS protect_shadow_gap=0:replace_intrin=0:detect_leaks=0
 
 WORKDIR /src
 
-# RUN apt update && apt upgrade -y
-# RUN apt install cmake -y
-# RUN apt-get -y install curl zip git pkg-config
-
-RUN apt-get -y update && apt-get -y install openssh-server gcc cmake git zip curl ninja-build pkg-config
+RUN apt-get -y update && apt-get -y --no-install-recommends install openssh-server gcc cmake git zip curl ninja-build pkg-config gdb \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
 RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg
 WORKDIR /opt/vcpkg
@@ -20,8 +18,6 @@ RUN ./vcpkg install gtest
 RUN ./vcpkg install nlohmann-json
 RUN ./vcpkg install spdlog
 RUN ./vcpkg install eigen3
-
-RUN apt-get -y install  gdb
 
 WORKDIR /root
 

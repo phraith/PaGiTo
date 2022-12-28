@@ -12,7 +12,12 @@ ENV VCPKG_FORCE_SYSTEM_BINARIES="1"
 WORKDIR /src
 COPY . .
 
-RUN apk update && apk add build-base cmake git zip ninja curl pkgconfig
+RUN apk update && \
+    apk add \
+      --no-cache \
+      --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
+      --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
+      lcov build-base cmake git zip ninja curl pkgconfig
 
 RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg
 WORKDIR /opt/vcpkg
@@ -26,8 +31,9 @@ RUN ./vcpkg install eigen3
 
 WORKDIR /src
 RUN cmake -DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake -B./build -S. && cmake --build ./build
-
-FROM base AS final
-RUN apk update && apk add build-base
-WORKDIR /app
-COPY --from=build /src/build .
+WORKDIR /src/build
+# RUN make GisaxsCoverage
+# FROM base AS final
+# RUN apk update && apk add build-base
+# WORKDIR /app
+# COPY --from=build /src/build .
