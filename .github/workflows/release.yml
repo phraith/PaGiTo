@@ -26,7 +26,7 @@ jobs:
       - name: Build and push client docker image
         uses: docker/build-push-action@v3
         with:
-          context: ./client/GisaxsClient
+          context: ./client
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:latest, ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:$VERSION
           
