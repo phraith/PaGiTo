@@ -10,7 +10,7 @@ WORKDIR /src
 
 COPY . .
 
-WORKDIR /src/src/.GisaxsClient
+WORKDIR /src/src/ParallelGisaxsToolkit.GisaxsClient
 RUN dotnet build "ParallelGisaxsToolkit.GisaxsClient.csproj" -c Release -o /app/build
 
 FROM build AS publish
