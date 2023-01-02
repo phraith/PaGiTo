@@ -14,8 +14,8 @@ namespace Vraith.GisaxsClient.Controllers
 
         public JobStoreController(ILogger<JobStoreController> logger, IConfiguration configuration)
         {
-            this.logger = logger;
-            jobStore = new JobStore(configuration);
+            _logger = logger;
+            _jobStore = new JobStore(configuration);
         }
 
         //[Authorize]

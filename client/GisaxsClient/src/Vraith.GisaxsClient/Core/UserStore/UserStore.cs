@@ -11,7 +11,7 @@ namespace Vraith.GisaxsClient.Core.UserStore
         private readonly string connectionString;
         public UserStore(string connectionString)
         {
-            this.connectionString = connectionString;
+            _connectionString = connectionString;
             using IDbConnection connection = new NpgsqlConnection(connectionString);
             connection.Execute(
                 @$"CREATE TABLE IF NOT EXISTS users (

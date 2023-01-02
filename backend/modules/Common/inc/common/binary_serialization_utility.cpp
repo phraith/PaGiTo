@@ -34,7 +34,7 @@ BinarySerializationUtility::ReadLineProfiles(const std::vector<std::byte> &data)
 
         std::vector<MyType> casted_intensities(lp_px_count);
         std::transform(lp_intensities.begin(), lp_intensities.end(), casted_intensities.begin(),
-                       [](double x) { return  static_cast<MyType>(x); });
+                       [](double x) { return static_cast<MyType>(x); });
 
         consumed_bytes += lp_px_count * sizeof(double);
 
@@ -53,3 +53,58 @@ BinarySerializationUtility::ReadLineProfiles(const std::vector<std::byte> &data)
 
     return line_profiles;
 }
+
+std::vector<SimulationTargetData>
+BinarySerializationUtility::ReadSimulationTargetData(const std::vector<std::byte> &data) {
+    if (data.size() < sizeof(int)) {
+        return {};
+    }
+    size_t consumed_bytes = 0;
+    int target_count = *reinterpret_cast<int32_t const *>(&data[consumed_bytes]);
+    consumed_bytes += sizeof(int);
+
+
+    std::vector<SimulationTargetData> simulation_target_data;
+    for (int i = 0; i < target_count; ++i) {
+        if (data.size() < consumed_bytes + sizeof(int)) {
+            return {};
+        }
+
+        int start_x = *reinterpret_cast<int32_t const *>(&data[consumed_bytes]);
+        consumed_bytes += sizeof(int);
+
+        int start_y = *reinterpret_cast<int32_t const *>(&data[consumed_bytes]);
+        consumed_bytes += sizeof(int);
+
+        int end_x = *reinterpret_cast<int32_t const *>(&data[consumed_bytes]);
+        consumed_bytes += sizeof(int);
+
+        int end_y = *reinterpret_cast<int32_t const *>(&data[consumed_bytes]);
+        consumed_bytes += sizeof(int);
+
+        SimulationTargetDefinition simulation_target_definition;
+        simulation_target_definition.start = {start_x, start_y};
+        simulation_target_definition.end = {end_x, end_y};
+
+        int lp_px_count = *reinterpret_cast<int32_t const *>(&data[consumed_bytes]);
+        consumed_bytes += sizeof(int);
+        if (data.size() < consumed_bytes + lp_px_count * sizeof(double)) {
+            return {};
+        }
+
+        std::vector<double> lp_intensities(lp_px_count);
+        std::copy(reinterpret_cast<const double *>(&data[consumed_bytes]),
+                  reinterpret_cast<const double *>(&data[consumed_bytes] + lp_px_count * sizeof(double)),
+                  &lp_intensities[0]);
+
+        std::vector<MyType> casted_intensities(lp_px_count);
+        std::transform(lp_intensities.begin(), lp_intensities.end(), casted_intensities.begin(),
+                       [](double x) { return static_cast<MyType>(x); });
+
+        consumed_bytes += lp_px_count * sizeof(double);
+        simulation_target_data.emplace_back(SimulationTargetData{casted_intensities, simulation_target_definition});
+    }
+
+    return simulation_target_data;
+}
+

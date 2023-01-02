@@ -15,7 +15,7 @@
 #include <iostream>
 #include <spdlog/spdlog.h>
 
-SimData CpuDevice::RunGISAXS(const SimJob &description, const ImageData *real_img, bool copy_intensities) {
+SimData CpuDevice::RunGISAXS(const SimJob &description,std::shared_ptr<ImageData> real_img, bool copy_intensities) {
     auto flat_unitcell = description.ExperimentInfo().Unitcell();
 
     auto randoms = std::vector<MyType>(

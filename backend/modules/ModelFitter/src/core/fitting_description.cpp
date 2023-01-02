@@ -3,7 +3,7 @@
 FitJob::FitJob(json sim_data, ImageData real_image, int evolutions, int individuals, int populations)
         :
         sim_data_(sim_data),
-        base_shapes_(GisaxsTransformationContainer::ConvertToFlatShapes(sim_data.at("shapes"))),
+        base_shapes_(GisaxsTransformationContainer::ConvertToFlatShapes(sim_data.at("config").at("shapes"))),
         real_img_(real_image),
         evolutions_(evolutions),
         individuals_(individuals),

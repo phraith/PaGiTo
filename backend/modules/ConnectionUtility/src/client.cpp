@@ -16,8 +16,9 @@ socket_(context_, zmq::socket_type::dealer)
     socket_.connect(broker_address_);
 }
 
-void majordomo::Client::Send(const std::string &service_name, const std::string& job_payload){
+void majordomo::Client::Send(const std::string &service_name, const std::string& job_payload, const std::vector<std::byte> &image_data){
     zmq::multipart_t message;
+    message.pushmem(&image_data[0], sizeof(std::byte) * image_data.size());
     message.pushstr(job_payload);
     message.pushstr(service_name);
     message.pushstr("MDPC01");

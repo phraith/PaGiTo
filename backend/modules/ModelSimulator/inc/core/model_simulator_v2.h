@@ -26,13 +26,13 @@ public:
     std::vector<TimeMeasurement> GetDeviceTimings() const;
 
 private:
-    SimData RunGISAXS(const SimJob &descr, const ImageData *real_img, bool copy_intensities = false) const;
+    SimData RunGISAXS(const SimJob &descr, std::shared_ptr<ImageData> real_img, bool copy_intensities = false) const;
 
     static std::string CreateSerializedResult(const SimData &sim_data, const DetectorConfiguration &detector_data,
                                        const JobMetaInformation &job_meta_information);
 
     static std::vector<std::byte> CreateSerializedByteResult(const SimData &sim_data, const DetectorConfiguration &detector_data,
-                                              const JobMetaInformation &job_meta_information);
+                                              const JobMetaInformation &job_meta_information, bool copy_intensities);
 
 //    Device &LockAndReturnDevice() const;
 

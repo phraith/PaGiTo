@@ -12,6 +12,9 @@
 namespace BinarySerializationUtility {
     std::vector<GisaxsTransformationContainer::LineProfileContainer>
     ReadLineProfiles(const std::vector<std::byte> &data);
+
+    std::vector<GisaxsTransformationContainer::SimulationTargetData>
+    ReadSimulationTargetData(const std::vector<std::byte> &data);
 }
 
 

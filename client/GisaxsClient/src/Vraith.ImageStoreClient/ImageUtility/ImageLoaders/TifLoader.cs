@@ -29,7 +29,17 @@ namespace Vraith.ImageStoreClient.ImageUtility.ImageLoaders
                 return datad; 
             }).ToArray();
 
-            return new Image(new ImageInfo(name, width, height, height * width * sizeof(double)), data);
+            double[] imageDataTransposed = new double[imageData.Length];
+            for (int i = 0; i < width * height; i++)
+            {
+                var mWidth = i % width;
+                var dWidth = i / width;
+
+                var newIndex = mWidth * height + dWidth;
+                imageDataTransposed[newIndex] = imageData[i];
+            }
+            byte[] greyscaleImage = IntensityNormalizer.Normalize(imageData);
+            return new Image(new ImageInfo(name, width, height, height * width * sizeof(double)), imageData, imageDataTransposed, greyscaleImage);
         }
     }
 }

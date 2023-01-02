@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
-using Vraith.GisaxsClient.Controllers;
-using Vraith.GisaxsClient.Core.RequestHandling;
-using Vraith.GisaxsClient.Utility.HashComputer;
-using Vraith.GisaxsClient.Utility.LineProfile;
+using Vraith.Gisaxs.Configuration;
+using Vraith.Gisaxs.Core.ImageStore;
+using Vraith.Gisaxs.Core.RequestHandling;
+using Vraith.Gisaxs.Utility.HashComputer;
 
 namespace Vraith.GisaxsClient.Hubs
 {
@@ -17,38 +17,38 @@ namespace Vraith.GisaxsClient.Hubs
     [Authorize]
     public class MessageHub : Hub
     {
-        private readonly IRequestHandler requestHandler;
-        private readonly IHashComputer hashComputer;
-        private readonly ConnectionMultiplexer connection;
+        private readonly IImageStore _imageStore;
+        private readonly IRequestHandler _requestHandler;
+        private readonly IHashComputer _hashComputer;
 
-        public MessageHub(IOptionsMonitor<ConnectionStrings> connectionStrings)
+        public MessageHub(IOptionsMonitor<ConnectionStrings> connectionStrings, IImageStore imageStore)
         {
-            requestHandler = new MajordomoRequestHandler(connectionStrings);
-            hashComputer = new Sha256HashComputer();
-            this.connection = ConnectionMultiplexer.Connect(connectionStrings.CurrentValue.Redis);
+            _imageStore = imageStore;
+            _requestHandler = RequestHandlerFactory.CreateMajordomoRequestHandler(connectionStrings);
+            _hashComputer = HashComputerFactory.CreateSha256HashComputer();
+            ConnectionMultiplexer.Connect(connectionStrings.CurrentValue.Redis);
         }
 
         public async Task IssueJob(string stringRequest)
         {
-            IRequestFactory factory = new RequestFactory(hashComputer);
-            Request? request = factory.CreateRequest(stringRequest);
+            IRequestFactory factory = new RequestFactory(_hashComputer, _imageStore);
+            Request? request = factory.CreateRequest(stringRequest, "ReceiveJobId");
 
             if (request == null) { return; }
 
-            await Clients.All.SendAsync("ReceiveJobInfos", $"hash={request.InfoHash}");
-
-            RequestResult? result = requestHandler.HandleRequest(request);
-            if (result == null) { return; }
+            RequestResult? result = _requestHandler.HandleRequest(request);
+            if (result == null)
+            {
+                return;
+            }
 
             await Clients.Caller.SendAsync(result.Command, result.Body);
         }
 
         public async Task GetProfiles(string stringRequest)
         {
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
+            IRequestFactory factory = new RequestFactory(_hashComputer, _imageStore);
+            Request? request = factory.CreateRequest(stringRequest, "ProcessLineprofiles");
 
             JsonNode? jsonNode = JsonNode.Parse(stringRequest);
             if (jsonNode == null) { return; }
@@ -65,14 +65,7 @@ namespace Vraith.GisaxsClient.Hubs
                 if (profile != null) { profileInfos.Add(profile); }
             }
 
-            var hash = hashComputer.Hash(config.ToString());
-            IDatabase db = connection.GetDatabase();
-
-            var keyWidth = $"{hash}-width";
-            var keyHeight = $"{hash}-height";
-
-
-            if (!db.KeyExists(keyWidth) || !db.KeyExists(keyHeight)) { return; }
+            RequestResult? result = _requestHandler.HandleRequest(request);
 
             string heightAsString = await db.StringGetAsync(keyHeight);
             string widthAsString = await db.StringGetAsync(keyWidth);

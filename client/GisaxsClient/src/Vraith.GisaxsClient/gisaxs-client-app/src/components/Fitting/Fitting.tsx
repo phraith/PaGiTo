@@ -25,15 +25,24 @@ const Fitting = () => {
         setIsActive(true)
     }
 
-    const getLineprofiles = (message: any) => {
-        let j = JSON.parse(message)
-        let traces = []
-        j["profiles"].forEach((element, i) => {
-            let values = element.Data
-            let k = values.map((x: number, index: number) => { return { x: index, y: x } })
-            traces.push(k)
-        });
-        setPlotData(traces[0])
+    const getLineprofiles = (hash: any) => {
+        let url = `/api/redis/data?hash=${hash}`;
+        fetch(url, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
+                Accept: "application/json",
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                let json = JSON.parse(data);
+                let traces = []
+                let values = json.modifiedData
+                let k = values.map((x: number, index: number) => { return { x: index, y: x } })
+                traces.push(k)
+                setSimulatedPlotData(traces[0])
+            })
     }
 
     const receiveJobResult = (message: any) => {
@@ -107,9 +116,16 @@ const Fitting = () => {
 
     const throttled = useRef(throttle((data, lineprofiles) => sendLineprofileRequest(data, lineprofiles), 500));
 
-    useEffect(() => {
-        throttled.current(jsonData, [lineprofileState?.currentLineProfile])
-    }, [lineprofileState?.currentLineProfile]);
+    // useEffect(() => {
+    //     jsonCallback(lineprofileState.lineProfiles.map(lp => {
+    //         return {
+    //             start: lp.start,
+    //             end: lp.end
+    //         }
+    //     }), "lineprofiles")
+
+    //     jsonCallback(imageInfo.id, "imageId")
+    // }, [lineprofileState.lineProfiles])
 
     useEffect(() => {
         let jsonConfig = JSON.stringify({
@@ -144,12 +160,24 @@ const Fitting = () => {
     const sendJobInfo = () => {
         let jsonConfig = JSON.stringify({
             info: {
-                body: JSON.stringify(jsonData),
+                body: JSON.stringify({
+                    config: jsonData,
+                    jobInfo: {
+                        clientId: 0,
+                        jobId: 0,
+                        imageId: imageInfo.id,
+                        intensityFormat: "doublePrecision",
+                        simulationTargets: lineprofileState.lineProfiles
+                    },
+                    clientInfo: {
+                        jobType: "fitting"
+                    }
+                }),
                 history: []
             },
             userId: 0
         });
-
+        console.log(jsonConfig)
         const requestOptions = {
             method: 'POST',
             headers: {

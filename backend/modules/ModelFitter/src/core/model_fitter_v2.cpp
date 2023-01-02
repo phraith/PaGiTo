@@ -96,7 +96,6 @@ std::string ModelFitterV2::ServiceName() const {
 std::vector<std::byte>
 ModelFitterV2::HandleRequest(const std::string &request, std::vector<std::byte> image_data, const std::string &origin) {
 
-    auto lps = BinarySerializationUtility::ReadLineProfiles(image_data);
 
     json data = json::parse(request);
 
@@ -110,19 +109,72 @@ ModelFitterV2::HandleRequest(const std::string &request, std::vector<std::byte> 
 
     json sim_data = data;
 
-    int evolutions = 5;
+
+    int evolutions = 50;
     int individuals = 5;
-    int populations = 5;
-
-    ImageData img_data(lps);
+    int populations = 50;
+    auto simulation_target_data = BinarySerializationUtility::ReadSimulationTargetData(image_data);
+    ImageData img_data(simulation_target_data);
     auto fit_job = std::make_shared<FitJob>(sim_data, img_data, evolutions, individuals, populations);
+    int dim = fit_job->BaseShapes().parameters.size() * 2;
 
-    pagmo::archipelago archipelago{5, pagmo::thread_island(true),
-                                   pagmo::cmaes{20, -1, -1, -1, -1, 0.5, 1e-18, 1e-18, false, true},
-                                   pagmo::problem{GisaxsProblem(fit_job, broker_address_, origin)},
-                                   10};
-    archipelago.evolve(10);
-    archipelago.wait_check();
+    std::function<double(const std::vector<double> &dv)> func = [=](const std::vector<double> &dv) {
+        auto baseShapes = fit_job->BaseShapes();
+        auto test_client = majordomo::Client(broker_address_);
+        std::vector<Vector2<MyType>> parameters;
+        for (int i = 0; i < dv.size(); i += 2) {
+            parameters.emplace_back(Vector2<MyType>{static_cast<MyType>(dv[i]), static_cast<MyType>(dv[i + 1])});
+        }
+
+        baseShapes.parameters = parameters;
+
+        auto updatedJson = GisaxsTransformationContainer::UpdateShapes(fit_job->SimulationData(), baseShapes);
+        spdlog::info("fitness {}", std::hash<std::thread::id>{}(std::this_thread::get_id()));
+        test_client.Send("simulation", updatedJson.dump(), image_data);
+        zmq::multipart_t res = test_client.Recv("simulation");
+
+        auto fitness_bytes = res.pop();
+
+        if (!fitness_bytes.empty()) {
+            MyType* bt = fitness_bytes.data<MyType>();
+            MyType final = *bt;
+
+//            double final = *reinterpret_cast<double *>(fitness_bytes.data());
+            return final;
+        }
+        return -1.f;
+    };
+
+    std::vector<double> initial(2 * fit_job->BaseShapes().parameters.size());
+    for (int i = 0; i < fit_job->BaseShapes().parameters.size(); ++i) {
+        const auto &param = fit_job->BaseShapes().parameters[i];
+        initial[i] = param.x;
+        initial[i + 1] = param.y;
+    }
+
+    std::vector<double> upper(2 * fit_job->BaseShapes().upper_bounds.size());
+    for (int i = 0; i < fit_job->BaseShapes().upper_bounds.size(); ++i) {
+        const auto &param = fit_job->BaseShapes().upper_bounds[i];
+        upper[i] = param.x;
+        upper[i + 1] = param.y;
+    }
+
+    std::vector<double> lower(2 * fit_job->BaseShapes().lower_bounds.size());
+    for (int i = 0; i < fit_job->BaseShapes().lower_bounds.size(); ++i) {
+        const auto &param = fit_job->BaseShapes().lower_bounds[i];
+        lower[i] = param.x;
+        lower[i + 1] = param.y;
+    }
+
+    CmaesOptimizer o(func, initial, lower, upper, 2.0, 1000);
+    std::shared_ptr<Solution> best_solution = o.Optimize();
+
+//    pagmo::archipelago archipelago{5, pagmo::thread_island(true),
+//                                   pagmo::cmaes{20, -1, -1, -1, -1, 0.5, 1e-18, 1e-18, false, true},
+//                                   pagmo::problem{GisaxsProblem(fit_job, broker_address_, origin)},
+//                                   10};
+//    archipelago.evolve(10);
+//    archipelago.wait_check();
 
 
     return std::vector<std::byte>{};

@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Http.Json;
+using Vraith.Gisaxs.Configuration;
+using Vraith.Gisaxs.Core.ImageStore;
 using Vraith.GisaxsClient.Configuration;
 using Vraith.GisaxsClient.Controllers;
 using Vraith.GisaxsClient.Hubs;
@@ -25,6 +28,8 @@ builder.Services.AddSignalR();
 
 builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection("ConnectionStrings"));
 builder.Services.Configure<AuthConfig>(builder.Configuration.GetSection("AuthOptions"));
+
+builder.Services.AddScoped<IImageStore, ImageStore>();
 
 builder.Services.AddAuthorization(auth =>
 {

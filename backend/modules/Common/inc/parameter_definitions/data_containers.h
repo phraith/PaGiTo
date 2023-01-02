@@ -15,6 +15,16 @@ namespace GisaxsTransformationContainer {
         std::vector<int> offsets;
     };
 
+    struct SimulationTargetDefinition {
+        Vector2<int> start;
+        Vector2<int> end;
+    };
+
+    struct SimulationTargetData {
+        std::vector<MyType> intensities;
+        SimulationTargetDefinition simulation_target_definition;
+    };
+
     struct DetectorContainer {
         Vector2<int> beamImpact;
         Vector2<int> resolution;

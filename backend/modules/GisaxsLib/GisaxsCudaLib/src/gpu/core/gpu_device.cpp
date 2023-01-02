@@ -152,8 +152,8 @@ SimData GpuDevice::RunGISAXS(const SimJob &descr, const ImageData *real_img, boo
 
 
         MemoryBlock<MyType> dev_real_intensities = memoryProviderV2.RequestMemory<MyType>(
-                real_img->LineProfiles()[0].intensities.size());
-        dev_real_intensities.InitializeHtD(real_img->LineProfiles()[0].intensities);
+                real_img->SimulationTargets()[0].intensities.size());
+        dev_real_intensities.InitializeHtD(real_img->SimulationTargets()[0].intensities);
 
         SumReduce(dev_real_intensities.Get(), dev_real_intensities.Size(), dev_partial_sums.Get(), dev_scale_prod_,
                   work_stream->Get());

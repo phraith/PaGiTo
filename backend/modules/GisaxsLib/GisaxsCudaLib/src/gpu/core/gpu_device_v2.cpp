@@ -50,7 +50,7 @@ namespace GpuDeviceV2 {
         gpuErrchk(cudaHostUnregister(&scale_prod_));
     }
 
-    SimData GpuDeviceV2::RunGISAXS(const SimJob &descr, const ImageData *real_img, bool copy_intensities) {
+    SimData GpuDeviceV2::RunGISAXS(const SimJob &sim_job, std::shared_ptr<ImageData> real_img, bool copy_intensities) {
         Timer local_timer;
 
         complete_timer_.Start();
@@ -168,9 +168,11 @@ namespace GpuDeviceV2 {
         float scale = 1;
         if (real_img != nullptr) {
 
+            std::vector<MyType> combined_intensities = real_img->CombinedSimulationTargetIntensities();
+
             MemoryBlock<MyType> dev_real_intensities = memoryProviderV2.RequestMemory<MyType>(
-                    real_img->LineProfiles()[0].intensities.size());
-            dev_real_intensities.InitializeHtD(real_img->LineProfiles()[0].intensities);
+                    combined_intensities.size());
+            dev_real_intensities.InitializeHtD(combined_intensities);
 
             SumReduce(dev_real_intensities.Get(), dev_real_intensities.Size(), dev_partial_sums.Get(), dev_scale_prod_,
                       work_stream->Get());

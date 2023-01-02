@@ -20,7 +20,9 @@
             }
 
             ImageInfo info = new(Path.GetFileNameWithoutExtension(path), width, height, imageData.Count * sizeof(double));
-            Image image = new(info, imageData.ToArray());
+
+            byte[] greyscaleImage = IntensityNormalizer.Normalize(imageData);
+            Image image = new(info, imageData.ToArray(), imageDataTransposed, greyscaleImage);
             return image;
         }
     }

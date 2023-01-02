@@ -12,7 +12,7 @@
 class CpuDevice : public Device {
 public:
     CpuDevice();
-    SimData RunGISAXS(const SimJob &description, const ImageData *real_img, bool copy_intensities) override;
+    SimData RunGISAXS(const SimJob &description,std::shared_ptr<ImageData> real_img, bool copy_intensities) override;
     void SetStatus(WorkStatus status) const override;
     [[nodiscard]] WorkStatus Status() const override;
 

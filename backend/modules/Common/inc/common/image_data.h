@@ -8,14 +8,16 @@
 
 class ImageData {
 public:
-    explicit ImageData(std::vector<GisaxsTransformationContainer::LineProfileContainer> line_profiles);
+    explicit ImageData(std::vector<GisaxsTransformationContainer::SimulationTargetData> simulation_targets);
 
     ~ImageData();
 
-    const std::vector<GisaxsTransformationContainer::LineProfileContainer> &LineProfiles() const;
+    const std::vector<GisaxsTransformationContainer::SimulationTargetData> &SimulationTargets() const;
+
+    std::vector<MyType> CombinedSimulationTargetIntensities() const;
 
 private:
-    std::vector<GisaxsTransformationContainer::LineProfileContainer> line_profiles_;
+    std::vector<GisaxsTransformationContainer::SimulationTargetData> simulation_targets_;
 };
 
 #endif

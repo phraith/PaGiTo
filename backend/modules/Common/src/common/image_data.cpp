@@ -4,15 +4,30 @@
 #include <iostream>
 #include <algorithm>
 
-using namespace GisaxsTransformationContainer;
 
-ImageData::ImageData(std::vector<LineProfileContainer> line_profiles)
+ImageData::ImageData(std::vector<GisaxsTransformationContainer::SimulationTargetData> simulation_targets)
         :
-        line_profiles_(std::move(line_profiles)) {
+        simulation_targets_(std::move(simulation_targets)) {
 }
 
 ImageData::~ImageData() = default;
 
-const std::vector<LineProfileContainer> &ImageData::LineProfiles() const {
-    return line_profiles_;
+const std::vector<GisaxsTransformationContainer::SimulationTargetData> &ImageData::SimulationTargets() const {
+    return simulation_targets_;
+}
+
+std::vector<MyType> ImageData::CombinedSimulationTargetIntensities() const {
+    size_t combined_size = 0;
+    for (const auto &target: simulation_targets_) {
+        combined_size += target.intensities.size();
+    }
+
+    std::vector<MyType> combined_intensities;
+    combined_intensities.reserve(combined_size);
+
+    for (const auto &target: simulation_targets_) {
+        combined_intensities.insert(combined_intensities.end(), target.intensities.begin(), target.intensities.end());
+    }
+
+    return combined_intensities;
 }

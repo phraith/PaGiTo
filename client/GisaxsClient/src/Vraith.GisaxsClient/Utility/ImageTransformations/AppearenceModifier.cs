@@ -1,4 +1,5 @@
-﻿using SixLabors.ImageSharp;
+﻿using System.Numerics;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -7,7 +8,7 @@ namespace Vraith.GisaxsClient.Utility.ImageTransformations
 {
     public static class ColormapValueProvider
     {
-        private static readonly Dictionary<string, (float[] rValues, float[] gValues, float[] bValues)> DataMapping = new()
+        public static readonly Dictionary<string, (float[] rValues, float[] gValues, float[] bValues)> DataMapping = new()
         {
             { "twilightshifted", (TwilightShifted.R, TwilightShifted.G, TwilightShifted.B) },
             { "twilight", (Twilight.R, Twilight.G, Twilight.B) },
@@ -77,16 +78,26 @@ namespace Vraith.GisaxsClient.Utility.ImageTransformations
     {
         public static Image<Rgb24> ApplyColormap(this Image<L8> image, string colormapName)
         {
-            var coloredImage = new Image<Rgb24>(image.Width, image.Height);
-            for (int i = 0; i < image.Width; i++)
+            var coloredImage = image.CloneAs<Rgb24>();
+            
+            var (rValues, gValues, bValues) = ColormapValueProvider.DataMapping[colormapName.ToLower()];
+            
+            coloredImage.Mutate(c => c.ProcessPixelRowsAsVector4(row =>
             {
-                for (int j = 0; j < image.Height; j++)
+                for (int x = 0; x < row.Length; x++)
                 {
-                    var greyscale = image[i, j];
-                    var rgb = ColormapValueProvider.ColorValue(colormapName, greyscale.PackedValue);
-                    coloredImage[i, j] = new Rgb24(rgb.r, rgb.g, rgb.b);
+                    var first = row[x][0];
+                    int index = (int)Math.Floor(first * rValues.Length);
+                    index = Math.Min(rValues.Length - 1, index);
+                    
+                    var r = rValues[index];
+                    var g = gValues[index];
+                    var b = bValues[index];
+                    
+                    // We can apply any custom processing logic here
+                    row[x] = new Vector4(r, g, b, 1);
                 }
-            }
+            }));
             return coloredImage;
         }
     }

@@ -30,8 +30,8 @@ namespace Vraith.GisaxsClient.Controllers
                 return BadRequest();
             }
 
-            User user = new() { UserId = userId, PasswordHash = passwordHash, PasswordSalt = passwordSalt };
-            userStore.Insert(user);
+            User user = new(userId, passwordSalt, passwordHash);
+            _userStore.Insert(user);
             return Ok();
         }
 

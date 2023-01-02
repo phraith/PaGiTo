@@ -37,23 +37,23 @@ services:
       - '5432:5432'
     volumes:
       - db:/var/lib/postgresql/data
-  gisaxs_backend:
-    build:
-      context: backend
-      dockerfile: Dockerfile.cuda
-    ports:
-      - '5555:5555'
-    # networks:
-    #   - aspnetcoreapp-network
-    cap_add:
-      - SYS_PTRACE
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [ gpu ]
+  # gisaxs_backend:
+  #   build:
+  #     context: backend
+  #     dockerfile: Dockerfile.cuda
+  #   ports:
+  #     - '5555:5555'
+  #   # networks:
+  #   #   - aspnetcoreapp-network
+  #   cap_add:
+  #     - SYS_PTRACE
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: 1
+  #             capabilities: [ gpu ]
   # gisaxs_remote_dev:
   #   build: backend
   #   entrypoint: /docker-entrypoint.sh

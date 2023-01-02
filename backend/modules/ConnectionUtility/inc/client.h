@@ -13,7 +13,7 @@ namespace majordomo {
     class Client {
     public:
         explicit Client(std::string  broker_address);
-        void Send(const std::string &service_name, const std::string& job_payload);
+        void Send(const std::string &service_name, const std::string& job_payload, const std::vector<std::byte> &image_data);
         zmq::multipart_t Recv(const std::string &service_name);
     private:
         std::string broker_address_;

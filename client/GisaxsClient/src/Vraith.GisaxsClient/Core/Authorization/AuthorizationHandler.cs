@@ -16,8 +16,8 @@ namespace Vraith.GisaxsClient.Core.Authorization
 
         public AuthorizationHandler(IOptionsMonitor<AuthConfig> authOptions)
         {
-            userIdGenerator = new HMACSHA512(Encoding.UTF8.GetBytes("MySecretKey"));
-            this.authOptions = authOptions;
+            _userIdGenerator = new HMACSHA512("MySecretKey"u8.ToArray());
+            _authOptions = authOptions;
         }
 
         public AuthInfo CreateJwtToken(User user)

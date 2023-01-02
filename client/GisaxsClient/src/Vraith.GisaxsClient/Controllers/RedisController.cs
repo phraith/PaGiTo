@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -17,8 +18,8 @@ namespace Vraith.GisaxsClient.Controllers
 
         public RedisController(IOptionsMonitor<ConnectionStrings> connectionStrings, ILogger<RedisController> logger)
         {
-            this.logger = logger;
-            this.connection = ConnectionMultiplexer.Connect(connectionStrings.CurrentValue.Redis);
+            _logger = logger;
+            _connection = ConnectionMultiplexer.Connect(connectionStrings.CurrentValue.Redis);
             ThreadPool.SetMinThreads(16, 16);
         }
 
@@ -47,11 +48,84 @@ namespace Vraith.GisaxsClient.Controllers
             string heightAsString = await db.StringGetAsync(keyHeight);
             string widthAsString = await db.StringGetAsync(keyWidth);
 
+<<<<<<< Updated upstream
             int height = int.Parse(heightAsString);
             int width = int.Parse(widthAsString);
 
             string modifiedData = AppearanceModifier.ApplyColorMap(data, width, height, true, colormapName);
             return Ok(JsonSerializer.Serialize(new FinalResult() { data = modifiedData, width = width, height = height }));
+=======
+            if (dim == null)
+            {
+                return BadRequest("Dimension of image are null!");
+            }
+            
+            int width = BitConverter.ToInt32(dim, 0);
+            int height = BitConverter.ToInt32(dim, sizeof(int));
+
+            int start = 2 * sizeof(int);
+            int end = 2 * sizeof(int) + width * height * sizeof(double);
+            byte[]? data = await db.StringGetRangeAsync(hash, start, end);
+
+            if (data == null)
+            {
+                return BadRequest("Data of image is null!");
+            }
+            
+            double[] modifiedData = new double[data.Length / 8];
+            Buffer.BlockCopy(data, 0, modifiedData, 0, modifiedData.Length * 8);
+            var logData = modifiedData.Select(x => Math.Log(x + 1)).Reverse().ToArray();
+
+            return Ok(JsonSerializer.Serialize(
+                new NumericResult(logData, width, height), new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                }));
+        }
+
+        [HttpGet("image")]
+        public async Task<IActionResult> GetImage(string hash, string colormapName)
+        {
+            
+            
+            IDatabase db = _connection.GetDatabase();
+            if (!db.KeyExists(hash))
+            {
+                return NotFound();
+            }
+
+            byte[]? dim = await db.StringGetRangeAsync(hash, 0, 2 * sizeof(int));
+
+            if (dim == null)
+            {
+                return BadRequest("Dimension of image are null!");
+            }
+
+            int width = BitConverter.ToInt32(dim, 0);
+            int height = BitConverter.ToInt32(dim, sizeof(int));
+
+            int start = 2 * sizeof(int);
+            int end = 2 * sizeof(int) + width * height;
+            byte[]? data = await db.StringGetRangeAsync(hash, start, end);
+
+            if (data == null)
+            {
+                return BadRequest("Data of image is null!");
+            }
+            var s = new Stopwatch();
+            s.Start();
+            string modifiedData = AppearanceModifier.ApplyColorMap(data, width, height, true, colormapName);
+            s.Stop();
+            
+            
+            Console.WriteLine($"Redis took {s.ElapsedMilliseconds} ms");
+            
+            return Ok(JsonSerializer.Serialize(
+                new JpegResult(modifiedData, width, height), new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                }));
+>>>>>>> Stashed changes
         }
     }
 }

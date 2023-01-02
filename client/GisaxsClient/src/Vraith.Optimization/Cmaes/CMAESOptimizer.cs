@@ -23,8 +23,8 @@ namespace Vraith.Optimization.Cmaes
 
         public CMAESOptimizer(Func<double[], double> function, double[] initial, double sigma, int randSeed = 0)
         {
-            this.function = function;
-            maxIteration = initial.Length * 200;
+            _function = function;
+            _maxIteration = initial.Length * 200;
 
             cma = new CMA(initial, sigma, seed: randSeed);
 
@@ -43,8 +43,8 @@ namespace Vraith.Optimization.Cmaes
                 throw new ArgumentException("Length of upperBounds must be equal to that of initial");
             }
 
-            this.function = function;
-            maxIteration = initial.Length * 2000;
+            _function = function;
+            _maxIteration = initial.Length * 2000;
 
             Matrix<double> bounds = Matrix<double>.Build.Dense(initial.Length, 2);
             bounds.SetColumn(0, lowerBounds.ToArray());

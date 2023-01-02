@@ -30,7 +30,7 @@ namespace GpuDeviceV2 {
 
         ~GpuDeviceV2();
 
-        SimData RunGISAXS(const SimJob &descr, const ImageData *real_img, bool copy_intensities);
+        SimData RunGISAXS(const SimJob &sim_job, std::shared_ptr<ImageData> real_img, bool copy_intensities);
 
         void SetStatus(WorkStatus status) const;
 

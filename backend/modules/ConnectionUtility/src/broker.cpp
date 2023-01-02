@@ -142,7 +142,7 @@ majordomo::Broker::ProcessRequestFromWorker(const majordomo::remote_id_t &origin
     if (majordomo::worker::info == command) {
         remote_id_t client_id = multipart_msg.popstr();
         multipart_msg.pop();
-        multipart_msg.pushstr("fit");
+        multipart_msg.pushstr("fitting");
         multipart_msg.pushstr(majordomo::client::ident);
 
          zmq::send_result_t res = SendToRouter(socket_, multipart_msg, client_id);
