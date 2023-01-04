@@ -32,6 +32,15 @@ namespace GpuConversionHelper {
         return converted_vector;
     }
 
+    std::vector<MyType2I> Convert(const std::vector<Vector2<int>> &input) {
+        std::vector<MyType2I> converted_vector;
+        for (const auto &element: input) {
+            converted_vector.emplace_back(MyType2I {element.x, element.y});
+        }
+
+        return converted_vector;
+    }
+
     std::vector<MyType3> Convert(const std::vector<Vector3<MyType>> &input) {
         std::vector<MyType3> converted_vector;
         for (const auto &element: input) {

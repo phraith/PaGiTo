@@ -13,7 +13,7 @@ namespace GisaxsV2 {
                                      MyType2 *parameters, MyType *randoms);
 
     __global__ void
-    cuda_calculate_propagation_coefficients(int qcount, MyType2I resolution, MyType2I beam_direction, MyType pixelsize,
+    cuda_calculate_propagation_coefficients_full(int qcount, MyType2I resolution, MyType2I beam_direction, MyType pixelsize,
                                             MyType sample_distance, MyType k0, MyComplex sub_n2m1, MyType alpha_i,
                                             MyComplex *coefficients) {
 
@@ -31,6 +31,53 @@ namespace GisaxsV2 {
 
         for (int i = tid; i < qcount; i += blockDim.x * gridDim.x) {
             int y = (i / resolution.x) + 1;
+
+            MyType pixel_dist_y = pixelsize * (y - beam_direction.y);
+
+            const auto alpha_f = atan2f(pixel_dist_y, quad_dist_x);
+
+            MyType qz = k0 * (sinf(alpha_f) + sinf(alpha_i));
+            MyType kzf = qz + kzi;
+
+            if (kzf < 0) {
+                coefficients[i] = {0, 0};
+                coefficients[qcount + i] = {0, 0};
+                coefficients[2 * qcount + i] = {0, 0};
+                coefficients[3 * qcount + i] = {0, 0};
+            } else {
+                MyType sin_af = kzf / k0;
+                tmp = cuCsqrt(sin_af * sin_af - sub_n2m1);
+                MyComplex rkf = (sin_af - tmp) / (sin_af + tmp);
+
+                MyComplex t4 = rki * rkf;
+
+                coefficients[i] = {1, 0};
+                coefficients[qcount + i] = rkf;
+                coefficients[2 * qcount + i] = rki;
+                coefficients[3 * qcount + i] = t4;
+            }
+        }
+    }
+
+    __global__ void
+    cuda_calculate_propagation_coefficients(int qcount, MyType2I *detector_positions, MyType2I resolution, MyType2I beam_direction, MyType pixelsize,
+                                                 MyType sample_distance, MyType k0, MyComplex sub_n2m1, MyType alpha_i,
+                                                 MyComplex *coefficients) {
+
+        int tid = threadIdx.x + blockDim.x * blockIdx.x;
+        if (tid >= qcount)
+            return;
+
+        MyType sin_ai = sinf(alpha_i);
+        MyType kzi = -1.f * k0 * sin_ai;
+        MyComplex tmp = cuCsqrt(sin_ai * sin_ai - sub_n2m1);
+        MyComplex rki = (sin_ai - tmp) / (sin_ai + tmp);
+
+        MyType quad_dist_x = std::sqrt(
+                sample_distance * sample_distance + pixelsize * pixelsize);
+
+        for (int i = tid; i < qcount; i += blockDim.x * gridDim.x) {
+            int y = detector_positions[i].y + 1;
 
             MyType pixel_dist_y = pixelsize * (y - beam_direction.y);
 
@@ -197,7 +244,6 @@ namespace GisaxsV2 {
                     shape_sum_u = shape_sum_u + shape_sum * cuCexpi(-1.f * qr);
                 }
                 scattering = scattering + coefficients[i * qcount + idx] * shape_sum_u * sfs_c;
-
             }
         }
 
@@ -227,7 +273,21 @@ namespace GisaxsV2 {
         blocks, threads, 0, work_stream >> > (qpar, q, qpoints_xy, qpoints_z_coeffs, calculations, coefficients, intensities, shape_count, qcount, sfs, flat_unitcell, randoms);
     }
 
-    void CalculatePropagationCoefficientsTopBuried(int qcount, MyType2I resolution, MyType2I beam_direction,
+    void CalculatePropagationCoefficientsTopBuriedFull(int qcount, MyType2I resolution, MyType2I beam_direction,
+                                                       MyType pixelsize,
+                                                       MyType sample_distance, MyType k0, MyComplex sub_n2m1,
+                                                       MyType alpha_i,
+                                                       MyComplex *coefficients, cudaStream_t work_stream) {
+        int threads = 128;
+        int blocks = 128;
+
+        cuda_calculate_propagation_coefficients_full<<< blocks, threads, 0, work_stream>>>(qcount, resolution,
+                                                                                      beam_direction, pixelsize,
+                                                                                      sample_distance, k0, sub_n2m1,
+                                                                                      alpha_i, coefficients);
+    }
+
+    void CalculatePropagationCoefficientsTopBuried(int qcount, MyType2I *detector_positions, MyType2I resolution, MyType2I beam_direction,
                                                    MyType pixelsize,
                                                    MyType sample_distance, MyType k0, MyComplex sub_n2m1,
                                                    MyType alpha_i,
@@ -235,9 +295,9 @@ namespace GisaxsV2 {
         int threads = 128;
         int blocks = 128;
 
-        cuda_calculate_propagation_coefficients<<< blocks, threads, 0, work_stream>>>(qcount, resolution,
-                                                                                      beam_direction, pixelsize,
-                                                                                      sample_distance, k0, sub_n2m1,
-                                                                                      alpha_i, coefficients);
+        cuda_calculate_propagation_coefficients<<< blocks, threads, 0, work_stream>>>(qcount, detector_positions, resolution,
+                                                                                           beam_direction, pixelsize,
+                                                                                           sample_distance, k0, sub_n2m1,
+                                                                                           alpha_i, coefficients);
     }
 }

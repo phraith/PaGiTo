@@ -4,7 +4,6 @@
 
 #include "worker_information.h"
 #include <utility>
-#include <iostream>
 
 WorkerInformation::WorkerInformation(std::shared_ptr<ServiceInformation> service, majordomo::remote_id_t worker_id, majordomo::ms_time_t expiry)
         :
@@ -31,8 +30,6 @@ const std::shared_ptr<ServiceInformation> &WorkerInformation::AssignedService() 
 }
 
 void WorkerInformation::Expiry(majordomo::ms_time_t expiry) {
-
-//    std::cout << "updating worker expiry from " << expiry_.count() << " to " << expiry.count() << " | diff: " << expiry.count() - expiry_.count() <<std::endl;
     expiry_ = expiry;
 }
 

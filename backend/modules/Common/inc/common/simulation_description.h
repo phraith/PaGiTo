@@ -8,11 +8,12 @@
 #include "job_meta_information.h"
 #include "experimental_data.h"
 
-class SimJob
-{
+class SimJob {
 public:
     SimJob(const JobMetaInformation &meta_information, const ExperimentalData &experimental_information);
+
     [[nodiscard]] const JobMetaInformation &JobInfo() const;
+
     [[nodiscard]] const ExperimentalData &ExperimentInfo() const;
 
     [[nodiscard]] std::vector<Vector2<int>> DetectorPositions() const;

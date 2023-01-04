@@ -57,19 +57,17 @@ namespace GpuDeviceV2 {
 
         //set current device
         int device_id = Bind();
-        int qcount = descr.ExperimentInfo().DetectorConfig().PixelCount();
+        auto detector_positions = sim_job.DetectorPositions();
 
-        auto unitcell = descr.ExperimentInfo().Unitcell();
+        int qcount = detector_positions.size() > 0 ? detector_positions.size()
+                                                   : sim_job.ExperimentInfo().DetectorConfig().PixelCount();
+
+        auto unitcell = sim_job.ExperimentInfo().Unitcell();
 
         const auto &current_params = unitcell.Parameters();
         const auto work_stream = ProvideStream();
         auto start = event_provider_.ProvideEvent(work_stream->Get());
         auto stop = event_provider_.ProvideEvent(work_stream->Get());
-
-        if (work_stream->Get() == nullptr)
-        {
-            auto f = 5;
-        }
 
         //get cuda memory for work
         GpuMemoryProviderV2 memoryProviderV2(0);
@@ -100,41 +98,76 @@ namespace GpuDeviceV2 {
         MemoryBlock<MyType> container_qy = memoryProviderV2.RequestMemory<MyType>(qcount);
         MemoryBlock<MyType> container_qz = memoryProviderV2.RequestMemory<MyType>(qcount);
 
+        MemoryBlock<MyType2I> dev_detector_positions = memoryProviderV2.RequestMemory<MyType2I>(
+                detector_positions.size());
+        dev_detector_positions.InitializeHtD(GpuConversionHelper::Convert(detector_positions));
+
 
         local_timer.Start();
-        GisaxsV2::CalculatePropagationCoefficientsTopBuried(qcount,
-                                                            GpuConversionHelper::Convert(
-                                                                    descr.ExperimentInfo().DetectorConfig().Resolution()),
-                                                            GpuConversionHelper::Convert(
-                                                                    descr.ExperimentInfo().BeamConfig().BeamDirection()),
-                                                            descr.ExperimentInfo().DetectorConfig().Pixelsize(),
-                                                            descr.ExperimentInfo().DetectorConfig().SampleDistance(),
-                                                            descr.ExperimentInfo().BeamConfig().K0(),
-                                                            GpuConversionHelper::Convert(
-                                                                    descr.ExperimentInfo().SampleConfig().Layers().at(
-                                                                            0).N2MinusOne()),
-                                                            descr.ExperimentInfo().BeamConfig().AlphaI(),
-                                                            dev_coefficients.Get(),
-                                                            work_stream->Get());
+        if (detector_positions.size() == 0) {
+            GisaxsV2::CalculatePropagationCoefficientsTopBuriedFull(qcount,
+                                                                    GpuConversionHelper::Convert(
+                                                                            sim_job.ExperimentInfo().DetectorConfig().Resolution()),
+                                                                    GpuConversionHelper::Convert(
+                                                                            sim_job.ExperimentInfo().BeamConfig().BeamDirection()),
+                                                                    sim_job.ExperimentInfo().DetectorConfig().Pixelsize(),
+                                                                    sim_job.ExperimentInfo().DetectorConfig().SampleDistance(),
+                                                                    sim_job.ExperimentInfo().BeamConfig().K0(),
+                                                                    GpuConversionHelper::Convert(
+                                                                            sim_job.ExperimentInfo().SampleConfig().Layers().at(
+                                                                                    0).N2MinusOne()),
+                                                                    sim_job.ExperimentInfo().BeamConfig().AlphaI(),
+                                                                    dev_coefficients.Get(),
+                                                                    work_stream->Get());
+        } else {
+            GisaxsV2::CalculatePropagationCoefficientsTopBuried(qcount,
+                                                                dev_detector_positions.Get(),
+                                                                GpuConversionHelper::Convert(
+                                                                        sim_job.ExperimentInfo().DetectorConfig().Resolution()),
+                                                                GpuConversionHelper::Convert(
+                                                                        sim_job.ExperimentInfo().BeamConfig().BeamDirection()),
+                                                                sim_job.ExperimentInfo().DetectorConfig().Pixelsize(),
+                                                                sim_job.ExperimentInfo().DetectorConfig().SampleDistance(),
+                                                                sim_job.ExperimentInfo().BeamConfig().K0(),
+                                                                GpuConversionHelper::Convert(
+                                                                        sim_job.ExperimentInfo().SampleConfig().Layers().at(
+                                                                                0).N2MinusOne()),
+                                                                sim_job.ExperimentInfo().BeamConfig().AlphaI(),
+                                                                dev_coefficients.Get(),
+                                                                work_stream->Get());
+        }
+
+        gpuErrchk(cudaDeviceSynchronize());
+
         local_timer.End();
         spdlog::info("Calculating coefficients took {} ms", local_timer.Duration());
+
 
         GpuQGrid::GpuQGridContainer container{container_xy.Get(), container_zcoeffs.Get(), container_qpar.Get(),
                                               container_q.Get(), container_coeffs.Get(), container_alpha_fs.Get(),
                                               container_theta_fs.Get(), container_qx.Get(), container_qy.Get(),
                                               container_qz.Get()};
 
-        auto alpha_i = descr.ExperimentInfo().BeamConfig().AlphaI();
-        auto k0 = descr.ExperimentInfo().BeamConfig().K0();
-        auto pixelsize = descr.ExperimentInfo().DetectorConfig().Pixelsize();
-        auto sample_distance = descr.ExperimentInfo().DetectorConfig().SampleDistance();
-        auto direct_beam = descr.ExperimentInfo().DetectorConfig().Directbeam();
-        auto detector_width = descr.ExperimentInfo().DetectorConfig().Resolution().x;
-        auto detector_height = descr.ExperimentInfo().DetectorConfig().Resolution().y;
+        auto alpha_i = sim_job.ExperimentInfo().BeamConfig().AlphaI();
+        auto k0 = sim_job.ExperimentInfo().BeamConfig().K0();
+        auto pixelsize = sim_job.ExperimentInfo().DetectorConfig().Pixelsize();
+        auto sample_distance = sim_job.ExperimentInfo().DetectorConfig().SampleDistance();
+        auto direct_beam = sim_job.ExperimentInfo().DetectorConfig().Directbeam();
+        auto detector_width = sim_job.ExperimentInfo().DetectorConfig().Resolution().x;
+        auto detector_height = sim_job.ExperimentInfo().DetectorConfig().Resolution().y;
 
-        GpuQGrid::CreateQGridFull(alpha_i, k0, pixelsize, sample_distance, GpuConversionHelper::Convert(direct_beam),
-                                  detector_width, detector_height,
+        if (detector_positions.size() == 0) {
+            GpuQGrid::CreateQGridFull(alpha_i, k0, pixelsize, sample_distance,
+                                      GpuConversionHelper::Convert(direct_beam),
+                                      detector_width, detector_height,
+                                      container, work_stream->Get());
+        } else {
+
+            GpuQGrid::CreateQGrid(alpha_i, k0, pixelsize, sample_distance, dev_detector_positions.Get(),
+                                  GpuConversionHelper::Convert(direct_beam),
+                                  detector_width, qcount,
                                   container, work_stream->Get());
+        }
 
         gpuErrchk(cudaDeviceSynchronize());
         cudaMemset(dev_sim_intensities.Get(), 0, qcount * sizeof(MyType));
@@ -213,12 +246,11 @@ namespace GpuDeviceV2 {
             //memoryProviderV2.UnlockAll();
             return {fitness_, {copied_intensities.begin(), copied_intensities.end()}, copied_normalized_intensities,
                     container_qx.CopyToHost(),
-                    container_qy.CopyToHost(), container_qz.CopyToHost(),
-                    descr.ExperimentInfo().DetectorConfig().Resolution(), 0};//scale};
+                    container_qy.CopyToHost(), container_qz.CopyToHost(), 0};
         }
 
         //memoryProviderV2.UnlockAll();
-        return {fitness_, {}, std::vector<unsigned char>(), {}, {}, {}, {0, 0}, 0};//scale};
+        return {fitness_, {}, std::vector<unsigned char>(), {}, {}, {}, 0};//scale};
     }
 
     int GpuDeviceV2::Bind() const {
@@ -236,8 +268,7 @@ namespace GpuDeviceV2 {
     }
 
     std::string GpuDeviceV2::WorkStatusToStr(WorkStatus status) const {
-        switch(status)
-        {
+        switch (status) {
             case WorkStatus::kIdle:
                 return "idle";
             case WorkStatus::kWorking:

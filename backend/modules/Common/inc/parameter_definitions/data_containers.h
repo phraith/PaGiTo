@@ -42,6 +42,13 @@ namespace GisaxsTransformationContainer {
         std::vector <ShapeTypeV2> shape_types;
     };
 
+    struct JobMetaInformationContainer {
+        long client_id;
+        long job_id;
+        IntensityFormat intensity_format;
+        std::vector<SimulationTargetDefinition> simulationTargets;
+    };
+
     struct SampleContainer {
         std::vector <Layer> layers;
 

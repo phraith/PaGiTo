@@ -1,13 +1,11 @@
 #include <spdlog/spdlog.h>
 #include "parameter_definitions/transformation_container.h"
-#include "common/timer.h"
 
-void from_json (const json &j, Vector3<MyType> &vector)
-{
+void from_json(const json &j, Vector3<MyType> &vector) {
     vector = {j.at("x"), j.at("y"), j.at("z")};
 }
 
-void to_json (json &j, const Vector3<MyType> &vector) {
+void to_json(json &j, const Vector3<MyType> &vector) {
     j["x"] = vector.x;
     j["y"] = vector.y;
     j["z"] = vector.z;
@@ -70,9 +68,9 @@ namespace GisaxsTransformationContainer {
                     auto heightStddevUpper = shape.at("height").at("stddevUpper");
                     auto heightStddevLower = shape.at("height").at("stddevLower");
 
-                    shapes.upper_bounds.emplace_back(Vector2<MyType>{radiusMeanUpper, radiusStddevUpper});
-                    shapes.lower_bounds.emplace_back(Vector2<MyType>{radiusMeanLower, radiusStddevLower});
-                    shapes.parameters.emplace_back(Vector2<MyType>{radiusMeanUpper, radiusStddevUpper});
+                    shapes.upper_bounds.emplace_back(Vector2<MyType>{heightMeanUpper, heightStddevUpper});
+                    shapes.lower_bounds.emplace_back(Vector2<MyType>{heightMeanLower, heightStddevLower});
+                    shapes.parameters.emplace_back(Vector2<MyType>{heightMeanUpper, heightStddevUpper});
 
                     std::vector<Vector3<MyType>> positions;
                     shapes.position_indices.emplace_back(shapes.positions.size());
@@ -87,11 +85,9 @@ namespace GisaxsTransformationContainer {
         shapes.position_indices.emplace_back(shapes.positions.size());
     }
 
-    void to_json(json& j, const FlatShapeContainer &shapes)
-    {
+    void to_json(json &j, const FlatShapeContainer &shapes) {
         j = json::array();
-        for (int i = 0; i < shapes.shape_types.size(); ++i)
-        {
+        for (int i = 0; i < shapes.shape_types.size(); ++i) {
             auto shape_type = shapes.shape_types.at(i);
             int first_parameter = shapes.parameter_indices[i];
 
@@ -102,13 +98,11 @@ namespace GisaxsTransformationContainer {
             shape["type"] = shape_type;
 
             std::vector<Vector3<MyType>> positions;
-            for(int j = first_position; j < last_position; ++j)
-            {
+            for (int j = first_position; j < last_position; ++j) {
                 positions.emplace_back(shapes.positions[j]);
             }
             shape["locations"] = positions;
-            switch(shape_type)
-            {
+            switch (shape_type) {
                 case ShapeTypeV2::sphere: {
                     auto radius = shapes.parameters[first_parameter];
                     shape["radius"]["mean"] = radius.x;
@@ -123,8 +117,8 @@ namespace GisaxsTransformationContainer {
                     shape["radius"]["mean"] = radius.x;
                     shape["radius"]["stddev"] = radius.y;
 
-                    shape["height"]["mean"] = radius.x;
-                    shape["height"]["stddev"] = radius.y;
+                    shape["height"]["mean"] = height.x;
+                    shape["height"]["stddev"] = height.y;
                     j.push_back(shape);
                     break;
                 }
@@ -161,6 +155,28 @@ namespace GisaxsTransformationContainer {
         j.at("photonEv").get_to(beam.photonEv);
     }
 
+    void from_json(const json &j, SimulationTargetDefinition &lineprofile) {
+        j.at("start").at("x").get_to(lineprofile.start.x);
+        j.at("start").at("y").get_to(lineprofile.start.y);
+
+        j.at("end").at("x").get_to(lineprofile.end.x);
+        j.at("end").at("y").get_to(lineprofile.end.y);
+    }
+
+    void from_json(const json &j, JobMetaInformationContainer &job_meta_information) {
+        auto intensityFormat = j.at("intensityFormat").get<IntensityFormat>();
+        job_meta_information.intensity_format = intensityFormat;
+
+        auto simulationTargets = j.at("simulationTargets");
+        for (const json &item: simulationTargets) {
+            job_meta_information.simulationTargets.emplace_back(ConvertToSimulationTargetDefinition(item));
+        }
+
+        j.at("clientId").get_to(job_meta_information.client_id);
+        j.at("jobId").get_to(job_meta_information.job_id);
+    }
+
+
     FlatShapeContainer ConvertToFlatShapes(const json &json) {
         return json.get<FlatShapeContainer>();
     }
@@ -181,25 +197,35 @@ namespace GisaxsTransformationContainer {
         return json.get<DetectorContainer>();
     }
 
+    SimulationTargetDefinition ConvertToSimulationTargetDefinition(const json &json) {
+        return json.get<SimulationTargetDefinition>();
+    }
+
+    JobMetaInformationContainer ConvertToJobMetaInformation(const json &json) {
+        return json.get<JobMetaInformationContainer>();
+    }
+
     SimJob CreateSimJobFromRequest(const std::string &request) {
         json data = json::parse(request);
         return CreateSimJobFromRequest(data);
     }
 
-    json UpdateShapes(const json &input, const FlatShapeContainer &shape_container)
-    {
+    json UpdateShapes(const json &input, const FlatShapeContainer &shape_container) {
         json j(input);
         j["shapes"] = shape_container;
         return j;
     }
 
     SimJob CreateSimJobFromRequest(json request) {
-        json detector = request.at("instrumentation").at("detector");
-        json shapes = request.at("shapes");
+        json detector = request.at("config").at("instrumentation").at("detector");
+        json shapes = request.at("config").at("shapes");
 
-        json sample = request.at("sample");
-        json beam = request.at("instrumentation").at("beam");
-        json unitcellMeta = request.at("unitcellMeta");
+        json sample = request.at("config").at("sample");
+        json beam = request.at("config").at("instrumentation").at("beam");
+        json unitcellMeta = request.at("config").at("unitcellMeta");
+
+        json job_info = request.at("jobInfo");
+        auto job_info_container = ConvertToJobMetaInformation(job_info);
 
         auto detector_container = ConvertToDetector(detector);
         auto shapes_container = ConvertToFlatShapes(shapes);
@@ -216,7 +242,7 @@ namespace GisaxsTransformationContainer {
                 Layer(sample_container.substrate_delta, sample_container.substrate_beta, -1, 0),
                 sample_container.layers);
 
-        return {JobMetaInformation{"1"},
+        return {JobMetaInformation{job_info_container},
                 ExperimentalData{detector_config, beam_config, sample_config, flat_unitcell}};
     }
 }
