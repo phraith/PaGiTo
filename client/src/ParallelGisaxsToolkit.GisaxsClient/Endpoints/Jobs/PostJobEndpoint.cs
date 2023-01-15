@@ -17,12 +17,13 @@ public class PostJobEndpoint : Endpoint<PostJobRequest, PostJobResponse>
     private readonly IJobScheduler _jobScheduler;
     private readonly IHashComputer _hashComputer;
 
-    public PostJobEndpoint(IImageStore imageStore, IJobStore jobStore, IJobScheduler jobScheduler)
+    public PostJobEndpoint(IImageStore imageStore, IHashComputer hashComputer, IJobStore jobStore,
+        IJobScheduler jobScheduler)
     {
         _imageStore = imageStore;
         _jobStore = jobStore;
         _jobScheduler = jobScheduler;
-        _hashComputer = HashComputerFactory.CreateSha256HashComputer();
+        _hashComputer = hashComputer;
     }
 
     public override async Task HandleAsync(PostJobRequest req, CancellationToken ct)
