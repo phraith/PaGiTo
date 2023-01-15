@@ -39,7 +39,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.ImageStore
             return images.FirstOrDefault();
         }
 
-        public async void Delete(long id)
+        public async Task Delete(long id)
         {
             await _connection.ExecuteAsync($@"DELETE * FROM images WHERE id = {id}");
         }
@@ -56,7 +56,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.ImageStore
                 });
         }
 
-        public async void Insert(IReadOnlyCollection<Image> images)
+        public async Task Insert(IEnumerable<Image> images)
         {
             using IDbTransaction transaction = _connection.BeginTransaction();
             foreach (var image in images)
