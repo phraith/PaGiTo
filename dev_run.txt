@@ -1,0 +1,1 @@
+docker run -e ASAN_OPTIONS=protect_shadow_gap=0:replace_intrin=0:detect_leaks=0 --gpus all --cap-add=SYS_PTRACE --security-opt seccomp=unconfined -p5556:5555 -p2222:22 --name gisaxs_remote_dev cuda_dev:0.16
