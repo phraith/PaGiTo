@@ -54,6 +54,7 @@ jobs:
       COMPOSE_FILE: docker-compose.yml
       DOCKER_USER: ${{ secrets.DOCKER_USER }}
       DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+      IMAGE_TAG: ${{ github.head_ref || github.ref_name }} 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -70,4 +71,4 @@ jobs:
         with:
           context: ./client
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:latest, ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:$GITHUB_REF_NAME
+          tags: ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:latest, ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:${IMAGE_TAG}
