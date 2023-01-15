@@ -20,7 +20,7 @@ const Register = () => {
       }),
     };
 
-    let url = "/api/auth/register";
+    const url = "/api/auth/register";
     fetch(url, requestOptions).then((response) => response.text()).then((token) => {
       localStorage.setItem('apiToken', token)
     })

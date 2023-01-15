@@ -22,7 +22,7 @@ import ColormapSelect from "../Colormap";
 
 const Fitting = () => {
     const getLineprofiles = (hash: any) => {
-        let url = `/api/job/${hash}`;
+        const url = `/api/job/${hash}`;
         fetch(url, {
             method: "GET",
             headers: {
@@ -42,7 +42,7 @@ const Fitting = () => {
     }
 
     const receiveJobResult = (hash: any) => {
-        let url = `/api/job/${hash}`;
+        const url = `/api/job/${hash}`;
         console.log(hash)
         fetch(url, {
             method: "GET",
@@ -130,7 +130,7 @@ const Fitting = () => {
             },
             body: jsonConfigForRealImage
         };
-        let url = `/api/image/profile`;
+        const url = `/api/image/profile`;
         fetch(url, requestOptions)
             .then((response) => response.json())
             .then((data) => {
@@ -218,14 +218,14 @@ const Fitting = () => {
             )
         };
 
-        let url = "/api/job";
+        const url = "/api/job";
         fetch(url, requestOptions)
             .then(data => console.log(data));
 
     }, [jsonData, colormap]);
 
     useEffect(() => {
-        let url = `/api/image/${imageInfo.id}/${colormap}`;
+        const url = `/api/image/${imageInfo.id}/${colormap}`;
         fetch(url, {
             method: "GET",
             headers: {
@@ -265,7 +265,7 @@ const Fitting = () => {
             },
             body: jsonConfig
         };
-        let url = "/api/jobconfig";
+        const url = "/api/jobs";
         fetch(url, requestOptions)
             .then(data => console.log(data));
     }

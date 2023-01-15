@@ -47,7 +47,7 @@ const Jobs = () => {
                 })
         };
 
-        let url = "/api/job";
+        const url = "/api/job";
         fetch(url, requestOptions)
             .then(data => console.log(data));
     };

@@ -19,7 +19,7 @@ const Simulation = () => {
 
 
   const receiveJobResult = (hash: any) => {
-    let url = `/api/job/${hash}`;
+    const url = `/api/job/${hash}`;
     console.log(hash)
     fetch(url, {
       method: "GET",
@@ -98,11 +98,9 @@ const Simulation = () => {
         }
       )
     };
-    let url = "/api/job";
+    const url = "/api/job";
     fetch(url, requestOptions)
       .then(data => console.log(data));
-
-    // hubConnection.requestJob(jsonConfig, colormap);
   }, [jsonData, colormap]);
 
   return (

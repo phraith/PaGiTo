@@ -27,7 +27,7 @@
         public IReadOnlyList<double> RowWiseData { get; }
         public IReadOnlyList<double> ColumnWiseData { get; }
         public byte[] GreyScaleData { get; }
-        public static Image Empty = CreateEmptyImage();
+        public static readonly Image Empty = CreateEmptyImage();
         public Image(ImageInfo info, IReadOnlyList<double> rowWiseData, IReadOnlyList<double> columnWiseData,
             byte[] greyscaleData)
         {

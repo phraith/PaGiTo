@@ -20,7 +20,7 @@ const Login = () => {
       }),
     };
 
-    let url = "/api/auth/login";
+    const url = "/api/auth/login";
     fetch(url, requestOptions)
       .then((response) => {
         if (!response.ok) { throw new Error(response.status.toString()) }
