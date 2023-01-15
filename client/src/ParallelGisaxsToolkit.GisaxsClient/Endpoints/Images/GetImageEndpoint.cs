@@ -20,7 +20,7 @@ public class GetImageEndpoint : Endpoint<GetImageRequest, GetImageResponse>
 
     public override async Task HandleAsync(GetImageRequest request, CancellationToken ct)
     {
-        SimpleImage? image = await _imageStore.Get(request.Id);
+        GreyScaleImage? image = await _imageStore.Get(request.Id);
         if (image == null)
         {
             throw new InvalidOperationException("Image does not exist!");

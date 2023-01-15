@@ -29,12 +29,12 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.ImageStore
                 (string info, int id) => new ImageInfoWithId(id, JsonSerializer.Deserialize<Utility.Images.ImageInfo>(info)!));
         }
 
-        public async Task<SimpleImage?> Get(long id)
+        public async Task<GreyScaleImage?> Get(long id)
         {
-            IEnumerable<SimpleImage>? images = await _connection.QueryAsync(
+            IEnumerable<GreyScaleImage>? images = await _connection.QueryAsync(
                 @$"SELECT info, greyScaleData as greyScaleDataId FROM images WHERE id = {id}",
                 (string info, byte[] greyScaleData) =>
-                    new SimpleImage(JsonSerializer.Deserialize<Utility.Images.ImageInfo>(info)!, greyScaleData),
+                    new GreyScaleImage(JsonSerializer.Deserialize<Utility.Images.ImageInfo>(info)!, greyScaleData),
                 splitOn: "greyScaleDataId");
             return images.FirstOrDefault();
         }

@@ -8,7 +8,7 @@ public interface IImageStore
     Task<double[]> GetHorizontalProfile(int id, int startX, int endX, int startY);
     Task Insert(Image image);
     Task Insert(IEnumerable<Image> images);
-    Task<SimpleImage?> Get(long id);
+    Task<GreyScaleImage?> Get(long id);
     Task<IEnumerable<ImageInfoWithId>> Get();
     Task Delete(long id);
 }

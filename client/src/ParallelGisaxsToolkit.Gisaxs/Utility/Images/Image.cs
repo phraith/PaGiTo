@@ -23,5 +23,5 @@
         }
     }
 
-    public record SimpleImage(ImageInfo Info, IReadOnlyList<byte> GreyscaleData);
+    public record GreyScaleImage(ImageInfo Info, IReadOnlyList<byte> GreyscaleData);
 }
