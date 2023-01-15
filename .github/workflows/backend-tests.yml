@@ -42,9 +42,8 @@ jobs:
           # or
           # api-token: ${{ secrets.CODACY_API_TOKEN }}
           coverage-reports: /reports/backend/GisaxsCoverage.xml
-          # or a comma-separated list for multiple reports
           # coverage-reports: <PATH_TO_REPORT>, <PATH_TO_REPORT>
-   publish:
+  publish:
     needs: test
     if: startsWith(github.ref, 'refs/tags/v')
     name: publish
