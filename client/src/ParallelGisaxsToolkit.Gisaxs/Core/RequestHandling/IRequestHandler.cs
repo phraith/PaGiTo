@@ -1,7 +1,4 @@
-﻿#nullable enable
-
-
-namespace ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling
+﻿namespace ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling
 {
     public interface IRequestHandler
     {

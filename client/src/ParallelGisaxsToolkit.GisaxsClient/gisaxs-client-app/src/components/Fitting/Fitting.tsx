@@ -21,13 +21,8 @@ import ColormapSelect from "../Colormap";
 
 
 const Fitting = () => {
-    const receiveJobInfos = (message: any) => {
-        setCurrentInfoPath(message)
-        setIsActive(true)
-    }
-
     const getLineprofiles = (hash: any) => {
-        let url = `/api/redis/data?hash=${hash}`;
+        let url = `/api/job/${hash}`;
         fetch(url, {
             method: "GET",
             headers: {
@@ -37,17 +32,18 @@ const Fitting = () => {
         })
             .then((response) => response.json())
             .then((data) => {
-                let json = JSON.parse(data);
+                let json = JSON.parse(data.response)
                 let traces = []
-                let values = json.modifiedData
+                let values = json.numericResults[0].modifiedData
                 let k = values.map((x: number, index: number) => { return { x: index, y: x } })
                 traces.push(k)
                 setSimulatedPlotData(traces[0])
             })
     }
 
-    const receiveJobResult = (hash: any, colormap: any) => {
-        let url = `/api/redis/image?colorMapName=${colormap}&hash=${hash}`;
+    const receiveJobResult = (hash: any) => {
+        let url = `/api/job/${hash}`;
+        console.log(hash)
         fetch(url, {
             method: "GET",
             headers: {
@@ -62,9 +58,10 @@ const Fitting = () => {
     const [hubConnection, _] = useState<MessageHubConnectionProvider>(
         new MessageHubConnectionProvider(
             `${localStorage.getItem("apiToken")}`,
-            receiveJobResult,
-            receiveJobInfos,
-            getLineprofiles
+            [
+                ["receiveJobResult", (message: string) => receiveJobResult(message)],
+                ["receiveLineProfile", (message: string) => getLineprofiles(message)]
+            ]
         )
     )
 
@@ -86,10 +83,10 @@ const Fitting = () => {
 
     const handleData = (input: any) => {
         let startTime = performance.now();
-        let json = JSON.parse(input);
-        setIntensities(json.data);
-        setImgWidth(json.width);
-        setImgHeight(json.height);
+        let json = JSON.parse(input.response);
+        setIntensities(json.jpegResults[0].data);
+        setImgWidth(json.jpegResults[0].width);
+        setImgHeight(json.jpegResults[0].height);
         let endTime = performance.now();
         console.log(`Handling data took ${endTime - startTime} milliseconds`);
     };
@@ -103,12 +100,26 @@ const Fitting = () => {
         setJsonData({ ...jsonData });
     };
 
-    const sendLineprofileRequest = (json) => {
-        hubConnection.requestProfiles(json);
-    }
-
     const throttled = useRef(throttle((jsonConfigForSimulation, jsonConfigForRealImage) => {
-        sendLineprofileRequest(jsonConfigForSimulation)
+
+        const requestOptions1 = {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
+                Accept: "application/json",
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(
+                {
+                    "jsonConfig": jsonConfigForSimulation
+                }
+            )
+        };
+
+        let url1 = "/api/job";
+        fetch(url1, requestOptions1)
+            .then(data => console.log(data));
+
 
         const requestOptions = {
             method: 'POST',
@@ -119,15 +130,15 @@ const Fitting = () => {
             },
             body: jsonConfigForRealImage
         };
-        let url = `/api/scatterstore/profile`;
+        let url = `/api/image/profile`;
         fetch(url, requestOptions)
             .then((response) => response.json())
             .then((data) => {
-                let json = JSON.parse(data);
                 let traces = []
-                let values = json.modifiedData
+                let values = data.modifiedData
                 let k = values.map((x: number, index: number) => { return { x: index, y: x } })
                 traces.push(k)
+                console.log(traces)
                 setRealPlotData(traces[0])
             })
 
@@ -136,12 +147,11 @@ const Fitting = () => {
 
     useEffect(() => {
         let jsonConfigForSimulation = JSON.stringify({
-            clientInfo: {
-                jobType: "simulation"
+            meta: {
+                type: "simulation",
+                notification: "receiveLineProfile"
             },
-            jobInfo: {
-                clientId: 0,
-                jobId: 0,
+            properties: {
                 intensityFormat: "doublePrecision",
                 simulationTargets: [
                     lineprofileState?.currentLineProfile.inverseHeight(imgHeight)
@@ -152,10 +162,13 @@ const Fitting = () => {
             },
         });
 
-        let jsonConfigForRealImage = JSON.stringify({
-            id: imageInfo.id,
-            target: lineprofileState?.currentLineProfile.inverseHeight(imgHeight)
-        })
+        let jsonConfigForRealImage = JSON.stringify(
+            {
+                target: {
+                    id: imageInfo.id,
+                    target: lineprofileState?.currentLineProfile.inverseHeight(imgHeight)
+                }
+            })
 
         throttled.current(jsonConfigForSimulation, jsonConfigForRealImage)
     }, [lineprofileState?.currentLineProfile, jsonData]);
@@ -173,28 +186,46 @@ const Fitting = () => {
 
     useEffect(() => {
         let jsonConfig = JSON.stringify({
-            clientInfo: {
-                jobType: "simulation"
+            meta: {
+                type: "simulation",
+                notification: "receiveJobResult",
+                persist: true,
+                execute: false,
+                colormap: colormap
             },
-            jobInfo: {
-                clientId: 0,
-                jobId: 0,
+            properties: {
                 intensityFormat: "greyscale",
-                simulationTargets: [
-                    // { start: { x: 0, y: 0 }, end: { x: 1475, y: 120 } }
-                ]
+                simulationTargets: []
             },
             config: {
                 ...jsonData,
             },
         });
         localStorage.setItem("simulation_config", jsonConfig);
-        hubConnection.requestJob(jsonConfig, colormap);
+
+
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
+                Accept: "application/json",
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(
+                {
+                    "jsonConfig": jsonConfig
+                }
+            )
+        };
+
+        let url = "/api/job";
+        fetch(url, requestOptions)
+            .then(data => console.log(data));
 
     }, [jsonData, colormap]);
 
     useEffect(() => {
-        let url = "/api/scatterstore/get?id=" + imageInfo.id + "&colormap=" + colormap;
+        let url = `/api/image/${imageInfo.id}/${colormap}`;
         fetch(url, {
             method: "GET",
             headers: {
@@ -203,7 +234,7 @@ const Fitting = () => {
             },
         })
             .then((response) => response.json())
-            .then((data) => setRefIntensities(data));
+            .then((data) => setRefIntensities(data.imageAsBase64));
     }, [imageInfo.id, colormap]);
 
     const sendJobInfo = () => {
@@ -211,22 +242,20 @@ const Fitting = () => {
             info: {
                 body: JSON.stringify({
                     config: jsonData,
-                    jobInfo: {
-                        clientId: 0,
-                        jobId: 0,
+                    properties: {
                         imageId: imageInfo.id,
                         intensityFormat: "doublePrecision",
                         simulationTargets: lineprofileState.lineProfiles
                     },
-                    clientInfo: {
-                        jobType: "fitting"
+                    meta: {
+                        type: "fitting"
                     }
                 }),
                 history: []
             },
             userId: 0
         });
-        console.log(jsonConfig)
+
         const requestOptions = {
             method: 'POST',
             headers: {
@@ -236,7 +265,7 @@ const Fitting = () => {
             },
             body: jsonConfig
         };
-        let url = "/api/jobstore/push";
+        let url = "/api/jobconfig";
         fetch(url, requestOptions)
             .then(data => console.log(data));
     }

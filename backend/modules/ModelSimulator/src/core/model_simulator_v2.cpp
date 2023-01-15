@@ -36,8 +36,7 @@ std::vector<std::byte> ModelSimulatorV2::HandleRequest(const std::string &reques
         bool copy_intensities = true;
         std::shared_ptr<ImageData> img_data = nullptr;
 
-        if (!image_data.empty())
-        {
+        if (!image_data.empty()) {
             auto simulation_target_data = BinarySerializationUtility::ReadSimulationTargetData(image_data);
             img_data = std::make_shared<ImageData>(simulation_target_data);
             copy_intensities = false;
@@ -51,8 +50,8 @@ std::vector<std::byte> ModelSimulatorV2::HandleRequest(const std::string &reques
         //spdlog::info("Simulation took {} ms", localTimer.Duration());
 
         localTimer.Start();
-
-        auto final_message = CreateSerializedByteResult(sim_data, job.ExperimentInfo().DetectorConfig(), job.JobInfo(), copy_intensities);
+        auto final_message = SerializeResult(sim_data, job.ExperimentInfo().DetectorConfig(), job.JobInfo(),
+                                             copy_intensities);
 
         localTimer.End();
         //spdlog::info("Serializing result took {} ms", localTimer.Duration());
@@ -69,7 +68,8 @@ std::vector<std::byte> ModelSimulatorV2::HandleRequest(const std::string &reques
     }
 }
 
-SimData ModelSimulatorV2::RunGISAXS(const SimJob &descr, std::shared_ptr<ImageData> real_img, bool copy_intensities) const {
+SimData
+ModelSimulatorV2::RunGISAXS(const SimJob &descr, std::shared_ptr<ImageData> real_img, bool copy_intensities) const {
     Device &device = hw_info_->LockAndReturnDevice();
 
     SimData sim_data = device.RunGISAXS(descr, real_img, copy_intensities);
@@ -93,91 +93,115 @@ std::string ModelSimulatorV2::ServiceName() const {
     return "simulation";
 }
 
-std::string
-ModelSimulatorV2::CreateSerializedResult(const SimData &sim_data, const DetectorConfiguration &detector_data,
-                                         const JobMetaInformation &job_meta_information) {
-
-    nlohmann::json message;
-    message["intensities"] = sim_data.normalized_intensities;
-    message["width"] = detector_data.Resolution().x;
-    message["height"] = detector_data.Resolution().y;
-    message["id"] = job_meta_information.ClientId();
-
-    return message.dump();
-}
-
 std::vector<std::byte>
-ModelSimulatorV2::CreateSerializedByteResult(const SimData &sim_data, const DetectorConfiguration &detector_data,
-                                             const JobMetaInformation &job_meta_information, bool copy_intensities) {
-    if (!copy_intensities)
-    {
+ModelSimulatorV2::SerializeResult(const SimData &sim_data, const DetectorConfiguration &detector_data,
+                                  const JobMetaInformation &job_meta_information, bool copy_intensities) {
+    if (!copy_intensities) {
         std::vector<std::byte> bytes(sizeof(MyType));
         auto byte_ptr = reinterpret_cast<const std::byte *>(&sim_data.fitness);
         std::copy(byte_ptr, byte_ptr + sizeof(MyType), &bytes[0]);
         return bytes;
     }
 
-    if (job_meta_information.SimulationTargets().size() == 0) {
-        size_t s1 = 2 * sizeof detector_data.Resolution().x;
-        size_t s2 = sim_data.normalized_intensities.size() * sizeof sim_data.normalized_intensities[0];
-        size_t s3 = sim_data.intensities.size() * sizeof(double);
-
-        std::vector<std::byte> bytes(s1 + s2 + s3);
-        std::copy(reinterpret_cast<const std::byte *>(&detector_data.Resolution().x),
-                  reinterpret_cast<const std::byte *>(&detector_data.Resolution().x) + s1,
-                  &bytes[0]);
-
-        std::copy(reinterpret_cast<const std::byte *>(&detector_data.Resolution().y),
-                  reinterpret_cast<const std::byte *>(&detector_data.Resolution().y) + s1,
-                  &bytes[0] + s1);
-
-        if (job_meta_information.Format() == IntensityFormat::greyscale) {
-            std::copy(reinterpret_cast<const std::byte *>(&sim_data.normalized_intensities[0]),
-                      reinterpret_cast<const std::byte *>(&sim_data.normalized_intensities[0]) + s2,
-                      &bytes[0] + 2 * s1);
-        }
-
-        if (job_meta_information.Format() == IntensityFormat::double_precision) {
-            std::copy(reinterpret_cast<const std::byte *>(&sim_data.intensities[0]),
-                      reinterpret_cast<const std::byte *>(&sim_data.intensities[0]) + s3,
-                      &bytes[0] + 2 * s1);
-        }
-        return bytes;
-
-    } else {
-        size_t s1 = sizeof(int);
-        size_t s2 = sim_data.normalized_intensities.size() * sizeof sim_data.normalized_intensities[0];
-        size_t s3 = sim_data.intensities.size() * sizeof(double);
-
-        std::vector<std::byte> bytes(2 * job_meta_information.SimulationTargets().size() * s1 + s2 + s3);
-        int current_offset = 0;
-        for (const auto &st: job_meta_information.SimulationTargets()) {
-            int x = st.end.x - st.start.x + 1;
-            int y = st.start.y - st.end.y + 1;
-
-            size_t s2_local = x * y * sizeof sim_data.normalized_intensities[0];
-            size_t s3_local = x * y * sizeof sim_data.intensities[0];
-
-            std::copy(reinterpret_cast<const std::byte *>(&x),
-                      reinterpret_cast<const std::byte *>(&x) + s1,
-                      &bytes[0] + current_offset);
-
-            std::copy(reinterpret_cast<const std::byte *>(&y),
-                      reinterpret_cast<const std::byte *>(&y) + s1,
-                      &bytes[0] + current_offset + s1);
-
-            if (job_meta_information.Format() == IntensityFormat::greyscale) {
-                std::copy(reinterpret_cast<const std::byte *>(&sim_data.normalized_intensities[0]),
-                          reinterpret_cast<const std::byte *>(&sim_data.normalized_intensities[0]) + s2_local,
-                          &bytes[0] + current_offset + 2 * s1);
-            }
-
-            if (job_meta_information.Format() == IntensityFormat::double_precision) {
-                std::copy(reinterpret_cast<const std::byte *>(&sim_data.intensities[0]),
-                          reinterpret_cast<const std::byte *>(&sim_data.intensities[0]) + s3_local,
-                          &bytes[0] + current_offset + 2 * s1);
-            }
-        }
-        return bytes;
+    std::vector<GisaxsTransformationContainer::SimulationTargetDefinition> simulation_targets = job_meta_information.SimulationTargets();
+    if (simulation_targets.empty()) {
+        auto resolution = detector_data.Resolution();
+        Vector2<int> target = {resolution.x - 1, resolution.y - 1};
+        simulation_targets.emplace_back(
+                GisaxsTransformationContainer::SimulationTargetDefinition{{0, 0}, target});
     }
+
+    std::vector<std::byte> bytes = Serialize(simulation_targets, sim_data.normalized_intensities, sim_data.intensities,
+                                             job_meta_information.Format());
+    return bytes;
+}
+
+
+std::vector<std::byte> ModelSimulatorV2::Serialize(
+        const std::vector<GisaxsTransformationContainer::SimulationTargetDefinition> &target_definitions,
+        const std::vector<unsigned char> &normalized_intensities,
+        const std::vector<double> &intensities,
+        IntensityFormat format) {
+    size_t s1 = sizeof(int);
+    size_t s2 = normalized_intensities.size() * sizeof normalized_intensities[0];
+    size_t s3 = intensities.size() * sizeof intensities[0];
+
+    size_t byte_count = 7 * target_definitions.size() * s1;
+    if (format == IntensityFormat::double_precision)
+    {
+        byte_count += s3;
+    }
+    if (format == IntensityFormat::greyscale)
+    {
+        byte_count += s2;
+    }
+
+
+    std::vector<std::byte> bytes(byte_count);
+    int current_offset = 0;
+    for (const auto &st: target_definitions) {
+        std::copy(reinterpret_cast<const std::byte *>(&st.start.x),
+                  reinterpret_cast<const std::byte *>(&st.start.x) + s1,
+                  &bytes[0] + current_offset);
+        current_offset += s1;
+
+        std::copy(reinterpret_cast<const std::byte *>(&st.start.y),
+                  reinterpret_cast<const std::byte *>(&st.start.y) + s1,
+                  &bytes[0] + current_offset);
+        current_offset += s1;
+
+        std::copy(reinterpret_cast<const std::byte *>(&st.end.x),
+                  reinterpret_cast<const std::byte *>(&st.end.x) + s1,
+                  &bytes[0] + current_offset);
+        current_offset += s1;
+
+        std::copy(reinterpret_cast<const std::byte *>(&st.end.y),
+                  reinterpret_cast<const std::byte *>(&st.end.y) + s1,
+                  &bytes[0] + current_offset);
+        current_offset += s1;
+
+        int x = st.end.x - st.start.x + 1;
+        int y = st.end.y - st.start.y + 1;
+
+        std::copy(reinterpret_cast<const std::byte *>(&x),
+                  reinterpret_cast<const std::byte *>(&x) + s1,
+                  &bytes[0] + current_offset);
+        current_offset += s1;
+
+        std::copy(reinterpret_cast<const std::byte *>(&y),
+                  reinterpret_cast<const std::byte *>(&y) + s1,
+                  &bytes[0] + current_offset);
+        current_offset += s1;
+
+        if (format == IntensityFormat::greyscale) {
+            int single_value_size = sizeof normalized_intensities[0];
+
+            std::copy(reinterpret_cast<const std::byte *>(&single_value_size),
+                      reinterpret_cast<const std::byte *>(&single_value_size) + s1,
+                      &bytes[0] + current_offset);
+            current_offset += s1;
+
+            size_t s2_local = x * y * single_value_size;
+            std::copy(reinterpret_cast<const std::byte *>(&normalized_intensities[0]),
+                      reinterpret_cast<const std::byte *>(&normalized_intensities[0]) + s2_local,
+                      &bytes[0] + current_offset);
+            current_offset += s2_local;
+        }
+
+        if (format == IntensityFormat::double_precision) {
+            int single_value_size = sizeof intensities[0];
+
+            std::copy(reinterpret_cast<const std::byte *>(&single_value_size),
+                      reinterpret_cast<const std::byte *>(&single_value_size) + single_value_size,
+                      &bytes[0] + current_offset);
+            current_offset += s1;
+
+            size_t s3_local = x * y * single_value_size;
+            std::copy(reinterpret_cast<const std::byte *>(&intensities[0]),
+                      reinterpret_cast<const std::byte *>(&intensities[0]) + s3_local,
+                      &bytes[0] + current_offset);
+            current_offset += s3_local;
+        }
+    }
+    return bytes;
 }

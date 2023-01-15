@@ -1,27 +1,48 @@
-﻿namespace ParallelGisaxsToolkit.Gisaxs.Configuration
-{
-    public record RequestInformation(JobInformation JobInformation, ClientInformation ClientInformation);
+﻿using System.Text.Json.Serialization;
 
-    public record JobInformation(long ClientId, IReadOnlyList<SimulationTarget> SimulationTargets, long JobId,
+namespace ParallelGisaxsToolkit.Gisaxs.Configuration
+{
+    public record RequestInformation(JobProperties JobProperties, MetaInformation MetaInformation);
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum IntensityFormat
+    {
+        Greyscale,
+        DoublePrecision
+    }
+
+    public record JobProperties(IReadOnlyList<SimulationTarget> SimulationTargets, IntensityFormat IntensityFormat,
         long? ImageId = null);
 
-    public record ClientInformation(string JobType);
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum JobType
+    {
+        Fitting,
+        Simulation
+    }
+
+    public record MetaInformation(JobType Type, string Notification, string? Colormap = null);
 
     public record SimulationTarget(DetectorPosition Start, DetectorPosition End)
     {
-        public byte[] ToBytes()
+        public IEnumerable<byte> ToBytes()
         {
-            return Start.ToBytes().Concat(End.ToBytes()).ToArray();
+            return Start.ToBytes().Concat(End.ToBytes());
         }
     }
 
-    public record SimulationTargetWithId(SimulationTarget Target, int Id);
+    public record SimulationTargetWithId(SimulationTarget Target, int Id)
+    {
+        public static readonly SimulationTargetWithId Empty =
+            new SimulationTargetWithId(new SimulationTarget(new DetectorPosition(0, 0), new DetectorPosition(0, 0)),
+                -1);
+    }
 
     public record DetectorPosition(int X, int Y)
     {
-        public byte[] ToBytes()
+        public IEnumerable<byte> ToBytes()
         {
-            return BitConverter.GetBytes(X).Concat(BitConverter.GetBytes(Y)).ToArray();
+            return BitConverter.GetBytes(X).Concat(BitConverter.GetBytes(Y));
         }
     }
 }

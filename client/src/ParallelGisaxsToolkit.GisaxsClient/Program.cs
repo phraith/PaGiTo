@@ -1,12 +1,22 @@
+using System.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using FastEndpoints;
+using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.Extensions.Options;
+using Npgsql;
 using ParallelGisaxsToolkit.Gisaxs.Configuration;
 using ParallelGisaxsToolkit.Gisaxs.Core.ImageStore;
+using ParallelGisaxsToolkit.Gisaxs.Core.JobStore;
+using ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling;
+using ParallelGisaxsToolkit.Gisaxs.Utility.HashComputer;
 using ParallelGisaxsToolkit.GisaxsClient.Configuration;
+using ParallelGisaxsToolkit.GisaxsClient.Endpoints.Jobs;
 using ParallelGisaxsToolkit.GisaxsClient.Hubs;
+using StackExchange.Redis;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,14 +27,42 @@ if (LaunchConfig.LaunchMode == LaunchMode.Kubernetes)
     builder.Configuration.SetBasePath("/vault/secrets/").AddJsonFile("appsettings.json", false, true);
 }
 
-builder.Services.AddControllersWithViews();
-
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerDoc();
+builder.Services.AddFastEndpoints();
 builder.Services.AddSignalR();
 
 builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection("ConnectionStrings"));
 builder.Services.Configure<AuthConfig>(builder.Configuration.GetSection("AuthOptions"));
 
 builder.Services.AddScoped<IImageStore, ImageStore>();
+builder.Services.AddScoped<IJobStore, JobStore>();
+builder.Services.AddScoped<IRequestFactory, RequestFactory>();
+
+builder.Services.AddSingleton<IHashComputer, Sha256HashComputer>();
+builder.Services.AddSingleton<IRequestHandler, MajordomoRequestHandler>();
+builder.Services.AddSingleton<IJobScheduler, JobScheduler>();
+builder.Services.AddSingleton<IDatabase>(provider =>
+{
+    var connectionStrings = provider.GetService<IOptionsMonitor<ConnectionStrings>>();
+    if (connectionStrings == null)
+    {
+        throw new InvalidOperationException("ConnectionStrings do not exist!");
+    }
+    IConnectionMultiplexer multiplexer = ConnectionMultiplexer.Connect(connectionStrings.CurrentValue.Redis);
+    return multiplexer.GetDatabase();
+});
+
+builder.Services.AddScoped<IDbConnection>(provider =>
+{
+    var connectionStrings = provider.GetService<IOptionsMonitor<ConnectionStrings>>();
+    if (connectionStrings == null)
+    {
+        throw new InvalidOperationException("ConnectionStrings do not exist!");
+    }    
+    IDbConnection connection = new NpgsqlConnection(connectionStrings.CurrentValue.Default);
+    return connection;
+});
 
 builder.Services.AddAuthorization(auth =>
 {
@@ -70,12 +108,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     };
 });
 
-builder.Services.AddSpaStaticFiles(configuration => { configuration.RootPath = "gisaxs-client-app/dist"; });
-
+// builder.Services.AddSpaStaticFiles(configuration => { configuration.RootPath = "gisaxs-client-app/dist"; });
 builder.Services.Configure<JsonOptions>(options => { options.SerializerOptions.PropertyNameCaseInsensitive = true; });
 
-var app = builder.Build();
 
+var app = builder.Build();
+app.UseDefaultExceptionHandler();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -85,16 +123,16 @@ if (!app.Environment.IsDevelopment())
 
 app.UseWebSockets();
 //app.UseHttpsRedirection();
-//app.UseSpa(configuration => {  });
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseFastEndpoints();
+app.UseOpenApi();
 
-app.UseSpaStaticFiles();
-app.UseSpa(spa => { spa.Options.SourcePath = "gisaxs-client-app"; });
-
-app.MapControllerRoute(name: "default",
-    pattern: "{controller}/{action=Index}/{id?}");
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwaggerGen();
+}
 
 app.MapHub<MessageHub>("/message");
 app.Run();

@@ -3,6 +3,7 @@
     "GisaxsClient": {
       "commandName": "Project",
       "launchBrowser": true,
+//      "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.SpaProxy"

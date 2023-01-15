@@ -1,4 +1,4 @@
 ﻿namespace ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling
 {
-    public record RequestResult(string DataAccessor, string SignalREndpoint);
+    public record RequestResult(string JobId, string Notification);
 }

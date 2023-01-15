@@ -22,6 +22,7 @@ export default defineConfig({
     https: true,
     proxy: {
       '/api': { target: 'https://localhost:9999', secure: false },
+      '/swagger': { target: 'https://localhost:9999', secure: false },
       '/message': {
         target: 'ws://localhost:9998',
         ws: true

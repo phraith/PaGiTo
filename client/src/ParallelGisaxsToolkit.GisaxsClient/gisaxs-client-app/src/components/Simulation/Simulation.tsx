@@ -18,8 +18,9 @@ const Simulation = () => {
   const [jsonData, setJsonData] = React.useState({});
 
 
-  const receiveJobResult = (hash: any, colormap: any) => {
-    let url = `/api/redis/image?colorMapName=${colormap}&hash=${hash}`;
+  const receiveJobResult = (hash: any) => {
+    let url = `/api/job/${hash}`;
+    console.log(hash)
     fetch(url, {
       method: "GET",
       headers: {
@@ -27,6 +28,7 @@ const Simulation = () => {
         Accept: "application/json",
       },
     })
+
       .then((response) => response.json())
       .then((data) => handleData(data));
   };
@@ -34,9 +36,9 @@ const Simulation = () => {
   const [hubConnection, _] = useState<MessageHubConnectionProvider>(
     new MessageHubConnectionProvider(
       `${localStorage.getItem("apiToken")}`,
-      (message: string, colormap: string) => receiveJobResult(message, colormap),
-      (message: string) => { },
-      (message: string) => { }
+      [
+        ["receiveJobResult", (message: string) => receiveJobResult(message)]
+      ]
     )
   )
 
@@ -49,16 +51,16 @@ const Simulation = () => {
   }, [hubConnection]);
 
   const handleData = (input: any) => {
+    console.log(input)
     var startTime = performance.now();
-    let json = JSON.parse(input);
-    setIntensities(json.data);
-    setImgWidth(json.width);
-    setImgHeight(json.height);
+    let json = JSON.parse(input.response);
+    console.log(json.jpegResults[0].data)
+    setIntensities(json.jpegResults[0].data);
+    setImgWidth(json.jpegResults[0].width);
+    setImgHeight(json.jpegResults[0].height);
     var endTime = performance.now();
     console.log(`Handling data took ${endTime - startTime} milliseconds`);
   };
-
-
 
   const jsonCallback = (value, key) => {
     jsonData[key] = value;
@@ -67,16 +69,14 @@ const Simulation = () => {
 
   react.useEffect(() => {
     let jsonConfig = JSON.stringify({
-      clientInfo: {
-        jobType: "simulation"
+      meta: {
+        type: "simulation",
+        notification: "receiveJobResult",
+        colormap: colormap
       },
-      jobInfo: {
-        clientId: 0,
-        jobId: 0,
+      properties: {
         intensityFormat: "greyscale",
-        simulationTargets: [
-          // { start: { x: 0, y: 0 }, end: { x: 1475, y: 120 } }
-        ]
+        simulationTargets: []
       },
       config: {
         ...jsonData,
@@ -84,7 +84,25 @@ const Simulation = () => {
     });
     console.log(jsonConfig)
     localStorage.setItem("simulation_config", jsonConfig);
-    hubConnection.requestJob(jsonConfig, colormap);
+
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
+        Accept: "application/json",
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(
+        {
+          "jsonConfig": jsonConfig
+        }
+      )
+    };
+    let url = "/api/job";
+    fetch(url, requestOptions)
+      .then(data => console.log(data));
+
+    // hubConnection.requestJob(jsonConfig, colormap);
   }, [jsonData, colormap]);
 
   return (

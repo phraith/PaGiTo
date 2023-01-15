@@ -20,7 +20,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.Authorization
             _authOptions = authOptions;
         }
 
-        public AuthInfo CreateJwtToken(User user)
+        public string CreateJwtToken(User user)
         {
             List<Claim> claims = new()
             {
@@ -37,7 +37,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.Authorization
             );
 
             string jwt = new JwtSecurityTokenHandler().WriteToken(token);
-            return new AuthInfo(jwt);
+            return jwt;
         }
 
         public bool VerifyPasswordHash(User user, string password)

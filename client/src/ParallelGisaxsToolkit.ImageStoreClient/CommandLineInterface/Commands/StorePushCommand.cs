@@ -23,20 +23,26 @@ namespace ParallelGisaxsToolkit.ImageStoreClient.CommandLineInterface.Commands
 
         public override int Execute(CommandContext context, Settings settings)
         {
-            if (settings.ImageDataPath == null || settings.ImageStoreUrl == null) { return 1; }
+            if (settings.ImageDataPath == null || settings.ImageStoreUrl == null)
+            {
+                return 1;
+            }
 
             string extension = Path.GetExtension(settings.ImageDataPath);
             Image image = extension switch
             {
                 ".txt" => new AsciiLoader().Load(settings.ImageDataPath),
-                ".tif" => new TifLoader().Load(settings.ImageDataPath), 
+                ".tif" => new TifLoader().Load(settings.ImageDataPath),
                 _ => throw new NotImplementedException(),
             };
 
             HttpClient client = new();
-            StringContent body = new(JsonSerializer.Serialize(image), Encoding.UTF8, "application/json");
+            string data = @$"{{""image"": {JsonSerializer.Serialize(image)}}}";
+
+            StringContent body = new(data, Encoding.UTF8, "application/json");
             Console.WriteLine($"{settings.ImageStoreUrl}");
-            HttpResponseMessage result = client.PostAsync($"{settings.ImageStoreUrl}/api/scatterstore/push", body).Result;
+            HttpResponseMessage result = client.PostAsync($"{settings.ImageStoreUrl}/api/image", body).Result;
+            AnsiConsole.WriteLine(result.ToString());
             AnsiConsole.WriteLine(StatusMessage(result.IsSuccessStatusCode));
             return 0;
         }
@@ -47,6 +53,7 @@ namespace ParallelGisaxsToolkit.ImageStoreClient.CommandLineInterface.Commands
             {
                 return $"Request was successfull!";
             }
+
             return $"Request failed!";
         }
     }

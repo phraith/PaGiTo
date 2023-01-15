@@ -2,11 +2,11 @@
 
 namespace ParallelGisaxsToolkit.Gisaxs.Core.ImageStore
 {
-    public class ImageInfoDto
+    public class ImageInfoWithId
     {
         public int Id { get; }
         public ImageInfo Info { get; }
-        public ImageInfoDto(int id, ImageInfo info)
+        public ImageInfoWithId(int id, ImageInfo info)
         {
             Id = id;
             Info = info;

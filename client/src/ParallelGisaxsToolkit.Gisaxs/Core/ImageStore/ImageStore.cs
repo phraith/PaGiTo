@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System.Data;
+﻿using System.Data;
 using System.Text.Json;
 using Dapper;
 using Microsoft.Extensions.Configuration;
@@ -29,11 +27,11 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.ImageStore
             );
         }
 
-        public async Task<IEnumerable<ImageInfoDto>> Get()
+        public async Task<IEnumerable<ImageInfoWithId>> Get()
         {
             using IDbConnection connection = new NpgsqlConnection(_connectionString);
             return await connection.QueryAsync(@"SELECT info, id FROM images",
-                (string info, int id) => new ImageInfoDto(id, JsonSerializer.Deserialize<ImageInfo>(info)!));
+                (string info, int id) => new ImageInfoWithId(id, JsonSerializer.Deserialize<Utility.Images.ImageInfo>(info)!));
         }
 
         public async Task<SimpleImage?> Get(long id)
@@ -42,7 +40,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.ImageStore
             IEnumerable<SimpleImage>? images = await connection.QueryAsync(
                 @$"SELECT info, greyScaleData as greyScaleDataId FROM images WHERE id = {id}",
                 (string info, byte[] greyScaleData) =>
-                    new SimpleImage(JsonSerializer.Deserialize<ImageInfo>(info)!, greyScaleData),
+                    new SimpleImage(JsonSerializer.Deserialize<Utility.Images.ImageInfo>(info)!, greyScaleData),
                 splitOn: "greyScaleDataId");
             return images.FirstOrDefault();
         }
@@ -53,7 +51,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.ImageStore
             await connection.ExecuteAsync($@"DELETE * FROM images WHERE id = {id}");
         }
 
-        public async void Insert(Image image)
+        public async Task Insert(Image image)
         {
             using IDbConnection connection = new NpgsqlConnection(_connectionString);
             await connection.ExecuteAsync($@"
@@ -85,28 +83,8 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.ImageStore
 
             transaction.Commit();
         }
-        //
-        // public async Task<Image> GetImageFromRange(int id, int start, int end)
-        // {
-        //     using IDbConnection connection = new NpgsqlConnection(_connectionString);
-        //     IEnumerable<double[]> dataSliceEnumerator = await connection.QueryAsync<double[]>(
-        //         @$"SELECT rowWiseData[{start}:{end}] FROM images WHERE id = {id}");
-        //
-        //     if (dataSliceEnumerator == null)
-        //     {
-        //         return Array.Empty<double>();
-        //     }
-        //
-        //     var dataSlices = dataSliceEnumerator.ToArray();
-        //     if (dataSlices.Length != 1 || dataSlices[0].Length != width)
-        //     {
-        //         return Array.Empty<double>();
-        //     }
-        //
-        //     return dataSlices[0];
-        // }
 
-        public async Task<double[]> GetHorizonalProfile(int id, int startX, int endX, int startY)
+        public async Task<double[]> GetHorizontalProfile(int id, int startX, int endX, int startY)
         {
             int width = endX - startX;
             int start = width * startY;
@@ -151,14 +129,5 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.ImageStore
 
             return dataSlices[0];
         }
-    }
-
-    public interface IImageStore
-    {
-        Task<double[]> GetVerticalProfile(int id, int startY, int endY, int startX);
-        Task<double[]> GetHorizonalProfile(int id, int startX, int endX, int startY);
-        void Insert(Image image);
-        Task<SimpleImage?> Get(long id);
-        Task<IEnumerable<ImageInfoDto>> Get();
     }
 }

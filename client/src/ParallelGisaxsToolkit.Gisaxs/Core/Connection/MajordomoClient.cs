@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using NetMQ;
+﻿using NetMQ;
 using NetMQ.Sockets;
 using ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling;
 

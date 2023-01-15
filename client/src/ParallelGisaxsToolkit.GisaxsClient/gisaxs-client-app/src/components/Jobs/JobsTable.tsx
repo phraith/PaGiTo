@@ -17,7 +17,7 @@ const JobsTable = (props: JobsTableProps) => {
   ]
 
   useEffect(() => {
-    fetch("/api/jobstore/info", {
+    fetch("/api/jobs", {
       method: "GET",
       headers: {
           Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
@@ -25,10 +25,10 @@ const JobsTable = (props: JobsTableProps) => {
       },
   })
       .then((data) => data.json())
-      .then((data) => data.map(entry => {
+      .then((data) => data.jobInfosWithId.map(entry => {
         return {
           id: entry.id,
-          info: entry.jobInfo,
+          info: entry.jobInfo.config,
         }
       })
       )

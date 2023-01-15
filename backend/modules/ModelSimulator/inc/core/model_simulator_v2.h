@@ -21,18 +21,24 @@ public:
 
     std::string ServiceName() const override;
 
-    std::vector<std::byte> HandleRequest(const std::string &request, std::vector<std::byte> image_data, const std::string &origin) override;
+    std::vector<std::byte>
+    HandleRequest(const std::string &request, std::vector<std::byte> image_data, const std::string &origin) override;
 
     std::vector<TimeMeasurement> GetDeviceTimings() const;
 
 private:
     SimData RunGISAXS(const SimJob &descr, std::shared_ptr<ImageData> real_img, bool copy_intensities = false) const;
 
-    static std::string CreateSerializedResult(const SimData &sim_data, const DetectorConfiguration &detector_data,
-                                       const JobMetaInformation &job_meta_information);
 
-    static std::vector<std::byte> CreateSerializedByteResult(const SimData &sim_data, const DetectorConfiguration &detector_data,
-                                              const JobMetaInformation &job_meta_information, bool copy_intensities);
+    static std::vector<std::byte>
+    Serialize(const std::vector<GisaxsTransformationContainer::SimulationTargetDefinition> &target_definitions,
+              const std::vector<unsigned char> &normalized_intensities,
+              const std::vector<double> &intensities,
+              IntensityFormat format);
+
+    static std::vector<std::byte> SerializeResult(const SimData &sim_data, const DetectorConfiguration &detector_data,
+                                                  const JobMetaInformation &job_meta_information,
+                                                  bool copy_intensities);
 
 //    Device &LockAndReturnDevice() const;
 

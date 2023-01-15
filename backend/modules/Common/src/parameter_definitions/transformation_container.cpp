@@ -172,8 +172,8 @@ namespace GisaxsTransformationContainer {
             job_meta_information.simulationTargets.emplace_back(ConvertToSimulationTargetDefinition(item));
         }
 
-        j.at("clientId").get_to(job_meta_information.client_id);
-        j.at("jobId").get_to(job_meta_information.job_id);
+//        j.at("clientId").get_to(job_meta_information.client_id);
+//        j.at("jobId").get_to(job_meta_information.job_id);
     }
 
 
@@ -224,7 +224,7 @@ namespace GisaxsTransformationContainer {
         json beam = request.at("config").at("instrumentation").at("beam");
         json unitcellMeta = request.at("config").at("unitcellMeta");
 
-        json job_info = request.at("jobInfo");
+        json job_info = request.at("properties");
         auto job_info_container = ConvertToJobMetaInformation(job_info);
 
         auto detector_container = ConvertToDetector(detector);

@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace ParallelGisaxsToolkit.Gisaxs.Tests;
 
 [TestClass]

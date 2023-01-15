@@ -1,10 +1,7 @@
-﻿#nullable enable
-
-
-namespace ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling
+﻿namespace ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling
 {
     public interface IRequestFactory
     {
-        public Request? CreateRequest(string request, string dataAccessor);
+        public Request? CreateRequest(string request, string clientId);
     }
 }

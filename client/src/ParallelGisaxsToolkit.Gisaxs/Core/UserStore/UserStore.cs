@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System.Data;
+﻿using System.Data;
 using Dapper;
 using Npgsql;
 

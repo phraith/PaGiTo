@@ -12,7 +12,7 @@ import Button from "@mui/material/Button/Button";
 import { MessageHubConnectionProvider } from "../../utility/MessageHubConnectionProvider";
 
 const Jobs = () => {
-    const [jobInfo, setJobInfo] = React.useState<JobInfo>(new JobInfo(0, { body: "{}" }))
+    const [jobInfo, setJobInfo] = React.useState<JobInfo>(new JobInfo(0, "{}"))
 
     const receiveJobResult = (message: any) => {
         console.log(message)
@@ -21,27 +21,35 @@ const Jobs = () => {
     const [hubConnection, _] = useState<MessageHubConnectionProvider>(
         new MessageHubConnectionProvider(
             `${localStorage.getItem("apiToken")}`,
-            receiveJobResult,
-            (message: string) => { },
-            (message: string) => { }
+            [
+                ["receiveJobResult", (message: string) => receiveJobResult(message)],
+            ]
         )
     )
 
     useEffect(() => {
         hubConnection.connect()
-      }, [hubConnection]);
+    }, [hubConnection]);
 
     const sendJob = () => {
-        let jsonConfig = JSON.stringify({
-            info: {
-                clientId: 0,
-                jobId: 0,
-                jobType: "fit"
+        console.log(jobInfo.info)
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
+                Accept: "application/json",
+                'Content-Type': 'application/json'
             },
-            config: JSON.parse(jobInfo.info.body)
 
-        });
-        hubConnection.requestJob(jsonConfig, "");
+            body: JSON.stringify(
+                {
+                    "jsonConfig": jobInfo.info
+                })
+        };
+
+        let url = "/api/job";
+        fetch(url, requestOptions)
+            .then(data => console.log(data));
     };
 
     return (
@@ -54,7 +62,7 @@ const Jobs = () => {
                         <Box display="flex" sx={{ paddingBottom: 1, width: "100%" }}>
                             <JobsTable setJobsInfo={(updatedJobInfo: JobInfo) => { console.log(updatedJobInfo); setJobInfo(updatedJobInfo) }} />
                             <Box sx={{ height: 500, overflow: 'auto', paddingLeft: 5, width: "50%" }}>
-                                <JsonViewer value={JSON.parse(jobInfo.info.body)} />
+                                <JsonViewer value={JSON.parse(jobInfo.info)} />
                             </Box>
                         </Box>
                         <Button onClick={sendJob}>
