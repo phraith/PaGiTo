@@ -72,5 +72,5 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile.alpine
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/backend:latest, ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/backend:${IMAGE_TAG}
+          tags: ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/backend:latest, ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/backend:${{env.IMAGE_TAG}}
 
