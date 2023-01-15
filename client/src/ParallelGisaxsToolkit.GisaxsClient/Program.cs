@@ -9,9 +9,11 @@ using Microsoft.AspNetCore.Http.Json;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using ParallelGisaxsToolkit.Gisaxs.Configuration;
+using ParallelGisaxsToolkit.Gisaxs.Core.Authorization;
 using ParallelGisaxsToolkit.Gisaxs.Core.ImageStore;
 using ParallelGisaxsToolkit.Gisaxs.Core.JobStore;
 using ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling;
+using ParallelGisaxsToolkit.Gisaxs.Core.UserStore;
 using ParallelGisaxsToolkit.Gisaxs.Utility.HashComputer;
 using ParallelGisaxsToolkit.GisaxsClient.Configuration;
 using ParallelGisaxsToolkit.GisaxsClient.Endpoints.Jobs;
@@ -38,10 +40,29 @@ builder.Services.Configure<AuthConfig>(builder.Configuration.GetSection("AuthOpt
 builder.Services.AddScoped<IImageStore, ImageStore>();
 builder.Services.AddScoped<IJobStore, JobStore>();
 builder.Services.AddScoped<IRequestFactory, RequestFactory>();
+builder.Services.AddScoped<IUserStore, UserStore>();
+builder.Services.AddSingleton<IUserIdGenerator, HmacSha512UserIdGenerator>();
 
 builder.Services.AddSingleton<IHashComputer, Sha256HashComputer>();
 builder.Services.AddSingleton<IRequestHandler, MajordomoRequestHandler>();
 builder.Services.AddSingleton<IJobScheduler, JobScheduler>();
+builder.Services
+    .AddSingleton<ParallelGisaxsToolkit.Gisaxs.Core.Authorization.IAuthorizationHandler>(provider =>
+    {
+        IOptionsMonitor<AuthConfig>? authConfig = provider.GetService<IOptionsMonitor<AuthConfig>>();
+        if (authConfig == null)
+        {
+            throw new InvalidOperationException("ConnectionStrings do not exist!");
+        }
+
+        var userIdGenerator = provider.GetService<IUserIdGenerator>();
+        if (userIdGenerator == null)
+        {
+            throw new InvalidOperationException("UserIdGenerator does not exist!");
+        }
+
+        return new AuthorizationHandler(authConfig.CurrentValue.Token, userIdGenerator);
+    });
 builder.Services.AddSingleton<IDatabase>(provider =>
 {
     var connectionStrings = provider.GetService<IOptionsMonitor<ConnectionStrings>>();
@@ -49,6 +70,7 @@ builder.Services.AddSingleton<IDatabase>(provider =>
     {
         throw new InvalidOperationException("ConnectionStrings do not exist!");
     }
+
     IConnectionMultiplexer multiplexer = ConnectionMultiplexer.Connect(connectionStrings.CurrentValue.Redis);
     return multiplexer.GetDatabase();
 });
@@ -59,7 +81,8 @@ builder.Services.AddScoped<IDbConnection>(provider =>
     if (connectionStrings == null)
     {
         throw new InvalidOperationException("ConnectionStrings do not exist!");
-    }    
+    }
+
     IDbConnection connection = new NpgsqlConnection(connectionStrings.CurrentValue.Default);
     return connection;
 });

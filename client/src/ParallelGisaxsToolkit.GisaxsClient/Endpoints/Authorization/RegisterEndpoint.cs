@@ -12,14 +12,13 @@ namespace ParallelGisaxsToolkit.GisaxsClient.Endpoints.Authorization;
 [HttpPost("/api/auth/register")]
 public class RegisterEndpoint : Endpoint<RegisterRequest, RegisterResponse>
 {
-    private readonly UserStore _userStore;
+    private readonly IUserStore _userStore;
     private readonly IAuthorizationHandler _authorizationHandler;
 
-    public RegisterEndpoint(IOptionsMonitor<ConnectionStrings> connectionStrings,
-        IOptionsMonitor<AuthConfig> authOptions)
+    public RegisterEndpoint(IAuthorizationHandler authorizationHandler, IUserStore userStore)
     {
-        _userStore = new UserStore(connectionStrings.CurrentValue.Default);
-        _authorizationHandler = AuthorizationHandlerFactory.CreateDefaultAuthorizationHandler(authOptions);
+        _authorizationHandler = authorizationHandler;
+        _userStore = userStore;
     }
 
     public override async Task HandleAsync(RegisterRequest request, CancellationToken ct)
@@ -33,8 +32,8 @@ public class RegisterEndpoint : Endpoint<RegisterRequest, RegisterResponse>
             throw new InvalidOperationException("User already exists!");
         }
 
-        User user = new(userId, passwordHash, passwordSalt);
-        _userStore.Insert(user);
+        User user = new(userId, passwordSalt, passwordHash);
+        await _userStore.Insert(user);
         await SendAsync(new RegisterResponse(user.UserId, passwordHash, passwordSalt), cancellation: ct);
     }
 }

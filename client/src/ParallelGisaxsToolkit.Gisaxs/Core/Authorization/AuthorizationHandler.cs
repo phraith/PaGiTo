@@ -9,15 +9,15 @@ using ParallelGisaxsToolkit.Gisaxs.Core.UserStore;
 
 namespace ParallelGisaxsToolkit.Gisaxs.Core.Authorization
 {
-    internal class AuthorizationHandler : IAuthorizationHandler
+    public class AuthorizationHandler : IAuthorizationHandler
     {
-        private readonly HMACSHA512 _userIdGenerator;
-        private readonly IOptionsMonitor<AuthConfig> _authOptions;
+        private readonly string _token;
+        private readonly IUserIdGenerator _userIdGenerator;
 
-        public AuthorizationHandler(IOptionsMonitor<AuthConfig> authOptions)
+        public AuthorizationHandler(string token, IUserIdGenerator userIdGenerator)
         {
-            _userIdGenerator = new HMACSHA512("MySecretKey"u8.ToArray());
-            _authOptions = authOptions;
+            _token = token;
+            _userIdGenerator = userIdGenerator;
         }
 
         public string CreateJwtToken(User user)
@@ -27,10 +27,10 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.Authorization
                 new Claim(ClaimTypes.NameIdentifier, $"{user.UserId}")
             };
 
-            SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_authOptions.CurrentValue.Token));
+            SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_token));
             SigningCredentials cred = new(key, SecurityAlgorithms.HmacSha512Signature);
 
-            JwtSecurityToken token = new            (
+            JwtSecurityToken token = new(
                 claims: claims,
                 signingCredentials: cred,
                 expires: DateTime.Now.AddDays(1)
@@ -47,16 +47,16 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.Authorization
             return passwordHash.SequenceEqual(user.PasswordHash);
         }
 
-        public (long userId, byte[] passwordHash, byte[] passwordSalt) CreatePasswordHash(string password, string username)
+        public (long userId, byte[] passwordHash, byte[] passwordSalt) CreatePasswordHash(string password,
+            string username)
         {
             using HMACSHA512 hmac = new HMACSHA512();
-            return (CreateUserId(username), hmac.ComputeHash(Encoding.UTF8.GetBytes(password)), hmac.Key);
+            return (_userIdGenerator.Generate(username), hmac.ComputeHash(Encoding.UTF8.GetBytes(password)), hmac.Key);
         }
 
         public long CreateUserId(string username)
         {
-            var hash = _userIdGenerator.ComputeHash(Encoding.UTF8.GetBytes(username));
-            return BitConverter.ToInt64(hash);
+            return _userIdGenerator.Generate(username);
         }
     }
 }

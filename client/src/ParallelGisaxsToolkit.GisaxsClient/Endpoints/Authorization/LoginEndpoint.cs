@@ -1,8 +1,5 @@
 ﻿using FastEndpoints;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Options;
-using ParallelGisaxsToolkit.Gisaxs.Configuration;
-using ParallelGisaxsToolkit.Gisaxs.Core.Authorization;
 using ParallelGisaxsToolkit.Gisaxs.Core.UserStore;
 using IAuthorizationHandler = ParallelGisaxsToolkit.Gisaxs.Core.Authorization.IAuthorizationHandler;
 
@@ -12,14 +9,13 @@ namespace ParallelGisaxsToolkit.GisaxsClient.Endpoints.Authorization;
 [HttpPost("/api/auth/login")]
 public class LoginEndpoint : Endpoint<LoginRequest, LoginResponse>
 {
-    private readonly UserStore _userStore;
+    private readonly IUserStore _userStore;
     private readonly IAuthorizationHandler _authorizationHandler;
 
-    public LoginEndpoint(IOptionsMonitor<ConnectionStrings> connectionStrings,
-        IOptionsMonitor<AuthConfig> authOptions)
+    public LoginEndpoint(IUserStore userStore, IAuthorizationHandler authorizationHandler)
     {
-        _userStore = new UserStore(connectionStrings.CurrentValue.Default);
-        _authorizationHandler = AuthorizationHandlerFactory.CreateDefaultAuthorizationHandler(authOptions);
+        _userStore = userStore;
+        _authorizationHandler = authorizationHandler;
     }
 
     public override async Task HandleAsync(LoginRequest request, CancellationToken ct)
@@ -45,7 +41,9 @@ public class LoginEndpoint : Endpoint<LoginRequest, LoginResponse>
 
 public record LoginRequest(string Username, string Password)
 {
-    public LoginRequest() : this(string.Empty, string.Empty) {}
+    public LoginRequest() : this(string.Empty, string.Empty)
+    {
+    }
 }
 
 public record LoginResponse(string Token);

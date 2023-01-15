@@ -1,49 +1,44 @@
 ﻿using System.Data;
 using Dapper;
-using Npgsql;
 
 namespace ParallelGisaxsToolkit.Gisaxs.Core.UserStore
 {
-    public class UserStore
+    public class UserStore : IUserStore
     {
-        private readonly string _connectionString;
-        public UserStore(string connectionString)
+        private readonly IDbConnection _connection;
+
+        public UserStore(IDbConnection connection)
         {
-            _connectionString = connectionString;
-            using IDbConnection connection = new NpgsqlConnection(connectionString);
+            _connection = connection;
             connection.Execute(
                 @$"CREATE TABLE IF NOT EXISTS users (
                     UserId BIGINT NOT NULL PRIMARY KEY,
                     PasswordSalt BYTEA NOT NULL,
                     PasswordHash BYTEA NOT NULL); "
-                );
+            );
         }
 
         public async Task<IEnumerable<User>> Get()
         {
-            using IDbConnection connection = new NpgsqlConnection(_connectionString);
-            return await connection.QueryAsync<User>(@"SELECT * FROM users");
+            return await _connection.QueryAsync<User>(@"SELECT * FROM users");
         }
 
         public async Task<IEnumerable<User>> Get(long id)
         {
-            using IDbConnection connection = new NpgsqlConnection(_connectionString);
-            return await connection.QueryAsync<User>(@$"SELECT * FROM users WHERE Id = {id}");
+            return await _connection.QueryAsync<User>(@$"SELECT * FROM users WHERE userId = {id}");
         }
 
-        public async void Delete(long id)
+        public async Task Delete(long id)
         {
-            using IDbConnection connection = new NpgsqlConnection(_connectionString);
-            await connection.ExecuteAsync($@"DELETE * FROM users WHERE Id = {id}");
+            await _connection.ExecuteAsync($@"DELETE * FROM users WHERE Id = {id}");
         }
 
-        public async void Insert(User user)
+        public async Task Insert(User user)
         {
-            using IDbConnection connection = new NpgsqlConnection(_connectionString);
-            await connection.ExecuteAsync($@"
+            await _connection.ExecuteAsync($@"
                     INSERT INTO users (userid, passwordsalt, passwordhash)
                     VALUES ({user.UserId}, @salt, @hash)",
-                    new { salt = user.PasswordSalt, hash = user.PasswordHash });
+                new { salt = user.PasswordSalt, hash = user.PasswordHash });
         }
     }
 }
