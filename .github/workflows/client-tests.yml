@@ -1,6 +1,8 @@
 name: Gisaxs Client Tests
 
-on: push
+on: 
+  push:
+  release:
 jobs:
   test:
     name: Run test suite
@@ -43,3 +45,30 @@ jobs:
           coverage-reports: /reports/client/coverage.cobertura.xml
           # or a comma-separated list for multiple reports
           # coverage-reports: <PATH_TO_REPORT>, <PATH_TO_REPORT>
+  publish:
+    needs: test
+    if: github.event_name == 'release'
+    name: publish
+    runs-on: ubuntu-latest
+    env:
+      COMPOSE_FILE: docker-compose.yml
+      DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+      IMAGE_TAG: ${{ github.head_ref || github.ref_name }} 
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{secrets.REGISTRY}}
+          username: ${{secrets.DOCKER_USER}}
+          password: ${{secrets.DOCKER_TOKEN}}
+
+      - name: Build and push backend docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./client
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:latest, ${{secrets.REGISTRY}}/${{secrets.REPO_NAME}}/client:${{env.IMAGE_TAG}}
