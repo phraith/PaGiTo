@@ -1,15 +1,15 @@
 # version: "2"
 services:
-  # dotnet_client:
-  #   build:
-  #     context: client
-  #     dockerfile: Dockerfile
-  #   command: tail -f /dev/null
-  #   links:
-  #     - redis_jobs
-  #   ports:
-  #     - "8080:80"
-  #     - "8081:443"
+  dotnet_client:
+    build:
+      context: client
+      dockerfile: Dockerfile
+    command: tail -f /dev/null
+    links:
+      - redis
+    ports:
+      - "8080:80"
+      - "8081:443"
 
   client_tests:
       build:
@@ -39,7 +39,7 @@ services:
     volumes:
       - /reports:/reports
 
-  redis_jobs:
+  redis:
     image: redis:latest
     ports:
       - 6379:6379
@@ -51,7 +51,7 @@ services:
     ports:
       - "5050:80"
 
-  postgres_users:
+  postgres:
     image: postgres:latest
     restart: always
     environment:
@@ -63,22 +63,22 @@ services:
     volumes:
       - db:/var/lib/postgresql/data
 
-  # gisaxs_backend:
-  #   build:
-  #     context: backend
-  #     dockerfile: Dockerfile.cuda
-  #   ports:
-  #     - '5555:5555'
-  #   cap_add:
-  #     - SYS_PTRACE
-  #   entrypoint: ["./apps/ModelingFramework/ModelingFramework"]
-  #   deploy:
-  #     resources:
-  #       reservations:
-  #         devices:
-  #           - driver: nvidia
-  #             count: 1
-  #             capabilities: [ gpu ]
+  gisaxs-backend:
+    build:
+      context: backend
+      dockerfile: Dockerfile.cuda
+    ports:
+      - '5555:5555'
+    cap_add:
+      - SYS_PTRACE
+    entrypoint: ["./apps/ModelingFramework/ModelingFramework"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
 volumes:
   db:
     driver: local

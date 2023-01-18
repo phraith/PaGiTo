@@ -145,6 +145,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseWebSockets();
+app.UseStaticFiles();
 //app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
@@ -158,4 +159,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapHub<MessageHub>("/message");
+
+app.MapFallbackToFile("index.html");
+
 app.Run();
