@@ -2,9 +2,7 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using ParallelGisaxsToolkit.Gisaxs.Configuration;
 using ParallelGisaxsToolkit.Gisaxs.Core.UserStore;
 
 namespace ParallelGisaxsToolkit.Gisaxs.Core.Authorization

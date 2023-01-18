@@ -34,7 +34,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Configuration
     public record SimulationTargetWithId(SimulationTarget Target, int Id)
     {
         public static readonly SimulationTargetWithId Empty =
-            new SimulationTargetWithId(new SimulationTarget(new DetectorPosition(0, 0), new DetectorPosition(0, 0)),
+            new(new SimulationTarget(new DetectorPosition(0, 0), new DetectorPosition(0, 0)),
                 -1);
     }
 

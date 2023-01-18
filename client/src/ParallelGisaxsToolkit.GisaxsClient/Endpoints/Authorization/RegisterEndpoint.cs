@@ -1,8 +1,5 @@
 ﻿using FastEndpoints;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Options;
-using ParallelGisaxsToolkit.Gisaxs.Configuration;
-using ParallelGisaxsToolkit.Gisaxs.Core.Authorization;
 using ParallelGisaxsToolkit.Gisaxs.Core.UserStore;
 using IAuthorizationHandler = ParallelGisaxsToolkit.Gisaxs.Core.Authorization.IAuthorizationHandler;
 

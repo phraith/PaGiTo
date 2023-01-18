@@ -52,13 +52,13 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling
 
         private IReadOnlyList<byte> RetrieveImageData(MetaInformation metaInformation, JobProperties jobProperties)
         {
-            if (metaInformation.Type != JobType.Fitting || jobProperties.ImageId != null)
+            if (metaInformation.Type != JobType.Fitting || jobProperties.ImageId == null)
             {
                 return Array.Empty<byte>();
             }
 
-            List<byte> bytes = new List<byte>();
-            var simulationTargets = jobProperties.SimulationTargets;
+            List<byte> bytes = new();
+            IReadOnlyList<SimulationTarget> simulationTargets = jobProperties.SimulationTargets;
             var binarySimulationTargetCount = BitConverter.GetBytes(simulationTargets.Count);
             bytes.AddRange(binarySimulationTargetCount);
 

@@ -78,7 +78,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Utility.ImageTransformations
     {
         public static Image<Rgb24> ApplyColormap(this Image<L8> image, string colormapName)
         {
-            var coloredImage = image.CloneAs<Rgb24>();
+            Image<Rgb24>? coloredImage = image.CloneAs<Rgb24>();
             
             var (rValues, gValues, bValues) = ColormapValueProvider.DataMapping[colormapName.ToLower()];
             
@@ -94,7 +94,6 @@ namespace ParallelGisaxsToolkit.Gisaxs.Utility.ImageTransformations
                     var g = gValues[index];
                     var b = bValues[index];
                     
-                    // We can apply any custom processing logic here
                     row[x] = new Vector4(r, g, b, 1);
                 }
             }));
@@ -112,7 +111,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Utility.ImageTransformations
             {
                 image.Mutate(x => x.Rotate(RotateMode.Rotate180));
             }
-            var newImage = image.ApplyColormap(colormapTypeName);
+            Image<Rgb24> newImage = image.ApplyColormap(colormapTypeName);
             var res = newImage.ToBase64String(JpegFormat.Instance);
             return res;
         }
