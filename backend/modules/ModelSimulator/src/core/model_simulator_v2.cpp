@@ -24,14 +24,14 @@ std::vector<std::byte> ModelSimulatorV2::HandleRequest(const std::string &reques
     try {
         Timer localTimer;
         Timer globalTimer;
-        //spdlog::info("Received request");
+        spdlog::info("Received request");
 
         globalTimer.Start();
         localTimer.Start();
 
         SimJob job = GisaxsTransformationContainer::CreateSimJobFromRequest(request);
         localTimer.End();
-        //spdlog::info("Preparing data took {} ms", localTimer.Duration());
+        spdlog::info("Preparing data took {} ms", localTimer.Duration());
 
         bool copy_intensities = true;
         std::shared_ptr<ImageData> img_data = nullptr;
@@ -47,14 +47,14 @@ std::vector<std::byte> ModelSimulatorV2::HandleRequest(const std::string &reques
         SimData sim_data = RunGISAXS(job, img_data, copy_intensities);
 
         localTimer.End();
-        //spdlog::info("Simulation took {} ms", localTimer.Duration());
+        spdlog::info("Simulation took {} ms", localTimer.Duration());
 
         localTimer.Start();
         auto final_message = SerializeResult(sim_data, job.ExperimentInfo().DetectorConfig(), job.JobInfo(),
                                              copy_intensities);
 
         localTimer.End();
-        //spdlog::info("Serializing result took {} ms", localTimer.Duration());
+        spdlog::info("Serializing result took {} ms", localTimer.Duration());
 
         //hw_info_->CleanUpDevices();
 
