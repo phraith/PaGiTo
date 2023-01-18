@@ -28,7 +28,6 @@ services:
     build:
       context: backend
       dockerfile: Dockerfile.alpine
-    # command: tail -f /dev/null
     command: 
       - /bin/sh
       - -c
