@@ -12,7 +12,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.Connection
         public MajordomoClient(string connectionString)
         {
             _client = new DealerSocket(connectionString);
-            _timeout = TimeSpan.FromMilliseconds(50000);
+            _timeout = TimeSpan.FromMilliseconds(200_000);
         }
 
         public void Dispose()
