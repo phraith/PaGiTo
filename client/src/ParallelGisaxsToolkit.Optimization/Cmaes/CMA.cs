@@ -178,9 +178,9 @@ namespace ParallelGisaxsToolkit.Optimization.Cmaes
             Vector<double> d =
                 Vector<double>.Build.DenseOfArray(evdC.EigenValues.Select(x => RootTemp(x.Real)).ToArray());
 
-            var diagSquaredD = Matrix<double>.Build.DiagonalOfDiagonalArray(d.AsArray().Select(x => x * x).ToArray());
-            var bTimesDiagSquaredD = b * diagSquaredD;
-            var bTimesDiagSquaredDTimesBt = bTimesDiagSquaredD * b.Transpose();
+            Matrix<double>? diagSquaredD = Matrix<double>.Build.DiagonalOfDiagonalArray(d.AsArray().Select(x => x * x).ToArray());
+            Matrix<double>? bTimesDiagSquaredD = b * diagSquaredD;
+            Matrix<double>? bTimesDiagSquaredDTimesBt = bTimesDiagSquaredD * b.Transpose();
             _c = bTimesDiagSquaredDTimesBt;
             return (b, d);
         }
@@ -193,9 +193,9 @@ namespace ParallelGisaxsToolkit.Optimization.Cmaes
             Vector<double> d =
                 Vector<double>.Build.DenseOfArray(evdC.EigenValues.Select(x => RootTemp(x.Real)).ToArray());
 
-            var diagSquaredD = Matrix<double>.Build.DiagonalOfDiagonalArray(d.AsArray().Select(x => x * x).ToArray());
-            var bTimesDiagSquaredD = b * diagSquaredD;
-            var bTimesDiagSquaredDTimesBt = bTimesDiagSquaredD * b.Transpose();
+            Matrix<double>? diagSquaredD = Matrix<double>.Build.DiagonalOfDiagonalArray(d.AsArray().Select(x => x * x).ToArray());
+            Matrix<double>? bTimesDiagSquaredD = b * diagSquaredD;
+            Matrix<double>? bTimesDiagSquaredDTimesBt = bTimesDiagSquaredD * b.Transpose();
             c = bTimesDiagSquaredDTimesBt;
             return (b, d);
         }
@@ -209,7 +209,7 @@ namespace ParallelGisaxsToolkit.Optimization.Cmaes
         {
             (Matrix<double> b, Vector<double> d) = EigenDecomposition();
 
-            var dC = _c.Diagonal();
+            Vector<double>? dC = _c.Diagonal();
 
             if (Generation > _funhistTerm && _funhistValues.Max() - _funhistValues.Min() < Tolfun)
             {
@@ -287,7 +287,7 @@ namespace ParallelGisaxsToolkit.Optimization.Cmaes
             }
 
             Generation += 1;
-            var sortedSolutions = solutions.OrderBy(x => x.Fitness).ToArray();
+            Solution[]? sortedSolutions = solutions.OrderBy(x => x.Fitness).ToArray();
 
             int funhistIdx = 2 * (Generation % _funhistTerm);
             _funhistValues[funhistIdx] = sortedSolutions.First().Fitness;
@@ -300,7 +300,7 @@ namespace ParallelGisaxsToolkit.Optimization.Cmaes
             _d = null;
 
             Matrix<double> xK = Matrix<double>.Build.DenseOfRowVectors(sortedSolutions.Select(x => x.Parameters));
-            var yKRows = xK.EnumerateRows().Select((x, i) => (x - _mean) / _sigma).ToArray();
+            Vector<double>[]? yKRows = xK.EnumerateRows().Select((x, i) => (x - _mean) / _sigma).ToArray();
             Matrix<double> yK = Matrix<double>.Build.DenseOfRowVectors(yKRows);
 
             // Selection and recombination
@@ -308,12 +308,12 @@ namespace ParallelGisaxsToolkit.Optimization.Cmaes
                 _weights.SubVector(0, _mu));
             _mean += _cm * _sigma * yW;
 
-            var diag = Matrix<double>.Build.DenseOfDiagonalArray((1.0 / d).AsArray());
+            Matrix<double>? diag = Matrix<double>.Build.DenseOfDiagonalArray((1.0 / d).AsArray());
             Matrix<double> c2 = b * diag * b.Transpose();
 
             double sqrtFactor = Math.Sqrt(_cSigma * (2 - _cSigma) * _muEff);
-            var g = sqrtFactor * (c2 * yW);
-            var q = c2 * yW;
+            Vector<double>? g = sqrtFactor * (c2 * yW);
+            Vector<double>? q = c2 * yW;
             _pSigma = (1 - _cSigma) * _pSigma + sqrtFactor * (c2 * yW);
 
             double normPSigma = _pSigma.L2Norm();
@@ -405,15 +405,15 @@ namespace ParallelGisaxsToolkit.Optimization.Cmaes
                 z[i] = _normalDistribution.Sample();
             }
 
-            var h = b * Matrix<double>.Build.DenseOfDiagonalArray(d.AsArray());
-            var y = PointwiseMultiplicationOnRows(h, z);
+            Matrix<double>? h = b * Matrix<double>.Build.DenseOfDiagonalArray(d.AsArray());
+            Vector<double>? y = PointwiseMultiplicationOnRows(h, z);
             Vector<double> x = _mean + _sigma * y;
             return x;
         }
 
         private Vector<double> PointwiseMultiplicationOnRows(Matrix<double> matrix, Vector<double> vector)
         {
-            var rows = matrix.EnumerateRows().Select(x => x.PointwiseMultiply(vector)).ToArray();
+            Vector<double>[]? rows = matrix.EnumerateRows().Select(x => x.PointwiseMultiply(vector)).ToArray();
             return Vector<double>.Build.DenseOfArray(rows.Select(x => x.Sum()).ToArray());
         }
     }

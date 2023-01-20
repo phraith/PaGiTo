@@ -60,7 +60,7 @@ namespace ParallelGisaxsToolkit.Optimization.Cmaes
         {
             while (true)
             {
-                var solutions = new List<Solution>();
+                List<Solution>? solutions = new List<Solution>();
                 for (int i = 0; i < _cma.PopulationSize; i++)
                 {
                     Vector<double> parameterVector = _cma.Ask();

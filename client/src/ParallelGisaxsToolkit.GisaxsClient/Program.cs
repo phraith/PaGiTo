@@ -37,7 +37,7 @@ try
         .ReadFrom.Services(services)
         .Enrich.FromLogContext()
         .WriteTo.Console());
-    
+
 // Add services to the container.
     if (LaunchConfig.LaunchMode == LaunchMode.Kubernetes)
     {
@@ -88,7 +88,7 @@ try
 
     builder.Services.AddSingleton<IDatabase>(provider =>
     {
-        var connectionStrings = provider.GetService<IOptionsMonitor<ConnectionStrings>>();
+        IOptionsMonitor<ConnectionStrings>? connectionStrings = provider.GetService<IOptionsMonitor<ConnectionStrings>>();
         if (connectionStrings == null)
         {
             throw new InvalidOperationException("ConnectionStrings do not exist!");
@@ -100,7 +100,7 @@ try
 
     builder.Services.AddScoped<IDbConnection>(provider =>
     {
-        var connectionStrings = provider.GetService<IOptionsMonitor<ConnectionStrings>>();
+        IOptionsMonitor<ConnectionStrings>? connectionStrings = provider.GetService<IOptionsMonitor<ConnectionStrings>>();
         if (connectionStrings == null)
         {
             throw new InvalidOperationException("ConnectionStrings do not exist!");
@@ -154,7 +154,6 @@ try
         };
     });
 
-// builder.Services.AddSpaStaticFiles(configuration => { configuration.RootPath = "gisaxs-client-app/dist"; });
     builder.Services.Configure<JsonOptions>(
         options => { options.SerializerOptions.PropertyNameCaseInsensitive = true; });
 

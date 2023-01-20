@@ -13,8 +13,8 @@ public class RequestResultDeserializer : IRequestResultDeserializer
             return new RequestData(Array.Empty<JpegResult>(), Array.Empty<NumericResult>(), fitness);
         }
 
-        var jpegResults = new List<JpegResult>();
-        var numericResults = new List<NumericResult>();
+        List<JpegResult>? jpegResults = new List<JpegResult>();
+        List<NumericResult>? numericResults = new List<NumericResult>();
 
         int currentBytePosition = 0;
         while (currentBytePosition < bytes.Length)

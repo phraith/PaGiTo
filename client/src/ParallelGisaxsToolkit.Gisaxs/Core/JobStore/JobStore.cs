@@ -48,7 +48,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.JobStore
                 return null;
             }
 
-            var jobs = jobsEnumerator.ToArray();
+            Job[]? jobs = jobsEnumerator.ToArray();
 
             if (jobs.Length != 1)
             {
