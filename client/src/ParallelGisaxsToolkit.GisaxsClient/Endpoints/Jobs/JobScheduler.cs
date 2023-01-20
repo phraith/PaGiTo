@@ -1,16 +1,14 @@
-﻿using System.Collections.Concurrent;
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 using ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling;
 using ParallelGisaxsToolkit.GisaxsClient.Hubs;
 
 namespace ParallelGisaxsToolkit.GisaxsClient.Endpoints.Jobs;
 
-public class JobScheduler : IJobScheduler, IDisposable
+public class JobScheduler : IJobScheduler
 {
     private readonly IRequestHandler _requestHandler;
     private readonly IHubContext<MessageHub> _notificationHub;
     private readonly ILogger<JobScheduler> _logger;
-    private readonly ConcurrentDictionary<string, Task> _activeTasks;
 
 
     public JobScheduler(IRequestHandler requestHandler, IHubContext<MessageHub> notificationHub,
@@ -19,18 +17,11 @@ public class JobScheduler : IJobScheduler, IDisposable
         _requestHandler = requestHandler;
         _notificationHub = notificationHub;
         _logger = logger;
-        _activeTasks = new ConcurrentDictionary<string, Task>();
     }
 
-    public void ScheduleJob(Request request, CancellationToken cancellationToken)
+    public async Task ScheduleJob(Request request, CancellationToken cancellationToken)
     {
-        Task task = Task.Factory.StartNew(async () => await ProcessJob(request), cancellationToken);
-        if (!_activeTasks.TryAdd(request.JobId, task))
-        {
-            throw new InvalidOperationException("Task could not be activated");
-        }
-
-        task.ContinueWith(_ => Cleanup(request.JobId), cancellationToken);
+        await Task.Run(async () => await ProcessJob(request), cancellationToken);
     }
 
     private async Task ProcessJob(Request request)
@@ -48,16 +39,5 @@ public class JobScheduler : IJobScheduler, IDisposable
         _logger.LogInformation("Sending notification {Notification} to client {ClientId}!", result.Notification,
             request.ClientId);
         await _notificationHub.Clients.Group(request.ClientId).SendAsync(result.Notification, result.JobId);
-    }
-
-    private void Cleanup(string jobId)
-    {
-        _logger.LogInformation("Cleaning up after processing job with id {JobId}!", jobId);
-        _activeTasks.Remove(jobId, out var _);
-    }
-
-    public void Dispose()
-    {
-        Task.WaitAll(_activeTasks.Values.ToArray());
     }
 }

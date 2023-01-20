@@ -42,8 +42,7 @@ public class PostJobEndpoint : Endpoint<PostJobRequest, PostJobResponse>
         }
 
         await _jobStore.Insert(new Job(new JobInfo(req.JsonConfig), null, clientId));
-        _jobScheduler.ScheduleJob(request, ct);
-
+        Task _ = _jobScheduler.ScheduleJob(request, ct);
         await SendAsync(new PostJobResponse(request.JobHash), 201, ct);
     }
 }
