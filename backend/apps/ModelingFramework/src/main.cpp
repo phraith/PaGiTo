@@ -27,8 +27,6 @@ int main(int argc, char** argv)
 
     std::thread t1( majordomo::BrokerActor, broker_bind_address);
     std::thread t2(RunSimWorker, "tcp://*:5558", broker_address, hw_info);
-    std::thread t4(RunSimWorker, "tcp://*:5559", broker_address, hw_info);
-    std::thread t5(RunSimWorker, "tcp://*:5560", broker_address, hw_info);
     std::thread t3(RunFitWorker, "tcp://*:5557", broker_address);
 
     t1.join();
