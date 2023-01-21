@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using System.Collections.Concurrent;
+using Microsoft.AspNetCore.SignalR;
 using ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling;
 using ParallelGisaxsToolkit.GisaxsClient.Hubs;
 
@@ -9,6 +10,7 @@ public class JobScheduler : IJobScheduler
     private readonly IRequestHandler _requestHandler;
     private readonly IHubContext<MessageHub> _notificationHub;
     private readonly ILogger<JobScheduler> _logger;
+    private readonly ConcurrentDictionary<string, Task> _activeTasks;
 
 
     public JobScheduler(IRequestHandler requestHandler, IHubContext<MessageHub> notificationHub,
@@ -17,11 +19,16 @@ public class JobScheduler : IJobScheduler
         _requestHandler = requestHandler;
         _notificationHub = notificationHub;
         _logger = logger;
+        _activeTasks = new ConcurrentDictionary<string, Task>();
     }
 
-    public async Task ScheduleJob(Request request, CancellationToken cancellationToken)
+    public void ScheduleJob(Request request, CancellationToken cancellationToken)
     {
-        await Task.Run(async () => await ProcessJob(request), cancellationToken);
+        Task task = Task.Run(async () => await ProcessJob(request), cancellationToken);
+        if (!_activeTasks.TryAdd(request.JobId, task))
+        {
+            throw new ArgumentException("Job registering failed!");
+        }
     }
 
     private async Task ProcessJob(Request request)
@@ -38,6 +45,12 @@ public class JobScheduler : IJobScheduler
 
         _logger.LogInformation("Sending notification {Notification} to client {ClientId}!", result.Notification,
             request.ClientId);
+        
+        if (!_activeTasks.TryRemove(request.JobId, out _))
+        {
+            throw new ArgumentException("Job removal failed!");
+        }
+        
         await _notificationHub.Clients.Group(request.ClientId).SendAsync(result.Notification, result.JobId);
     }
 }

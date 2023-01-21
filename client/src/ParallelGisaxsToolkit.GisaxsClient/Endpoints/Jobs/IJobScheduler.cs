@@ -4,5 +4,5 @@ namespace ParallelGisaxsToolkit.GisaxsClient.Endpoints.Jobs;
 
 public interface IJobScheduler
 {
-    Task ScheduleJob(Request request, CancellationToken cancellationToken);
+    void ScheduleJob(Request request, CancellationToken cancellationToken);
 }
