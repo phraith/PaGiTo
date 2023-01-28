@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http.Json;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using ParallelGisaxsToolkit.Gisaxs.Configuration;
+using ParallelGisaxsToolkit.Gisaxs.Core;
 using ParallelGisaxsToolkit.Gisaxs.Core.Authorization;
 using ParallelGisaxsToolkit.Gisaxs.Core.ImageStore;
 using ParallelGisaxsToolkit.Gisaxs.Core.JobStore;
@@ -98,6 +99,17 @@ try
         return multiplexer.GetDatabase();
     });
 
+    builder.Services.AddSingleton<IProducer>(provider =>
+    {
+        IOptionsMonitor<ConnectionStrings>? connectionStrings = provider.GetService<IOptionsMonitor<ConnectionStrings>>();
+        if (connectionStrings == null)
+        {
+            throw new InvalidOperationException("ConnectionStrings do not exist!");
+        }
+
+        return new RabbitMqService(connectionStrings.CurrentValue.RabbitMq);
+    });
+    
     builder.Services.AddScoped<IDbConnection>(provider =>
     {
         IOptionsMonitor<ConnectionStrings>? connectionStrings = provider.GetService<IOptionsMonitor<ConnectionStrings>>();
