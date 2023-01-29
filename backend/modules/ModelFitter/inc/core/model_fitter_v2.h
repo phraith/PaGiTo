@@ -1,8 +1,8 @@
 #ifndef MODEL_FITTER_CORE_MODEL_FITTER_H
 #define MODEL_FITTER_CORE_MODEL_FITTER_H
 
-#include "service.h"
-#include "client.h"
+#include "common/service.h"
+//#include "client.h"
 #include "common/standard_defs.h"
 #include <barrier>
 #include <thread>
@@ -20,7 +20,7 @@ public:
 private:
     static double Fitness(const std::vector<double> &parameters);
 
-    std::shared_ptr<majordomo::Client> client_;
+//    std::shared_ptr<majordomo::RabbitMqClient> client_;
     const std::string &broker_address_;
 
 

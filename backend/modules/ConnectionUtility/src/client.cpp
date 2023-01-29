@@ -2,7 +2,7 @@
 // Created by Phil on 26.03.2022.
 //
 
-#include "client.h"
+#include "rabbitmq_client.h"
 #include "majordomo_utility.h"
 
 #include <utility>

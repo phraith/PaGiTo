@@ -1,5 +1,6 @@
 #find_package(Pagmo REQUIRED)
-find_package(cppzmq REQUIRED)
+#find_package(cppzmq REQUIRED)
+find_package(rabbitmq-c CONFIG REQUIRED)
 find_package(nlohmann_json REQUIRED)
 
 #file(GLOB_RECURSE MODEL_FITTER_FILES "src/*.cpp" "inc/*.h")
@@ -27,7 +28,8 @@ target_link_libraries(  ModelFitterLib
 #                              Pagmo::pagmo
                               nlohmann_json
                               nlohmann_json::nlohmann_json
-                              cppzmq
+                              rabbitmq::rabbitmq-static
+#                              cppzmq
                       )
 
 if (WIN32)

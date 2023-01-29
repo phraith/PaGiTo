@@ -11,7 +11,7 @@
 #include "util/hardware_information.h"
 #include "common/image_data.h"
 #include "common/device.h"
-#include "service.h"
+#include "common/service.h"
 
 class ModelSimulatorV2 : public Service {
 public:
