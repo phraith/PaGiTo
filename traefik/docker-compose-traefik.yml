@@ -1,0 +1,147 @@
+version: "3.3"
+
+services:
+  traefik:
+    image: "traefik:latest"
+    container_name: "traefik"
+    profiles:
+     - "backbone"
+    command:
+      - "--log.level=DEBUG"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--api" 
+      - "--providers.docker"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - type: bind
+        source: ./letsencrypt
+        target: /letsencrypt
+    networks:
+      - proxynet
+    labels:
+      # Dashboard
+      - "traefik.http.routers.traefik.rule=Host(`traefik.wavecomputing.xyz`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.tls.certresolver=myresolver"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.middlewares=authtraefik"
+      - "traefik.http.middlewares.authtraefik.basicauth.users=user:$$apr1$$q8eZFHjF$$Fvmkk//V6Btlaf2i/ju5n/"
+      
+      # global redirect to https
+      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall.entrypoints=web"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
+
+      # middleware redirect
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+  registry:
+    restart: always
+    image: registry:2
+    ports:
+    - "5000:5000"
+    profiles:
+     - "backbone"
+    networks:
+      - proxynet
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.registry-internal.entrypoints=websecure"
+      - "traefik.http.services.registry-internal.loadbalancer.server.port=5000"
+      - "traefik.http.routers.registry-internal.rule=Host(`registry-internal.wavecomputing.xyz`)"
+      - "traefik.http.routers.registry-internal.tls.certresolver=myresolver"
+    volumes:
+      - ./auth:/auth 
+      - ./data:/data
+      - ./config.yml:/etc/docker/registry/config.yml:ro
+  registry-ui:
+    # restart: always
+    image: joxit/docker-registry-ui:latest
+    environment:
+        - DELETE_IMAGES=true
+        - REGISTRY_TITLE=My Private Docker Registry
+        - NGINX_PROXY_PASS_URL=http://registry:5000
+        - SINGLE_REGISTRY=true
+    profiles:
+     - "backbone"
+    networks:
+      - proxynet
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.registry.entrypoints=websecure"
+      - "traefik.http.routers.registry.rule=Host(`registry.wavecomputing.xyz`)"
+      - "traefik.http.routers.registry.tls.certresolver=myresolver"
+  redis:
+    image: redis:latest
+    profiles:
+     - "gisaxsapp"
+    ports:
+      - 6379:6379
+    networks:
+      - proxynet
+  pg_admin4:
+    image: dpage/pgadmin4:latest
+    profiles:
+     - "gisaxsapp"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}"
+    ports:
+      - "5050:80"
+    networks:
+      - proxynet
+  postgres:
+    image: postgres:latest
+    profiles:
+     - "gisaxsapp"
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}"
+      POSTGRES_DB: base
+    ports:
+      - '5432:5432'
+    volumes:
+      - db:/var/lib/postgresql/data
+    networks:
+      - proxynet
+  gisaxs-client:
+    environment:
+      POSTGRES_URL: ${POSTGRES_URL}
+      GISAXS_BACKEND: ${GISAXS_BACKEND}
+      REDIS_URL: ${REDIS_URL}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      AUTH_TOKEN: ${AUTH_TOKEN}
+    image: registry-internal.wavecomputing.xyz/gisaxs/client:0.0.5
+    profiles:
+     - "gisaxsapp"
+    labels:
+     - "traefik.enable=true"
+     - "traefik.http.routers.client.entrypoints=websecure"
+     - "traefik.http.routers.client.rule=Host(`wavecomputing.xyz`)"
+     - "traefik.http.routers.client.tls.certresolver=myresolver"
+    ports:
+      - 8080:80
+    networks:
+      - proxynet
+  gisaxs-backend:
+    image: "registry-internal.wavecomputing.xyz/gisaxs/backend:0.0.6"
+    entrypoint: ["./apps/ModelingFramework/ModelingFramework"]
+    profiles:
+     - "gisaxsapp"
+    ports:
+      - '5555:5555'
+    networks:
+      - proxynet
+networks:
+  proxynet:
+    name: custom_network
+volumes:
+  db:
+    driver: local

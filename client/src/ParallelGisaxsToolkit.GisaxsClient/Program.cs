@@ -22,6 +22,7 @@ using ParallelGisaxsToolkit.GisaxsClient.Hubs;
 using Serilog;
 using Serilog.Events;
 using StackExchange.Redis;
+using Steeltoe.Extensions.Configuration.Placeholder;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -32,6 +33,7 @@ try
     Log.Information("Starting web application");
 
     var builder = WebApplication.CreateBuilder(args);
+
 
     builder.Host.UseSerilog((context, services, configuration) => configuration
         .ReadFrom.Configuration(context.Configuration)
@@ -45,6 +47,8 @@ try
         builder.Configuration.SetBasePath("/vault/secrets/").AddJsonFile("appsettings.json", false, true);
     }
 
+    builder.Configuration.AddPlaceholderResolver();
+    
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerDoc();
     builder.Services.AddFastEndpoints();
@@ -117,6 +121,7 @@ try
         {
             throw new InvalidOperationException("ConnectionStrings do not exist!");
         }
+
 
         IDbConnection connection = new NpgsqlConnection(connectionStrings.CurrentValue.Default);
         return connection;
