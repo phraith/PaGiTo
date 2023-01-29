@@ -65,6 +65,11 @@ typedef struct SimData
     float scale;
 } SimData;
 
+typedef struct RequestResult
+{
+    std::vector<std::byte> data;
+} RequestResult;
+
 typedef struct TimeMeasurement
 {
     std::string device_name;

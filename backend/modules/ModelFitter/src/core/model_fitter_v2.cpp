@@ -26,7 +26,7 @@ std::string ModelFitterV2::ServiceName() const {
     return "fitting";
 }
 
-std::vector<std::byte>
+RequestResult
 ModelFitterV2::HandleRequest(const std::string &request, std::vector<std::byte> image_data, const std::string &origin) {
 
 
@@ -101,7 +101,7 @@ ModelFitterV2::HandleRequest(const std::string &request, std::vector<std::byte> 
     std::shared_ptr<Solution> best_solution = o.Optimize();
 
 
-    return std::vector<std::byte>{};
+    return {std::vector<std::byte>{}};
 }
 
 std::vector<double> ModelFitterV2::ConvertFlat(const std::vector<Vector2<MyType>> &input) {

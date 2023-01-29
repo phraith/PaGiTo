@@ -7,16 +7,18 @@
 #include "amqp.h"
 #include "amqp_tcp_socket.h"
 #include "amqp_framing.h"
-#include <stdarg.h>
+#include <iostream>
+#include <spdlog/spdlog.h>
+
 #define SUMMARY_EVERY_US 1000000
 
 uint64_t now_microseconds(void) {
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    return (uint64_t)tv.tv_sec * 1000000 + (uint64_t)tv.tv_usec;
+    return (uint64_t) tv.tv_sec * 1000000 + (uint64_t) tv.tv_usec;
 }
 
-static void run(amqp_connection_state_t conn) {
+void RabbitMqClient::Run() {
     uint64_t start_time = now_microseconds();
     int received = 0;
     int previous_received = 0;
@@ -36,23 +38,144 @@ static void run(amqp_connection_state_t conn) {
             int countOverInterval = received - previous_received;
             double intervalRate =
                     countOverInterval / ((now - previous_report_time) / 1000000.0);
-            printf("%d ms: Received %d - %d since last report (%d Hz)\n",
-                   (int)(now - start_time) / 1000, received, countOverInterval,
-                   (int)intervalRate);
+
+            int current_ms = (int) (now - start_time) / 1000;
+            spdlog::info("{} ms: Received {} - {} since last report ({} Hz)", current_ms, received, countOverInterval,
+                         (int) intervalRate);
 
             previous_received = received;
             previous_report_time = now;
             next_summary_time += SUMMARY_EVERY_US;
         }
 
-        amqp_maybe_release_buffers(conn);
-        ret = amqp_consume_message(conn, &envelope, NULL, 0);
+        amqp_maybe_release_buffers(connection_);
+        ret = amqp_consume_message(connection_, &envelope, nullptr, 0);
 
-        if (AMQP_RESPONSE_NORMAL != ret.reply_type) {
-            if (AMQP_RESPONSE_LIBRARY_EXCEPTION == ret.reply_type &&
-                AMQP_STATUS_UNEXPECTED_STATE == ret.library_error) {
-                if (AMQP_STATUS_OK != amqp_simple_wait_frame(conn, &frame)) {
-                    return;
+        bool success = EvaluateRpcOperation(ret);
+        if (!success) {
+            SetUpConnection();
+            continue;
+        }
+
+        received++;
+
+        std::string message(static_cast<const char *>(envelope.message.body.bytes), envelope.message.body.len);
+        auto result = service_->HandleRequest(message, {}, "");
+
+        std::string message2(static_cast<const char *>(envelope.message.properties.reply_to.bytes),
+                             envelope.message.properties.reply_to.len);
+
+
+        amqp_basic_properties_t props;
+        props._flags = AMQP_BASIC_CONTENT_TYPE_FLAG |
+                       AMQP_BASIC_DELIVERY_MODE_FLAG |
+                       AMQP_BASIC_CORRELATION_ID_FLAG;
+
+        props.correlation_id = envelope.message.properties.correlation_id;
+        props.content_type = amqp_cstring_bytes("text/plain");
+        props.delivery_mode = 2; /* persistent delivery mode */
+
+        amqp_bytes_t result_bytes{result.data.size(), &result.data[0]};
+        int publish_result = amqp_basic_publish(connection_, 2, amqp_cstring_bytes(""),
+                                                envelope.message.properties.reply_to, 1, 0, &props,
+                                                result_bytes);
+
+        amqp_destroy_envelope(&envelope);
+
+        if (publish_result < 0) {
+            spdlog::error("Publishing failed! Resetting connection...");
+            SetUpConnection();
+        }
+    }
+}
+
+
+RabbitMqClient::RabbitMqClient(const std::string &host_name, int port, const std::string &queue_name,
+                               std::unique_ptr<Service> service)
+        :
+        host_name_(host_name),
+        queue_name_(queue_name),
+        port_(port),
+        service_(std::move(service)),
+        connection_(nullptr) {
+
+    SetUpConnection();
+    Run();
+}
+
+void RabbitMqClient::SetUpConnection() {
+    for (;;) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        if (connection_ != nullptr) {
+            int ret_connection = amqp_destroy_connection(connection_);
+            if (ret_connection < 0) {
+                spdlog::error("Closing connection did not work...");
+                continue;
+            }
+        }
+
+        connection_ = amqp_new_connection();
+        auto socket = amqp_tcp_socket_new(connection_);
+        if (!socket) {
+            spdlog::error("Creating TCP socket failed...");
+            continue;
+        }
+
+        auto status = amqp_socket_open(socket, host_name_.c_str(), port_);
+        if (status) {
+            spdlog::error("Opening TCP socket failed...");
+            continue;
+        }
+
+        auto user = std::getenv("RABBITMQ_USER");
+        auto password = std::getenv("RABBITMQ_PASSWORD");
+
+        if (user == nullptr || password == nullptr)
+        {
+            spdlog::error("RABBITMQ_USER or RABBITMQ_PASSWORD are not set...");
+            continue;
+        }
+
+        auto ret = amqp_login(connection_, "/", 0, 131072, 0, AMQP_SASL_METHOD_PLAIN, user, password,
+                              std::getenv("RABBITMQ_PASSWORD"));
+        bool success = EvaluateRpcOperation(ret);
+        if (!success) {
+            spdlog::error("Login failed...");
+            continue;
+        }
+
+        amqp_channel_open(connection_, 1);
+        amqp_channel_open(connection_, 2);
+
+        amqp_get_rpc_reply(connection_);
+
+        amqp_bytes_t amq_queue_name{queue_name_.size(), (void *) queue_name_.c_str()};
+        amqp_basic_consume(connection_, 1, amq_queue_name, amqp_empty_bytes, 0, 1, 0,
+                           amqp_empty_table);
+
+        return;
+    }
+}
+
+bool RabbitMqClient::EvaluateRpcOperation(amqp_rpc_reply_t reply) {
+    if (AMQP_RESPONSE_NORMAL == reply.reply_type) {
+        return true;
+    }
+
+    if (AMQP_RESPONSE_LIBRARY_EXCEPTION == reply.reply_type &&
+        AMQP_STATUS_CONNECTION_CLOSED == reply.library_error) {
+        return false;
+    }
+
+    if (AMQP_RESPONSE_LIBRARY_EXCEPTION == reply.reply_type) {
+
+        switch (reply.library_error) {
+            case AMQP_STATUS_CONNECTION_CLOSED:
+                break;
+            case AMQP_STATUS_UNEXPECTED_STATE:
+                amqp_frame_t frame;
+                if (AMQP_STATUS_OK != amqp_simple_wait_frame(connection_, &frame)) {
+
                 }
 
                 if (AMQP_FRAME_METHOD == frame.frame_type) {
@@ -69,14 +192,13 @@ static void run(amqp_connection_state_t conn) {
                              */
                         {
                             amqp_message_t message;
-                            ret = amqp_read_message(conn, frame.channel, &message, 0);
-                            if (AMQP_RESPONSE_NORMAL != ret.reply_type) {
-                                return;
+                            reply = amqp_read_message(connection_, frame.channel, &message, 0);
+                            if (AMQP_RESPONSE_NORMAL != reply.reply_type) {
+                                break;
                             }
 
                             amqp_destroy_message(&message);
                         }
-
                             break;
 
                         case AMQP_CHANNEL_CLOSE_METHOD:
@@ -88,7 +210,7 @@ static void run(amqp_connection_state_t conn) {
                              * any queues that were declared auto-delete, and restart any
                              * consumers that were attached to the previous channel.
                              */
-                            return;
+                            break;
 
                         case AMQP_CONNECTION_CLOSE_METHOD:
                             /* a connection.close method happens when a connection exception
@@ -97,193 +219,15 @@ static void run(amqp_connection_state_t conn) {
                              *
                              * In this case the whole connection must be restarted.
                              */
-                            return;
+                            break;
 
                         default:
-                            fprintf(stderr, "An unexpected method was received %u\n",
-                                    frame.payload.method.id);
-                            return;
+                            spdlog::error("An unexpected method was received {}", frame.payload.method.id);
+                            break;
                     }
                 }
-            }
-
-        } else {
-            amqp_destroy_envelope(&envelope);
-        }
-
-        received++;
-    }
-}
-
-void die(const char *fmt, ...) {
-    va_list ap;
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    va_end(ap);
-    fprintf(stderr, "\n");
-    exit(1);
-}
-
-void die_on_error(int x, char const *context) {
-    if (x < 0) {
-        fprintf(stderr, "%s: %s\n", context, amqp_error_string2(x));
-        exit(1);
-    }
-}
-
-void die_on_amqp_error(amqp_rpc_reply_t x, char const *context) {
-    switch (x.reply_type) {
-        case AMQP_RESPONSE_NORMAL:
-            return;
-
-        case AMQP_RESPONSE_NONE:
-            fprintf(stderr, "%s: missing RPC reply type!\n", context);
-            break;
-
-        case AMQP_RESPONSE_LIBRARY_EXCEPTION:
-            fprintf(stderr, "%s: %s\n", context, amqp_error_string2(x.library_error));
-            break;
-
-        case AMQP_RESPONSE_SERVER_EXCEPTION:
-            switch (x.reply.id) {
-                case AMQP_CONNECTION_CLOSE_METHOD: {
-                    amqp_connection_close_t *m =
-                            (amqp_connection_close_t *)x.reply.decoded;
-                    fprintf(stderr, "%s: server connection error %uh, message: %.*s\n",
-                            context, m->reply_code, (int)m->reply_text.len,
-                            (char *)m->reply_text.bytes);
-                    break;
-                }
-                case AMQP_CHANNEL_CLOSE_METHOD: {
-                    amqp_channel_close_t *m = (amqp_channel_close_t *)x.reply.decoded;
-                    fprintf(stderr, "%s: server channel error %uh, message: %.*s\n",
-                            context, m->reply_code, (int)m->reply_text.len,
-                            (char *)m->reply_text.bytes);
-                    break;
-                }
-                default:
-                    fprintf(stderr, "%s: unknown server error, method id 0x%08X\n",
-                            context, x.reply.id);
-                    break;
-            }
-            break;
-    }
-
-    exit(1);
-}
-
-static void dump_row(long count, int numinrow, int *chs) {
-    int i;
-
-    printf("%08lX:", count - numinrow);
-
-    if (numinrow > 0) {
-        for (i = 0; i < numinrow; i++) {
-            if (i == 8) {
-                printf(" :");
-            }
-            printf(" %02X", chs[i]);
-        }
-        for (i = numinrow; i < 16; i++) {
-            if (i == 8) {
-                printf(" :");
-            }
-            printf("   ");
-        }
-        printf("  ");
-        for (i = 0; i < numinrow; i++) {
-            if (isprint(chs[i])) {
-                printf("%c", chs[i]);
-            } else {
-                printf(".");
-            }
+                break;
         }
     }
-    printf("\n");
-}
-
-static int rows_eq(int *a, int *b) {
-    int i;
-
-    for (i = 0; i < 16; i++)
-        if (a[i] != b[i]) {
-            return 0;
-        }
-
-    return 1;
-}
-
-void amqp_dump(void const *buffer, size_t len) {
-    unsigned char *buf = (unsigned char *)buffer;
-    long count = 0;
-    int numinrow = 0;
-    int chs[16];
-    int oldchs[16] = {0};
-    int showed_dots = 0;
-    size_t i;
-
-    for (i = 0; i < len; i++) {
-        int ch = buf[i];
-
-        if (numinrow == 16) {
-            int j;
-
-            if (rows_eq(oldchs, chs)) {
-                if (!showed_dots) {
-                    showed_dots = 1;
-                    printf(
-                            "          .. .. .. .. .. .. .. .. : .. .. .. .. .. .. .. ..\n");
-                }
-            } else {
-                showed_dots = 0;
-                dump_row(count, numinrow, chs);
-            }
-
-            for (j = 0; j < 16; j++) {
-                oldchs[j] = chs[j];
-            }
-
-            numinrow = 0;
-        }
-
-        count++;
-        chs[numinrow++] = ch;
-    }
-
-    dump_row(count, numinrow, chs);
-
-    if (numinrow != 0) {
-        printf("%08lX:\n", count);
-    }
-}
-
-RabbitMqClient::RabbitMqClient(const std::string &host_name, int port, const std::string &queue_name)
-        :
-        host_name_(host_name),
-        queue_name_(queue_name),
-        port_(port) {
-
-    auto conn = amqp_new_connection();
-    auto socket = amqp_tcp_socket_new(conn);
-    if (!socket) {
-        die("creating TCP socket");
-    }
-
-    auto status = amqp_socket_open(socket, host_name_.c_str(), port_);
-    if (status) {
-        die("opening TCP socket");
-    }
-
-    die_on_amqp_error(amqp_login(conn, "/", 0, 131072, 0, AMQP_SASL_METHOD_PLAIN,
-                                 "guest", "guest"),
-                      "Logging in");
-    amqp_channel_open(conn, 1);
-    amqp_get_rpc_reply(conn);
-
-    amqp_bytes_t amq_queue_name {queue_name_.size(), (void *)queue_name_.c_str()};
-
-    amqp_basic_consume(conn, 1, amq_queue_name, amqp_empty_bytes, 0, 1, 0,
-                       amqp_empty_table);
-
-    run(conn);
+    return false;
 }

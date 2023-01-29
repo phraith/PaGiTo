@@ -8,6 +8,7 @@
 
 #include <string>
 #include <vector>
+#include "standard_defs.h"
 
 class Service {
 public:
@@ -15,7 +16,7 @@ public:
 
     [[nodiscard]] virtual std::string ServiceName() const = 0;
 
-    [[nodiscard]] virtual std::vector<std::byte> HandleRequest(const std::string &request, std::vector<std::byte> image_data, const std::string &origin) = 0;
+    [[nodiscard]] virtual RequestResult HandleRequest(const std::string &request, std::vector<std::byte> image_data, const std::string &origin) = 0;
 };
 
 

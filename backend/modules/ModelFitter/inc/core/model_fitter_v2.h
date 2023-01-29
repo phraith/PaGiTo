@@ -2,7 +2,6 @@
 #define MODEL_FITTER_CORE_MODEL_FITTER_H
 
 #include "common/service.h"
-//#include "client.h"
 #include "common/standard_defs.h"
 #include <barrier>
 #include <thread>
@@ -15,7 +14,7 @@ public:
 
     [[nodiscard]] std::string ServiceName() const override;
 
-    [[nodiscard]] std::vector<std::byte> HandleRequest(const std::string &request, std::vector<std::byte> image_data, const std::string &origin) override;
+    [[nodiscard]]RequestResult HandleRequest(const std::string &request, std::vector<std::byte> image_data, const std::string &origin) override;
     static std::vector<double> ConvertFlat(const std::vector<Vector2<MyType>> &input);
 private:
     static double Fitness(const std::vector<double> &parameters);

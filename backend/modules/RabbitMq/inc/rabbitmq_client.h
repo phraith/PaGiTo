@@ -6,14 +6,23 @@
 #define GISAXSMODELINGFRAMEWORK_RABBITMQ_CLIENT_H
 
 #include <string>
+#include <amqp.h>
+#include <memory>
+#include "common/service.h"
 
 class RabbitMqClient {
 public:
-    RabbitMqClient(const std::string &host_name, int port, const std::string &queue_name);
+    RabbitMqClient(const std::string &host_name, int port, const std::string &queue_name, std::unique_ptr<Service> service);
 private:
+    void Run();
+    void SetUpConnection();
+    bool EvaluateRpcOperation(amqp_rpc_reply_t reply);
+
     std::string host_name_;
     std::string queue_name_;
     int port_;
+    std::unique_ptr<Service> service_;
+    amqp_connection_state_t connection_;
 };
 
 

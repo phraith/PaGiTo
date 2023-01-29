@@ -20,4 +20,5 @@ target_link_libraries(RabbitMq
         nlohmann_json::nlohmann_json
         spdlog::spdlog
         rabbitmq::rabbitmq-static
+        CommonLib
         )

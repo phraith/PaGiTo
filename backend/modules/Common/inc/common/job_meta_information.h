@@ -13,8 +13,8 @@ class JobMetaInformation {
 public:
     explicit JobMetaInformation(const GisaxsTransformationContainer::JobMetaInformationContainer &job_info);
 
-    [[nodiscard]] const std::string &ClientId() const;
-    [[nodiscard]] const std::string &JobId() const;
+    [[nodiscard]] std::string ClientId() const;
+    [[nodiscard]] std::string JobId() const;
     [[nodiscard]] IntensityFormat Format() const;
     [[nodiscard]] const std::vector<GisaxsTransformationContainer::SimulationTargetDefinition> &SimulationTargets() const;
 

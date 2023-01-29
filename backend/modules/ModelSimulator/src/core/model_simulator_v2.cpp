@@ -19,8 +19,8 @@ ModelSimulatorV2::~ModelSimulatorV2() {
 }
 
 
-std::vector<std::byte> ModelSimulatorV2::HandleRequest(const std::string &request, std::vector<std::byte> image_data,
-                                                       const std::string &origin) {
+RequestResult ModelSimulatorV2::HandleRequest(const std::string &request, std::vector<std::byte> image_data,
+                                              const std::string &origin) {
     try {
         Timer localTimer;
         Timer globalTimer;
@@ -60,11 +60,11 @@ std::vector<std::byte> ModelSimulatorV2::HandleRequest(const std::string &reques
 
         globalTimer.End();
         spdlog::info("Finished request in {} ms", globalTimer.Duration());
-        return final_message;
+        return {final_message};
     }
     catch (const std::exception &e) {
         spdlog::error(e.what());
-        return std::vector<std::byte>();
+        return {std::vector<std::byte>()};
     }
 }
 
@@ -127,12 +127,10 @@ std::vector<std::byte> ModelSimulatorV2::Serialize(
     size_t s3 = intensities.size() * sizeof intensities[0];
 
     size_t byte_count = 7 * target_definitions.size() * s1;
-    if (format == IntensityFormat::double_precision)
-    {
+    if (format == IntensityFormat::double_precision) {
         byte_count += s3;
     }
-    if (format == IntensityFormat::greyscale)
-    {
+    if (format == IntensityFormat::greyscale) {
         byte_count += s2;
     }
 
