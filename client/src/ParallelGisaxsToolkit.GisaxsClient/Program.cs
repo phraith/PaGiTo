@@ -11,14 +11,15 @@ using Npgsql;
 using ParallelGisaxsToolkit.Gisaxs.Configuration;
 using ParallelGisaxsToolkit.Gisaxs.Core;
 using ParallelGisaxsToolkit.Gisaxs.Core.Authorization;
+using ParallelGisaxsToolkit.Gisaxs.Core.Hubs;
 using ParallelGisaxsToolkit.Gisaxs.Core.ImageStore;
 using ParallelGisaxsToolkit.Gisaxs.Core.JobStore;
 using ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling;
 using ParallelGisaxsToolkit.Gisaxs.Core.UserStore;
 using ParallelGisaxsToolkit.Gisaxs.Utility.HashComputer;
+using ParallelGisaxsToolkit.GisaxsClient;
 using ParallelGisaxsToolkit.GisaxsClient.Configuration;
 using ParallelGisaxsToolkit.GisaxsClient.Endpoints.Jobs;
-using ParallelGisaxsToolkit.GisaxsClient.Hubs;
 using Serilog;
 using Serilog.Events;
 using StackExchange.Redis;
@@ -65,7 +66,7 @@ try
 
     builder.Services.AddSingleton<IHashComputer, Sha256HashComputer>();
     builder.Services.AddSingleton<IRequestHandler, MajordomoRequestHandler>();
-    builder.Services.AddSingleton<IJobScheduler, JobScheduler>();
+    // builder.Services.AddSingleton<IJobScheduler, JobScheduler>();
 
     builder.Services.AddLogging(x =>
     {
@@ -103,16 +104,7 @@ try
         return multiplexer.GetDatabase();
     });
 
-    builder.Services.AddSingleton<IProducer>(provider =>
-    {
-        IOptionsMonitor<ConnectionStrings>? connectionStrings = provider.GetService<IOptionsMonitor<ConnectionStrings>>();
-        if (connectionStrings == null)
-        {
-            throw new InvalidOperationException("ConnectionStrings do not exist!");
-        }
-
-        return new RabbitMqService(connectionStrings.CurrentValue.RabbitMq);
-    });
+    builder.Services.AddSingleton<IProducer, RabbitMqService>();
     
     builder.Services.AddScoped<IDbConnection>(provider =>
     {
