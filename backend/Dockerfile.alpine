@@ -15,7 +15,7 @@ COPY . .
 RUN apk update && \
   apk add \
   --no-cache \
-  python3 build-base cmake git zip ninja curl pkgconfig
+  python3 build-base cmake git zip ninja curl pkgconfig linux-headers
 
 RUN python3 -m ensurepip --upgrade && pip3 install gcovr
 
