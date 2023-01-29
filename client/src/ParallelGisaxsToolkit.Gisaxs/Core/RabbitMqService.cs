@@ -66,10 +66,10 @@ public class RabbitMqService : IProducer
 
         byte[] message = Encoding.UTF8.GetBytes(request.RawRequest);
 
-        if (!_trackedJobs.TryAdd(request.JobHash, request))
+        if (!_trackedJobs.TryAdd(request.JobId, request))
         {
             throw new InvalidOperationException(
-                $"Could not job with id {request.JobHash}!");
+                $"Could not job with id {request.JobId}!");
         }
 
         _channel.BasicPublish(exchange: "",
