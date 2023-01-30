@@ -15,7 +15,7 @@ COPY . .
 RUN apk update && \
   apk add \
   --no-cache \
-  python3 build-base cmake git zip ninja curl pkgconfig
+  python3 build-base cmake git zip ninja curl pkgconfig linux-headers perl
 
 RUN python3 -m ensurepip --upgrade && pip3 install gcovr
 
@@ -23,7 +23,7 @@ RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg
 WORKDIR /opt/vcpkg
 RUN mkdir ~/.vcpkg && touch ~/.vcpkg/vcpkg.path.txt && ./bootstrap-vcpkg.sh && ./vcpkg integrate install
 RUN ./vcpkg update
-RUN ./vcpkg install cppzmq[draft] zeromq[draft]
+RUN ./vcpkg install librabbitmq
 RUN ./vcpkg install gtest
 RUN ./vcpkg install nlohmann-json
 RUN ./vcpkg install spdlog

@@ -14,11 +14,11 @@ JobMetaInformation::JobMetaInformation(const GisaxsTransformationContainer::JobM
         lineprofiles_(job_info.simulationTargets) {
 }
 
-const std::string &JobMetaInformation::ClientId() const {
+std::string JobMetaInformation::ClientId() const {
     return std::to_string(client_id_);
 }
 
-const std::string &JobMetaInformation::JobId() const {
+std::string JobMetaInformation::JobId() const {
     return std::to_string(job_id_);
 }
 

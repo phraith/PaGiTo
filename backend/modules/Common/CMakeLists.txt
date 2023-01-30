@@ -39,6 +39,7 @@ target_sources(
         inc/common/binary_serialization_utility.h
         inc/cmaes/cmaes.h
         src/cmaes/cmaes.cpp
+        inc/common/service.h
         inc/parameter_definitions/transformation_container.h
         inc/common/job_meta_information.h
         inc/common/experimental_data.h

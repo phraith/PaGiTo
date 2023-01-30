@@ -130,7 +130,20 @@ services:
       - 8080:80
     networks:
       - proxynet
+  rabbitmq:
+    environment:
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+    image: rabbitmq:3-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - proxynet
   gisaxs-backend:
+    environment:
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
     image: "registry-internal.wavecomputing.xyz/gisaxs/backend:0.0.6"
     entrypoint: ["./apps/ModelingFramework/ModelingFramework"]
     profiles:

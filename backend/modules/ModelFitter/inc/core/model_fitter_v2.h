@@ -1,8 +1,7 @@
 #ifndef MODEL_FITTER_CORE_MODEL_FITTER_H
 #define MODEL_FITTER_CORE_MODEL_FITTER_H
 
-#include "service.h"
-#include "client.h"
+#include "common/service.h"
 #include "common/standard_defs.h"
 #include <barrier>
 #include <thread>
@@ -15,12 +14,12 @@ public:
 
     [[nodiscard]] std::string ServiceName() const override;
 
-    [[nodiscard]] std::vector<std::byte> HandleRequest(const std::string &request, std::vector<std::byte> image_data, const std::string &origin) override;
+    [[nodiscard]]RequestResult HandleRequest(const std::string &request, std::vector<std::byte> image_data, const std::string &origin) override;
     static std::vector<double> ConvertFlat(const std::vector<Vector2<MyType>> &input);
 private:
     static double Fitness(const std::vector<double> &parameters);
 
-    std::shared_ptr<majordomo::Client> client_;
+//    std::shared_ptr<majordomo::RabbitMqClient> client_;
     const std::string &broker_address_;
 
 

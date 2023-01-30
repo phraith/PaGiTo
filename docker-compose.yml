@@ -1,23 +1,23 @@
 # version: "2"
 services:
-  dotnet_client:
-    environment:
-      POSTGRES_URL: postgres
-      GISAXS_BACKEND: gisaxs_backend
-      REDIS_URL: redis
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      AUTH_TOKEN: ${AUTH_TOKEN}
+#   dotnet_client:
+#     environment:
+#       POSTGRES_URL: postgres
+#       GISAXS_BACKEND: gisaxs_backend
+#       REDIS_URL: redis
+#       POSTGRES_USER: ${POSTGRES_USER}
+#       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#       AUTH_TOKEN: ${AUTH_TOKEN}
 
-    build:
-      context: client
-      dockerfile: Dockerfile
-    command: tail -f /dev/null
-    links:
-      - redis
-    ports:
-      - "8080:80"
-      - "8081:443"
+#     build:
+#       context: client
+#       dockerfile: Dockerfile
+#     command: tail -f /dev/null
+#     links:
+#       - redis
+#     ports:
+#       - "8080:80"
+#       - "8081:443"
 
   client_tests:
       build:
@@ -57,7 +57,11 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}"
     ports:
       - "5050:80"
-
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - 5672:5672
+      - 15672:15672
   postgres:
     image: postgres:latest
     restart: always
@@ -70,22 +74,22 @@ services:
     volumes:
       - db:/var/lib/postgresql/data
 
-  gisaxs-backend:
-    build:
-      context: backend
-      dockerfile: Dockerfile.cuda
-    ports:
-      - '5555:5555'
-    cap_add:
-      - SYS_PTRACE
-    entrypoint: ["./apps/ModelingFramework/ModelingFramework"]
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [ gpu ]
+  # gisaxs-backend:
+  #   build:
+  #     context: backend
+  #     dockerfile: Dockerfile.cuda
+  #   ports:
+  #     - '5555:5555'
+  #   cap_add:
+  #     - SYS_PTRACE
+  #   entrypoint: ["./apps/ModelingFramework/ModelingFramework"]
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: 1
+  #             capabilities: [ gpu ]
 volumes:
   db:
     driver: local
