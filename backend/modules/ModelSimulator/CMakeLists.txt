@@ -1,4 +1,5 @@
-find_package(cppzmq REQUIRED)
+#find_package(cppzmq REQUIRED)
+find_package(rabbitmq-c CONFIG REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(spdlog REQUIRED)
 
@@ -35,9 +36,9 @@ endif ()
 
 target_link_libraries(
         ModelSimulatorLib
-        PUBLIC CommonLib GisaxsLib ConnectionUtility nlohmann_json spdlog::spdlog
+        PUBLIC CommonLib GisaxsLib RabbitMq nlohmann_json spdlog::spdlog
         nlohmann_json::nlohmann_json
-        PRIVATE cppzmq)
+        PRIVATE rabbitmq::rabbitmq-static)
 
 if (UNIX)
 

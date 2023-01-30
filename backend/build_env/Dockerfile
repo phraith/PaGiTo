@@ -16,7 +16,7 @@ RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg
 WORKDIR /opt/vcpkg
 RUN mkdir ~/.vcpkg && touch ~/.vcpkg/vcpkg.path.txt && ./bootstrap-vcpkg.sh && ./vcpkg integrate install
 RUN ./vcpkg update
-RUN ./vcpkg install cppzmq[draft] zeromq[draft]
+RUN ./vcpkg install librabbitmq
 RUN ./vcpkg install gtest
 RUN ./vcpkg install nlohmann-json
 RUN ./vcpkg install spdlog

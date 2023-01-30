@@ -11,7 +11,7 @@
 #include "util/hardware_information.h"
 #include "common/image_data.h"
 #include "common/device.h"
-#include "service.h"
+#include "common/service.h"
 
 class ModelSimulatorV2 : public Service {
 public:
@@ -21,7 +21,7 @@ public:
 
     std::string ServiceName() const override;
 
-    std::vector<std::byte>
+    RequestResult
     HandleRequest(const std::string &request, std::vector<std::byte> image_data, const std::string &origin) override;
 
     std::vector<TimeMeasurement> GetDeviceTimings() const;

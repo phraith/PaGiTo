@@ -9,7 +9,7 @@ target_sources  (ModelingFramework
 
 target_link_libraries(ModelingFramework
         PRIVATE
-            ConnectionUtility
+            RabbitMq
             ModelSimulatorLib
             ModelFitterLib)
 

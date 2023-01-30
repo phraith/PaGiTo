@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.SignalR;
 
-namespace ParallelGisaxsToolkit.GisaxsClient.Hubs
+namespace ParallelGisaxsToolkit.Gisaxs.Core.Hubs
 {
     // [Authorize]
     public class MessageHub : Hub
