@@ -8,7 +8,15 @@
 static void RunSimWorker(const std::string &worker_address, const std::string &broker_address,
                          std::shared_ptr<HardwareInformation> hw_info) {
     std::unique_ptr<Service> v2 = std::make_unique<ModelSimulatorV2>(hw_info);
-    RabbitMqClient c("host.docker.internal", 5672, "Simulation", std::move(v2));
+
+    auto rabbitmq_host = std::getenv("RABBITMQ_HOST");
+    if (rabbitmq_host == nullptr)
+    {
+        throw std::invalid_argument("RABBITMQ_HOST is not set...");
+    }
+
+
+    RabbitMqClient c(rabbitmq_host, 5672, "Simulation", std::move(v2));
 //    Worker w(v2, worker_address, broker_address);
 //    w.Start();
 }
