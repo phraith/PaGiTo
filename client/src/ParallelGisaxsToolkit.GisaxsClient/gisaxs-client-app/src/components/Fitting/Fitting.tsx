@@ -3,14 +3,12 @@ import Box from "@mui/material/Box"
 import CssBaseline from "@mui/material/CssBaseline"
 import Grid from "@mui/material/Grid"
 import throttle from "lodash/throttle";
-import ScatterImage from "../ScatterImage/ScatterImage";
 import GisaxsShapes from "../GisaxsShapes/GisaxsShapes";
 import Instrumentation from "../Instrumentation/Instrumentation";
 import UnitcellMeta from "../UnitcellMeta/UnitcellMeta";
 import { useEffect, useRef, useState } from "react";
 import * as React from "react";
 import Sample from "../Sample/Sample";
-import LineProfileWrapper from "../ScatterImage/LineProfileWrapper";
 import { Coordinate, LineMode, LineProfile, LineProfileState } from "../../utility/LineProfile";
 import ImageTable from "./ImageTable";
 import { Button } from "@mui/material";
@@ -18,6 +16,7 @@ import LineProfileGraphVx from "./LineProfileGraphVx";
 import { ImageInfo } from "../../utility/ImageInfo";
 import { MessageHubConnectionProvider } from "../../utility/MessageHubConnectionProvider";
 import ColormapSelect from "../Colormap";
+import ScatterImageWithLineprofile from "../ScatterImage/ScatterImageWithLineprofile";
 
 
 const Fitting = () => {
@@ -276,16 +275,9 @@ const Fitting = () => {
             <MiniDrawer />
             <Grid container spacing={2}>
                 <Grid item xs={6} sm={6} md={6} lg={8}>
-                    <Box display="flex" sx={{ gap: 2, padding: 10 }}>
-                        <LineProfileWrapper width={imgWidth} height={imgHeight} profileState={lineprofileState}
-                            setProfileState={setLineprofileState}>
-                            <ScatterImage intensities={intensities} width={imgWidth} height={imgHeight} />
-                        </LineProfileWrapper>
-
-                        <LineProfileWrapper width={imgWidth} height={imgHeight} profileState={lineprofileState}
-                            setProfileState={setLineprofileState}>
-                            <ScatterImage intensities={refIntensities} width={imgWidth} height={imgHeight} />
-                        </LineProfileWrapper>
+                    <Box sx={{ height: "100%", width: "100%", display: "flex", gap: 10, paddingTop: 10, paddingLeft: 10 }}>
+                        <ScatterImageWithLineprofile width={imgWidth} height={imgHeight} profileState={lineprofileState} setProfileState={setLineprofileState} intensities={refIntensities} />
+                        <ScatterImageWithLineprofile width={imgWidth} height={imgHeight} profileState={lineprofileState} setProfileState={setLineprofileState} intensities={intensities} />
                     </Box>
                 </Grid>
                 <Grid item xs={12} sm={12} md={12} lg={4}>

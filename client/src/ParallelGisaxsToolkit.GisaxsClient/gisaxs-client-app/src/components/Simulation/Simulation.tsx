@@ -2,7 +2,6 @@ import MiniDrawer from "../Drawer/MiniDrawer";
 import Grid from "@mui/material/Grid"
 import Box from "@mui/material/Box"
 import CssBaseline from "@mui/material/CssBaseline"
-import ScatterImage from "../ScatterImage/ScatterImage";
 import GisaxsShapes from "../GisaxsShapes/GisaxsShapes";
 import Instrumentation from "../Instrumentation/Instrumentation";
 import UnitcellMeta from "../UnitcellMeta/UnitcellMeta";
@@ -110,15 +109,15 @@ const Simulation = () => {
       <Grid container spacing={2}>
         <Grid item xs={12} sm={12} md={12} lg={8}>
           <Box display="flex"
+          component="img" src={intensities} 
             sx={{
               paddingTop: 10,
               paddingRight: 5,
               paddingLeft: 10,
               paddingBottom: 10,
+              width: "100%",
               height: "100%"
-            }}>
-            <ScatterImage intensities={intensities} width={imgWidth} height={imgHeight} />
-          </Box>
+            }}/>
         </Grid>
 
         <Grid item xs={12} sm={12} md={12} lg={4}>
