@@ -33,7 +33,7 @@ try
 {
     Log.Information("Starting web application");
 
-    var builder = WebApplication.CreateBuilder(args);
+    WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 
     builder.Host.UseSerilog((context, services, configuration) => configuration
@@ -83,7 +83,7 @@ try
                 throw new InvalidOperationException("ConnectionStrings do not exist!");
             }
 
-            var userIdGenerator = provider.GetService<IUserIdGenerator>();
+            IUserIdGenerator userIdGenerator = provider.GetService<IUserIdGenerator>();
             if (userIdGenerator == null)
             {
                 throw new InvalidOperationException("UserIdGenerator does not exist!");
@@ -150,7 +150,7 @@ try
             {
                 string? accessToken = context.Request.Query["access_token"];
                 // If the request is for our hub...
-                var path = context.HttpContext.Request.Path;
+                PathString path = context.HttpContext.Request.Path;
                 if (!string.IsNullOrEmpty(accessToken) &&
                     path.StartsWithSegments("/message"))
                 {
@@ -167,7 +167,7 @@ try
         options => { options.SerializerOptions.PropertyNameCaseInsensitive = true; });
 
 
-    var app = builder.Build();
+    WebApplication app = builder.Build();
 
     app.UseSerilogRequestLogging(options =>
     {

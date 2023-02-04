@@ -74,7 +74,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.JobStore
         public async Task Insert(IReadOnlyCollection<Job> jobs)
         {
             using IDbTransaction transaction = _dbConnection.BeginTransaction();
-            foreach (var job in jobs)
+            foreach (Job job in jobs)
             {
                 await _dbConnection.ExecuteAsync($@"
                     INSERT INTO jobs (info, userid)

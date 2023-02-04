@@ -26,7 +26,7 @@ public class GetImageEndpoint : Endpoint<GetImageRequest, GetImageResponse>
             throw new InvalidOperationException("Image does not exist!");
         }
 
-        var colorizedImageAsBase64 = AppearanceModifier.ApplyColorMap(image.GreyscaleData.ToArray(), image.Info.Width,
+        string colorizedImageAsBase64 = AppearanceModifier.ApplyColorMap(image.GreyscaleData.ToArray(), image.Info.Width,
             image.Info.Height, false, request.Colormap);
 
         await SendAsync(new GetImageResponse(colorizedImageAsBase64), cancellation: ct);

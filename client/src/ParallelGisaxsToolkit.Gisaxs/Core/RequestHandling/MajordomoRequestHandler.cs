@@ -70,8 +70,8 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling
 
             string? colormap = request.RequestInformation.MetaInformation.Colormap;
 
-            var resultData = _requestResultDeserializer.Deserialize(contentFrameData, colormap);
-            var serialized = JsonSerializer.Serialize(
+            RequestData resultData = _requestResultDeserializer.Deserialize(contentFrameData, colormap);
+            string serialized = JsonSerializer.Serialize(
                 resultData, new JsonSerializerOptions
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase

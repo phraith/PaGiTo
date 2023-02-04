@@ -4,7 +4,7 @@ public static class IntensityNormalizer
 {
     public static byte[] Normalize(IReadOnlyList<double> intensities)
     {
-        var maxIntensity = intensities.Max();
+        double maxIntensity = intensities.Max();
         Console.WriteLine($"Max intenity {maxIntensity}");
         byte[] normalizedImage = intensities.Select(x => Normalize(x, maxIntensity)).ToArray();
         return normalizedImage;

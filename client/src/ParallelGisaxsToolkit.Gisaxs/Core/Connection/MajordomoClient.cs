@@ -41,21 +41,21 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.Connection
                 throw new TransientException("[CLIENT ERROR] received a malformed reply");
             }
 
-            var emptyFrame = reply.Pop();
+            NetMQFrame emptyFrame = reply.Pop();
             if (emptyFrame != NetMQFrame.Empty)
             {
                 throw new TransientException(
                     $"[CLIENT ERROR] received a malformed reply expected empty frame instead of: {emptyFrame} ");
             }
 
-            var header = reply.Pop(); // [MDPHeader] <- [service name][reply] OR ['mmi.service'][return code]
+            NetMQFrame header = reply.Pop(); // [MDPHeader] <- [service name][reply] OR ['mmi.service'][return code]
 
             if (header.ConvertToString() != "MDPC01")
             {
                 throw new TransientException($"[CLIENT INFO] MDP Version mismatch: {header}");
             }
 
-            var service = reply.Pop(); // [service name or 'mmi.service'] <- [reply] OR [return code]
+            NetMQFrame service = reply.Pop(); // [service name or 'mmi.service'] <- [reply] OR [return code]
 
             if (service.ConvertToString() != serviceName)
             {

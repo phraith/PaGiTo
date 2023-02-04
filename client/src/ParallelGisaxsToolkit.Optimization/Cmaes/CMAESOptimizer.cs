@@ -71,7 +71,7 @@ namespace ParallelGisaxsToolkit.Optimization.Cmaes
                 _cma.Tell(solutions);
                 if (_cma.ShouldStop())
                 {
-                    foreach (var solution in solutions)
+                    foreach (Solution solution in solutions)
                     {
                         Console.WriteLine($"{solution.Fitness} | {string.Join(',', solution.Parameters)}");
                     }

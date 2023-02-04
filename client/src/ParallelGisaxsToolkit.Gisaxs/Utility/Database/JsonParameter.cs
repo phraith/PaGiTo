@@ -15,7 +15,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Utility.Database
 
         public void AddParameter(IDbCommand command, string name)
         {
-            var parameter = new NpgsqlParameter(name, NpgsqlDbType.Jsonb)
+            NpgsqlParameter parameter = new NpgsqlParameter(name, NpgsqlDbType.Jsonb)
             {
                 Value = _value
             };
