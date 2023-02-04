@@ -12,12 +12,12 @@ import Sample from "../Sample/Sample";
 import { Coordinate, LineMode, LineProfile, LineProfileState } from "../../utility/LineProfile";
 import ImageTable from "./ImageTable";
 import { Button } from "@mui/material";
-import LineProfileGraphVx from "./LineProfileGraphVx";
+// import LineProfileGraphVx from "./LineProfileGraphVx";
 import { ImageInfo } from "../../utility/ImageInfo";
 import { MessageHubConnectionProvider } from "../../utility/MessageHubConnectionProvider";
 import ColormapSelect from "../Colormap";
 import ScatterImageWithLineprofile from "../ScatterImage/ScatterImageWithLineprofile";
-
+import LineProfileGraph from "./LineProfileGraphECharts";
 
 const Fitting = () => {
     const getLineprofiles = (hash: any) => {
@@ -34,7 +34,7 @@ const Fitting = () => {
                 let json = JSON.parse(data.response)
                 let traces = []
                 let values = json.numericResults[0].modifiedData
-                let k = values.map((x: number, index: number) => { return { x: index, y: x } })
+                let k = values.map((x: number, index: number) => { return [index, x] })
                 traces.push(k)
                 setSimulatedPlotData(traces[0])
             })
@@ -135,14 +135,14 @@ const Fitting = () => {
             .then((data) => {
                 let traces = []
                 let values = data.modifiedData
-                let k = values.map((x: number, index: number) => { return { x: index, y: x } })
+                let k = values.map((x: number, index: number) => { return [index, x]})
                 traces.push(k)
                 console.log(traces)
                 setRealPlotData(traces[0])
             })
 
 
-    }, 250));
+    }, 50));
 
     useEffect(() => {
         let jsonConfigForSimulation = JSON.stringify({
@@ -282,14 +282,19 @@ const Fitting = () => {
                 </Grid>
                 <Grid item xs={12} sm={12} md={12} lg={4}>
                     <Box display="flex" sx={{ flexDirection: "column", gap: 2, padding: 10 }}>
-                        <Box display="flex" sx={{ paddingBottom: 1 }}>
-                            {!openTable &&
-                                <LineProfileGraphVx simulatedData={simulatedPlotData} realData={realPlotData}  ></LineProfileGraphVx>
-                            }
-                            {openTable &&
+
+                        {!openTable &&
+                            <Box sx={{ height: "100%", width: "100%" }}>
+                                <LineProfileGraph simulatedData={simulatedPlotData} realData={realPlotData}/>
+
+                                {/* <LineProfileGraphVx simulatedData={simulatedPlotData} realData={realPlotData} /> */}
+                            </Box>
+                        }
+                        {openTable &&
+                            <Box sx={{ width: "100%", height: "100%" }}>
                                 <ImageTable setImageInfo={(updatedImageInfo: ImageInfo) => { console.log(updatedImageInfo); setImageInfo(updatedImageInfo) }} />
-                            }
-                        </Box>
+                            </Box>
+                        }
                         <Box display="flex" sx={{ paddingBottom: 1, gap: 2 }}>
                             <Instrumentation jsonCallback={jsonCallback} initialResX={imageInfo.width} initialResY={imageInfo.height} />
                             <UnitcellMeta jsonCallback={jsonCallback} />
