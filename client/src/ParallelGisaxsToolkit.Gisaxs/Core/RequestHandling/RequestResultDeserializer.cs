@@ -13,8 +13,8 @@ public class RequestResultDeserializer : IRequestResultDeserializer
             return new RequestData(Array.Empty<JpegResult>(), Array.Empty<NumericResult>(), fitness);
         }
 
-        List<JpegResult>? jpegResults = new List<JpegResult>();
-        List<NumericResult>? numericResults = new List<NumericResult>();
+        List<JpegResult>? jpegResults = new();
+        List<NumericResult>? numericResults = new();
 
         int currentBytePosition = 0;
         while (currentBytePosition < bytes.Length)
@@ -42,7 +42,7 @@ public class RequestResultDeserializer : IRequestResultDeserializer
 
             int expectedByteCount = width * height * valueByteCount;
 
-            var data = bytes[currentBytePosition..(currentBytePosition + expectedByteCount)];
+            byte[] data = bytes[currentBytePosition..(currentBytePosition + expectedByteCount)];
             if (valueByteCount == sizeof(byte))
             {
                 if (colormap == null)
@@ -51,14 +51,14 @@ public class RequestResultDeserializer : IRequestResultDeserializer
                 }
 
                 string modifiedData = AppearanceModifier.ApplyColorMap(data, width, height, true, colormap);
-                var jpegResult = new JpegResult(modifiedData, width, height);
+                JpegResult jpegResult = new JpegResult(modifiedData, width, height);
                 jpegResults.Add(jpegResult);
             }
             else if (valueByteCount == sizeof(double))
             {
                 double[] samples = new double[width * height];
                 Buffer.BlockCopy(data, 0, samples, 0, data.Length);
-                var numericResult = new NumericResult(samples.Select(x => Math.Log(x + 1)).ToArray(), width, height);
+                NumericResult numericResult = new NumericResult(samples.Select(x => Math.Log(x + 1)).ToArray(), width, height);
                 numericResults.Add(numericResult);
             }
             else

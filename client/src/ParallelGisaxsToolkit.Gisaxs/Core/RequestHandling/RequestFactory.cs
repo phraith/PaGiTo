@@ -26,12 +26,12 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling
                 return null;
             }
 
-            if (!TryExtract<MetaInformation>(jsonObject, "meta", out var metaInformation))
+            if (!TryExtract<MetaInformation>(jsonObject, "meta", out MetaInformation? metaInformation))
             {
                 return null;
             }
 
-            if (!TryExtract<JobProperties>(jsonObject, "properties", out var jobProperties))
+            if (!TryExtract<JobProperties>(jsonObject, "properties", out JobProperties? jobProperties))
             {
                 return null;
             }
@@ -45,8 +45,8 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling
 
             jsonObject.Add("clientId", clientId);
             jsonObject.Add("jobId", jobHash);
-            var requestInformation = new RequestInformation(jobProperties, metaInformation);
-            var updatedRequest = jsonObject.ToJsonString();
+            RequestInformation requestInformation = new RequestInformation(jobProperties, metaInformation);
+            string updatedRequest = jsonObject.ToJsonString();
             return new Request(clientId, jobHash, Guid.NewGuid().ToString(), requestInformation, updatedRequest, imageData);
         }
 
@@ -59,7 +59,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling
 
             List<byte> bytes = new();
             IReadOnlyList<SimulationTarget> simulationTargets = jobProperties.SimulationTargets;
-            var binarySimulationTargetCount = BitConverter.GetBytes(simulationTargets.Count);
+            byte[] binarySimulationTargetCount = BitConverter.GetBytes(simulationTargets.Count);
             bytes.AddRange(binarySimulationTargetCount);
 
             foreach (SimulationTarget simulationTarget in simulationTargets)
@@ -76,7 +76,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling
         private static bool TryExtract<T>(JsonObject jsonObject, string jsonFieldName,
             [NotNullWhen(true)] out T? extracted) where T : class
         {
-            var options = new JsonSerializerOptions
+            JsonSerializerOptions options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             };
@@ -107,8 +107,8 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling
 
         private async Task<byte[]> ProfileFromStore(SimulationTarget simulationTarget, long id)
         {
-            var start = simulationTarget.Start;
-            var end = simulationTarget.End;
+            DetectorPosition start = simulationTarget.Start;
+            DetectorPosition end = simulationTarget.End;
 
             if (start.X == 0 && start.Y == end.Y)
             {

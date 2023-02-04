@@ -111,8 +111,8 @@ public class RabbitMqService : IProducer
 
         string? colormap = request.RequestInformation.MetaInformation.Colormap;
 
-        var resultData = _requestResultDeserializer.Deserialize(contentFrameData, colormap);
-        var serialized = JsonSerializer.Serialize(
+        RequestData resultData = _requestResultDeserializer.Deserialize(contentFrameData, colormap);
+        string serialized = JsonSerializer.Serialize(
             resultData, new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -121,9 +121,4 @@ public class RabbitMqService : IProducer
         _redisClient.StringSet(request.JobId, serialized);
         return new RequestResult(request.JobId, request.RequestInformation.MetaInformation.Notification);
     }
-}
-
-public interface IProducer
-{
-    void Produce(Request request);
 }

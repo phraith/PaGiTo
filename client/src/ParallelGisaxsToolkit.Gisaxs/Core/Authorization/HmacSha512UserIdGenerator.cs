@@ -14,7 +14,7 @@ public class HmacSha512UserIdGenerator : IUserIdGenerator
 
     public long Generate(string username)
     {
-        var hash = _userIdGenerator.ComputeHash(Encoding.UTF8.GetBytes(username));
+        byte[] hash = _userIdGenerator.ComputeHash(Encoding.UTF8.GetBytes(username));
         return BitConverter.ToInt64(hash);
     }
 }

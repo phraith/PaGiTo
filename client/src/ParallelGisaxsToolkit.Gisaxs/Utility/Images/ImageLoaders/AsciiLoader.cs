@@ -15,10 +15,10 @@
             double[] imageDataTransposed = new double[imageData.Count];
             for (int i = 0; i < width * height; i++)
             {
-                var mWidth = i % width;
-                var dWidth = i / width;
+                int mWidth = i % width;
+                int dWidth = i / width;
 
-                var newIndex = mWidth * height + dWidth;
+                int newIndex = mWidth * height + dWidth;
                 imageDataTransposed[newIndex] = imageData[i];
             }
             

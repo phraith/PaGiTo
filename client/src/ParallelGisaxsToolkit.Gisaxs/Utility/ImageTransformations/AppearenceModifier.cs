@@ -34,15 +34,15 @@ namespace ParallelGisaxsToolkit.Gisaxs.Utility.ImageTransformations
 
         public static (byte r, byte g, byte b) ColorValue(string colormapName, byte dataPoint)
         {
-            var (rValues, gValues, bValues) = DataMapping[colormapName.ToLower()];
+            (float[] rValues, float[] gValues, float[] bValues) = DataMapping[colormapName.ToLower()];
             return ColorValue(rValues, gValues, bValues, dataPoint);
         }
 
         private static (byte r, byte g, byte b) ColorValue(float[] rValues, float[] gValues, float[] bValues, byte dataPoint)
         {
-            var interpolatedR = LinearInterpolate(dataPoint, rValues);
-            var interpolatedG = LinearInterpolate(dataPoint, gValues);
-            var interpolatedB = LinearInterpolate(dataPoint, bValues);
+            double interpolatedR = LinearInterpolate(dataPoint, rValues);
+            double interpolatedG = LinearInterpolate(dataPoint, gValues);
+            double interpolatedB = LinearInterpolate(dataPoint, bValues);
 
             byte r = BitConverter.GetBytes((int)(interpolatedR * 255.0)).First();
             byte g = BitConverter.GetBytes((int)(interpolatedG * 255.0)).First();
@@ -53,7 +53,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Utility.ImageTransformations
 
         private static double LinearInterpolate(byte dataPoint, float[] data)
         {
-            var scaleFactor = data.Length / 256.0;
+            double scaleFactor = data.Length / 256.0;
 
             int unscaledIndex = dataPoint;
             double t = unscaledIndex * scaleFactor;
@@ -80,19 +80,19 @@ namespace ParallelGisaxsToolkit.Gisaxs.Utility.ImageTransformations
         {
             Image<Rgb24>? coloredImage = image.CloneAs<Rgb24>();
             
-            var (rValues, gValues, bValues) = ColormapValueProvider.DataMapping[colormapName.ToLower()];
+            (float[] rValues, float[] gValues, float[] bValues) = ColormapValueProvider.DataMapping[colormapName.ToLower()];
             
             coloredImage.Mutate(c => c.ProcessPixelRowsAsVector4(row =>
             {
                 for (int x = 0; x < row.Length; x++)
                 {
-                    var first = row[x][0];
+                    float first = row[x][0];
                     int index = (int)Math.Floor(first * rValues.Length);
                     index = Math.Min(rValues.Length - 1, index);
                     
-                    var r = rValues[index];
-                    var g = gValues[index];
-                    var b = bValues[index];
+                    float r = rValues[index];
+                    float g = gValues[index];
+                    float b = bValues[index];
                     
                     row[x] = new Vector4(r, g, b, 1);
                 }
@@ -112,7 +112,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Utility.ImageTransformations
                 image.Mutate(x => x.Rotate(RotateMode.Rotate180));
             }
             Image<Rgb24> newImage = image.ApplyColormap(colormapTypeName);
-            var res = newImage.ToBase64String(JpegFormat.Instance);
+            string? res = newImage.ToBase64String(JpegFormat.Instance);
             return res;
         }
     }

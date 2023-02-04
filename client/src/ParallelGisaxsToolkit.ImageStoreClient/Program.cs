@@ -2,7 +2,7 @@
 
 using ParallelGisaxsToolkit.ImageStoreClient.CommandLineInterface.Commands;
 
-var app = new CommandApp();
+CommandApp app = new CommandApp();
 app.Configure(config =>
 {
     config.CaseSensitivity(CaseSensitivity.None);

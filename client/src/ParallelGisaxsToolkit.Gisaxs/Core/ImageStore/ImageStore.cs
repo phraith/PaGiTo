@@ -59,7 +59,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.ImageStore
         public async Task Insert(IEnumerable<Image> images)
         {
             using IDbTransaction transaction = _connection.BeginTransaction();
-            foreach (var image in images)
+            foreach (Image image in images)
             {
                 await _connection.ExecuteAsync($@"
                         INSERT INTO images (info, rowWiseData, columnWiseData, greyScaleData)
@@ -88,7 +88,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.ImageStore
                 return Array.Empty<double>();
             }
 
-            var dataSlices = dataSliceEnumerator.ToArray();
+            double[][] dataSlices = dataSliceEnumerator.ToArray();
             if (dataSlices.Length != 1 || dataSlices[0].Length != width)
             {
                 return Array.Empty<double>();
@@ -110,7 +110,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.ImageStore
                 return Array.Empty<double>();
             }
 
-            var dataSlices = dataSliceEnumerator.ToArray();
+            double[][] dataSlices = dataSliceEnumerator.ToArray();
             if (dataSlices.Length != 1 || dataSlices[0].Length != height)
             {
                 return Array.Empty<double>();
