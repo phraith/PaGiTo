@@ -20,18 +20,16 @@ public class RegisterEndpoint : Endpoint<RegisterRequest, RegisterResponse>
 
     public override async Task HandleAsync(RegisterRequest request, CancellationToken ct)
     {
-        (long userId, byte[] passwordHash, byte[] passwordSalt) =
-            _authorizationHandler.CreatePasswordHash(request.Password, request.Username);
+        User user = _authorizationHandler.CreateUser(request.Username, request.Password);
 
         IEnumerable<User> users = await _userStore.Get();
-        if (users.Any(u => u.UserId == userId))
+        if (users.Any(u => u.UserId == user.UserId))
         {
             throw new InvalidOperationException("User already exists!");
         }
 
-        User user = new(userId, passwordSalt, passwordHash);
         await _userStore.Insert(user);
-        await SendAsync(new RegisterResponse(user.UserId, passwordHash, passwordSalt), cancellation: ct);
+        await SendAsync(new RegisterResponse(user.UserId, user.PasswordHash, user.PasswordSalt), cancellation: ct);
     }
 }
 

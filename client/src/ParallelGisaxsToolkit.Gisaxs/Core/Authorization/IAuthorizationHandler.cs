@@ -4,9 +4,9 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.Authorization
 {
     public interface IAuthorizationHandler
     {
-        (long userId, byte[] passwordHash, byte[] passwordSalt) CreatePasswordHash(string password, string username);
+        User CreateUser(string username, string password);
         string CreateJwtToken(User user);
-        bool VerifyPasswordHash(User user, string password);
+        bool VerifyPassword(User user, string password);
         long CreateUserId(string username);
     }
 }

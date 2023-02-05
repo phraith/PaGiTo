@@ -38,18 +38,18 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.Authorization
             return jwt;
         }
 
-        public bool VerifyPasswordHash(User user, string password)
+        public bool VerifyPassword(User user, string password)
         {
             using HMACSHA512 hmac = new HMACSHA512(user.PasswordSalt.ToArray());
             byte[] passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
             return passwordHash.SequenceEqual(user.PasswordHash);
         }
 
-        public (long userId, byte[] passwordHash, byte[] passwordSalt) CreatePasswordHash(string password,
-            string username)
+        public User CreateUser(string username, string password)
         {
             using HMACSHA512 hmac = new HMACSHA512();
-            return (_userIdGenerator.Generate(username), hmac.ComputeHash(Encoding.UTF8.GetBytes(password)), hmac.Key);
+            return new User(_userIdGenerator.Generate(username), hmac.Key,
+                hmac.ComputeHash(Encoding.UTF8.GetBytes(password)));
         }
 
         public long CreateUserId(string username)
