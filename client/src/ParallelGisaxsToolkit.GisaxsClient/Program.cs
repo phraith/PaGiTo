@@ -66,7 +66,6 @@ try
 
     builder.Services.AddSingleton<IHashComputer, Sha256HashComputer>();
     builder.Services.AddSingleton<IRequestHandler, MajordomoRequestHandler>();
-    // builder.Services.AddSingleton<IJobScheduler, JobScheduler>();
 
     builder.Services.AddLogging(x =>
     {
@@ -83,7 +82,7 @@ try
                 throw new InvalidOperationException("ConnectionStrings do not exist!");
             }
 
-            IUserIdGenerator userIdGenerator = provider.GetService<IUserIdGenerator>();
+            IUserIdGenerator? userIdGenerator = provider.GetService<IUserIdGenerator>();
             if (userIdGenerator == null)
             {
                 throw new InvalidOperationException("UserIdGenerator does not exist!");

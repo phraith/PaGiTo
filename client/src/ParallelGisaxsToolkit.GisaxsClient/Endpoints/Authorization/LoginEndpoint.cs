@@ -29,7 +29,7 @@ public class LoginEndpoint : Endpoint<LoginRequest, LoginResponse>
         }
 
         User matchingUser = matchingUsers[0];
-        if (!_authorizationHandler.VerifyPasswordHash(matchingUser, request.Password))
+        if (!_authorizationHandler.VerifyPassword(matchingUser, request.Password))
         {
             throw new InvalidOperationException("Password is incorrect!");
         }
