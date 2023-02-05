@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Http.Json;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using ParallelGisaxsToolkit.Gisaxs.Configuration;
-using ParallelGisaxsToolkit.Gisaxs.Core;
 using ParallelGisaxsToolkit.Gisaxs.Core.Authorization;
 using ParallelGisaxsToolkit.Gisaxs.Core.Hubs;
 using ParallelGisaxsToolkit.Gisaxs.Core.ImageStore;
@@ -19,7 +18,7 @@ using ParallelGisaxsToolkit.Gisaxs.Core.UserStore;
 using ParallelGisaxsToolkit.Gisaxs.Utility.HashComputer;
 using ParallelGisaxsToolkit.GisaxsClient;
 using ParallelGisaxsToolkit.GisaxsClient.Configuration;
-using ParallelGisaxsToolkit.GisaxsClient.Endpoints.Jobs;
+using RabbitMQ.Client;
 using Serilog;
 using Serilog.Events;
 using StackExchange.Redis;
@@ -91,6 +90,18 @@ try
             return new AuthorizationHandler(authConfig.CurrentValue.Token, userIdGenerator);
         });
 
+    builder.Services.AddSingleton<IConnection>(provider =>
+    {
+        IOptionsMonitor<ConnectionStrings>? connectionStrings = provider.GetService<IOptionsMonitor<ConnectionStrings>>();
+        if (connectionStrings == null)
+        {
+            throw new InvalidOperationException("ConnectionStrings do not exist!");
+        }
+        
+        ConnectionFactory factory = new ConnectionFactory() { HostName = connectionStrings.CurrentValue.RabbitMq };
+        return factory.CreateConnection();
+    });
+    
     builder.Services.AddSingleton<IDatabase>(provider =>
     {
         IOptionsMonitor<ConnectionStrings>? connectionStrings = provider.GetService<IOptionsMonitor<ConnectionStrings>>();
@@ -103,7 +114,7 @@ try
         return multiplexer.GetDatabase();
     });
 
-    builder.Services.AddSingleton<IProducer, RabbitMqService>();
+    builder.Services.AddSingleton<IGisaxsService, RabbitMqService>();
     
     builder.Services.AddScoped<IDbConnection>(provider =>
     {

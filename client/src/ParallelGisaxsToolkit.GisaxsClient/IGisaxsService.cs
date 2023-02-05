@@ -2,7 +2,7 @@
 
 namespace ParallelGisaxsToolkit.GisaxsClient;
 
-public interface IProducer
+public interface IGisaxsService
 {
-    void Produce(Request request);
+    void Issue(Request request);
 }
