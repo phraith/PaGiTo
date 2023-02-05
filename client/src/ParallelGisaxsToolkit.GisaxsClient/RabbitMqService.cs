@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Options;
 using ParallelGisaxsToolkit.Gisaxs.Configuration;
 using ParallelGisaxsToolkit.Gisaxs.Core.Hubs;
 using ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling;
@@ -12,7 +11,7 @@ using StackExchange.Redis;
 
 namespace ParallelGisaxsToolkit.GisaxsClient;
 
-public class RabbitMqService : IProducer
+public class RabbitMqService : IGisaxsService
 {
     private readonly IHubContext<MessageHub> _notificationHub;
     private readonly IDatabase _redisClient;
@@ -20,70 +19,38 @@ public class RabbitMqService : IProducer
     private readonly Guid _guid;
     private readonly ConcurrentDictionary<string, Request?> _trackedJobs;
     private readonly IRequestResultDeserializer _requestResultDeserializer;
-    private readonly IModel _consumerChannel;
-    private readonly EventingBasicConsumer _consumer;
 
-    public RabbitMqService(IOptionsMonitor<ConnectionStrings> connectionStrings,
+    public RabbitMqService(IConnection connection,
         IHubContext<MessageHub> notificationHub, IDatabase redisClient)
     {
         _trackedJobs = new ConcurrentDictionary<string, Request?>();
         _requestResultDeserializer = new RequestResultDeserializer();
-        ConnectionFactory factory = new ConnectionFactory() { HostName = connectionStrings.CurrentValue.RabbitMq };
-        IConnection connection = factory.CreateConnection();
-        _producerChannel = connection.CreateModel();
-        _consumerChannel = connection.CreateModel();
         _guid = Guid.NewGuid();
-        
         _notificationHub = notificationHub;
         _redisClient = redisClient;
-        
-        _producerChannel.QueueDeclare(queue: $"{JobType.Simulation}",
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null);
 
-        _producerChannel.QueueDeclare(queue: $"{JobType.Fitting}",
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null);
+        _producerChannel = CreateProducerModel(connection);
+        IModel consumerChannel = CreateConsumerModel(connection, _guid.ToString());
 
-        _consumerChannel.QueueDeclare(queue: $"{_guid}",
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null);
+        EventingBasicConsumer consumer = new EventingBasicConsumer(consumerChannel);
+        consumer.Received += EventConsume;
 
-
-        _consumer = new EventingBasicConsumer(_consumerChannel);
-
-        _consumer.Received += (model, ea) =>
-        {
-            if (!_trackedJobs.TryRemove(ea.BasicProperties.CorrelationId, out Request? request))
-            {
-                throw new InvalidOperationException(
-                    $"Unexpected message with correlation id {ea.BasicProperties.CorrelationId} received!");
-            }
-
-            byte[] body = ea.Body.ToArray();
-
-            RequestResult? result = HandleResult(body, request!);
-            if (result != null)
-            {
-                _notificationHub.Clients.Group(request!.ClientId).SendAsync(result.Notification, result.JobId).GetAwaiter().GetResult();
-            }
-        };
-
-        _consumerChannel.BasicConsume(
-            queue: $"{_guid}",
+        consumerChannel.BasicConsume(
+            queue: _guid.ToString(),
             autoAck: true,
-            consumer: _consumer
+            consumer: consumer
         );
     }
 
-    public void Produce(Request request)
+    public void Issue(Request request)
     {
+        byte[]? cachedResponse = _redisClient.StringGet(request.JobHash);
+        if (cachedResponse != null)
+        {
+            Consume(request, cachedResponse);
+            return;
+        }
+
         IBasicProperties properties = _producerChannel.CreateBasicProperties();
         properties.ReplyTo = _guid.ToString();
         properties.CorrelationId = request.JobId;
@@ -102,13 +69,64 @@ public class RabbitMqService : IProducer
             body: message);
     }
 
-    private RequestResult? HandleResult(byte[] contentFrameData, Request request)
+    private void Consume(Request request, byte[] response)
     {
-        if (contentFrameData.Length <= 0)
+        if (response.Length <= 0)
         {
-            return null;
+            throw new InvalidDataException("Response was empty!");
         }
 
+        _redisClient.StringSet(request.JobHash, response);
+
+        RequestResult result = HandleResult(response, request!);
+        _notificationHub.Clients.Group(request!.ClientId).SendAsync(result.Notification, result.JobId).GetAwaiter()
+            .GetResult();
+    }
+
+    private void EventConsume(object? model, BasicDeliverEventArgs deliverEventArgs)
+    {
+        string jobId = deliverEventArgs.BasicProperties.CorrelationId;
+        if (!_trackedJobs.TryRemove(jobId, out Request? request) || request == null)
+        {
+            throw new InvalidOperationException(
+                $"Unexpected message with correlation id {jobId} received!");
+        }
+
+        Consume(request, deliverEventArgs.Body.ToArray());
+    }
+
+    private static IModel CreateProducerModel(IConnection connection)
+    {
+        IModel producerChannel = connection.CreateModel();
+        producerChannel.QueueDeclare(queue: $"{JobType.Simulation}",
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: null);
+
+        producerChannel.QueueDeclare(queue: $"{JobType.Fitting}",
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: null);
+
+        return producerChannel;
+    }
+
+    private static IModel CreateConsumerModel(IConnection connection, string queueName)
+    {
+        IModel consumerChannel = connection.CreateModel();
+        consumerChannel.QueueDeclare(queue: queueName,
+            durable: true,
+            exclusive: false,
+            autoDelete: true,
+            arguments: null);
+
+        return consumerChannel;
+    }
+
+    private RequestResult HandleResult(byte[] contentFrameData, Request request)
+    {
         string? colormap = request.RequestInformation.MetaInformation.Colormap;
 
         RequestData resultData = _requestResultDeserializer.Deserialize(contentFrameData, colormap);
@@ -119,6 +137,7 @@ public class RabbitMqService : IProducer
             });
 
         _redisClient.StringSet(request.JobId, serialized);
+
         return new RequestResult(request.JobId, request.RequestInformation.MetaInformation.Notification);
     }
 }

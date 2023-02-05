@@ -1,7 +1,6 @@
 ﻿using System.Security.Claims;
 using FastEndpoints;
 using Microsoft.AspNetCore.Authorization;
-using ParallelGisaxsToolkit.Gisaxs.Core;
 using ParallelGisaxsToolkit.Gisaxs.Core.ImageStore;
 using ParallelGisaxsToolkit.Gisaxs.Core.JobStore;
 using ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling;
@@ -15,15 +14,15 @@ public class PostJobEndpoint : Endpoint<PostJobRequest, PostJobResponse>
 {
     private readonly IImageStore _imageStore;
     private readonly IJobStore _jobStore;
-    private readonly IProducer _producer;
+    private readonly IGisaxsService _gisaxsService;
     private readonly IHashComputer _hashComputer;
 
     public PostJobEndpoint(IImageStore imageStore, IHashComputer hashComputer, IJobStore jobStore,
-        IProducer producer)
+        IGisaxsService gisaxsService)
     {
         _imageStore = imageStore;
         _jobStore = jobStore;
-        _producer = producer;
+        _gisaxsService = gisaxsService;
         _hashComputer = hashComputer;
     }
 
@@ -43,7 +42,7 @@ public class PostJobEndpoint : Endpoint<PostJobRequest, PostJobResponse>
         }
 
         await _jobStore.Insert(new Job(new JobInfo(req.JsonConfig), null, clientId));
-        _producer.Produce(request);
+        _gisaxsService.Issue(request);
         await SendAsync(new PostJobResponse(request.JobHash), 201, ct);
     }
 }
