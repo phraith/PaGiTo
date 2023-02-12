@@ -68,13 +68,14 @@ void RabbitMqClient::Run() {
 
         amqp_basic_properties_t props;
         props._flags = AMQP_BASIC_CONTENT_TYPE_FLAG |
+                        AMQP_BASIC_HEADERS_FLAG |
                        AMQP_BASIC_DELIVERY_MODE_FLAG |
                        AMQP_BASIC_CORRELATION_ID_FLAG;
 
         props.correlation_id = envelope.message.properties.correlation_id;
         props.content_type = amqp_cstring_bytes("text/plain");
         props.delivery_mode = 2; /* persistent delivery mode */
-
+        props.headers = envelope.message.properties.headers;
         amqp_bytes_t result_bytes{result.data.size(), &result.data[0]};
         int publish_result = amqp_basic_publish(connection_, 2, amqp_cstring_bytes(""),
                                                 envelope.message.properties.reply_to, 1, 0, &props,
@@ -130,8 +131,7 @@ void RabbitMqClient::SetUpConnection() {
         auto user = std::getenv("RABBITMQ_USER");
         auto password = std::getenv("RABBITMQ_PASSWORD");
 
-        if (user == nullptr || password == nullptr)
-        {
+        if (user == nullptr || password == nullptr) {
             spdlog::error("RABBITMQ_USER or RABBITMQ_PASSWORD are not set...");
             continue;
         }
