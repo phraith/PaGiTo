@@ -2,9 +2,9 @@
 
 public interface IJobStore
 {
-    Task<IEnumerable<JobInfoWithId>> Get();
-    Task<Job?> Get(long id);
-    Task Delete(long id);
+    Task<IEnumerable<Job>> Get();
+    Task<Job?> Get(long jobId);
+    Task Delete(long jobId);
     Task Insert(Job job);
     Task Insert(IReadOnlyCollection<Job> jobs);
 }

@@ -1,36 +1,37 @@
 ﻿using FastEndpoints;
 using Microsoft.AspNetCore.Authorization;
+using ParallelGisaxsToolkit.Gisaxs.Core.ResultStore;
 using StackExchange.Redis;
 
 namespace ParallelGisaxsToolkit.GisaxsClient.Endpoints.Jobs;
 
 [Authorize]
-[HttpGet("/api/job/{id}")]
+[HttpGet("/api/job/{jobId}")]
 public class GetJobEndpoint : Endpoint<GetJobRequest, GetJobResponse>
 {
-    private readonly IDatabase _redisClient;
+    private readonly IResultStore _resultStore;
 
-    public GetJobEndpoint(IDatabase redisClient)
+    public GetJobEndpoint(IResultStore resultStore)
     {
-        _redisClient = redisClient;
+        _resultStore = resultStore;
     }
 
     public override async Task HandleAsync(GetJobRequest req, CancellationToken ct)
     {
-        string? result = await _redisClient.StringGetAsync(req.Id.ToString());
+        Result? result = await _resultStore.Get(req.JobId);
 
         if (result == null)
         {
             throw new InvalidOperationException("Job result does not exist!");
         }
         
-        await SendAsync(new GetJobResponse(result), cancellation: ct);
+        await SendAsync(new GetJobResponse(result.Data), cancellation: ct);
     }
 }
 
 public record GetJobResponse(string Response);
 
-public record GetJobRequest(string Id)
+public record GetJobRequest(string JobId)
 {
     public GetJobRequest() : this(string.Empty)
     {

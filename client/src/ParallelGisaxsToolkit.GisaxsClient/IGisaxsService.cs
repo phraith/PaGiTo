@@ -2,7 +2,7 @@
 
 namespace ParallelGisaxsToolkit.GisaxsClient;
 
-public interface IGisaxsService
-{
-    void Issue(Request request);
-}
+// public interface IGisaxsService
+// {
+//     void Issue(Request request);
+// }

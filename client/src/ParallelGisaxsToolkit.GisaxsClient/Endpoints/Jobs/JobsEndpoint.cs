@@ -17,9 +17,9 @@ public class JobsEndpoint : EndpointWithoutRequest<JobsResponse>
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        IEnumerable<JobInfoWithId> jobs = await _jobStore.Get();
+        IEnumerable<Job> jobs = await _jobStore.Get();
         await SendAsync(new JobsResponse(jobs), cancellation: ct);
     }
 }
 
-public record JobsResponse(IEnumerable<JobInfoWithId> JobInfosWithId);
+public record JobsResponse(IEnumerable<Job> Jobs);
