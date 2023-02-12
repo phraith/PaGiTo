@@ -14,15 +14,15 @@ public class PostJobEndpoint : Endpoint<PostJobRequest, PostJobResponse>
 {
     private readonly IImageStore _imageStore;
     private readonly IJobStore _jobStore;
-    private readonly IGisaxsService _gisaxsService;
+    private readonly IRabbitMqPublisher _publisher;
     private readonly IHashComputer _hashComputer;
 
     public PostJobEndpoint(IImageStore imageStore, IHashComputer hashComputer, IJobStore jobStore,
-        IGisaxsService gisaxsService)
+        IRabbitMqPublisher publisher)
     {
         _imageStore = imageStore;
         _jobStore = jobStore;
-        _gisaxsService = gisaxsService;
+        _publisher = publisher;
         _hashComputer = hashComputer;
     }
 
@@ -41,13 +41,13 @@ public class PostJobEndpoint : Endpoint<PostJobRequest, PostJobResponse>
             throw new InvalidOperationException("Request creation failed!");
         }
 
-        await _jobStore.Insert(new Job(new JobInfo(req.JsonConfig), null, clientId));
-        _gisaxsService.Issue(request);
-        await SendAsync(new PostJobResponse(request.JobHash), 201, ct);
+        await _jobStore.Insert(new Job(req.JsonConfig, request.JobId, clientId));
+        await _publisher.Publish(request);
+        await SendAsync(new PostJobResponse(request.JobId), 201, ct);
     }
 }
 
-public record PostJobResponse(string JobHash);
+public record PostJobResponse(string JobId);
 
 public record PostJobRequest(string JsonConfig)
 {

@@ -14,6 +14,7 @@ using ParallelGisaxsToolkit.Gisaxs.Core.Hubs;
 using ParallelGisaxsToolkit.Gisaxs.Core.ImageStore;
 using ParallelGisaxsToolkit.Gisaxs.Core.JobStore;
 using ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling;
+using ParallelGisaxsToolkit.Gisaxs.Core.ResultStore;
 using ParallelGisaxsToolkit.Gisaxs.Core.UserStore;
 using ParallelGisaxsToolkit.Gisaxs.Utility.HashComputer;
 using ParallelGisaxsToolkit.GisaxsClient;
@@ -48,7 +49,7 @@ try
     }
 
     builder.Configuration.AddPlaceholderResolver();
-    
+
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerDoc();
     builder.Services.AddFastEndpoints();
@@ -61,10 +62,15 @@ try
     builder.Services.AddScoped<IJobStore, JobStore>();
     builder.Services.AddScoped<IRequestFactory, RequestFactory>();
     builder.Services.AddScoped<IUserStore, UserStore>();
+    builder.Services.AddScoped<IResultStore, ResultStore>();
     builder.Services.AddSingleton<IUserIdGenerator, HmacSha512UserIdGenerator>();
-
     builder.Services.AddSingleton<IHashComputer, Sha256HashComputer>();
-    builder.Services.AddSingleton<IRequestHandler, MajordomoRequestHandler>();
+    builder.Services.AddSingleton<IRequestResultDeserializer, RequestResultDeserializer>();
+    // builder.Services.AddSingleton<IRequestHandler, MajordomoRequestHandler>();
+
+    builder.Services.AddScoped<IRabbitMqPublisher, RabbitMqPublisher>();
+    builder.Services.AddHostedService<RabbitMqConsumer>();
+
 
     builder.Services.AddLogging(x =>
     {
@@ -92,19 +98,25 @@ try
 
     builder.Services.AddSingleton<IConnection>(provider =>
     {
-        IOptionsMonitor<ConnectionStrings>? connectionStrings = provider.GetService<IOptionsMonitor<ConnectionStrings>>();
+        IOptionsMonitor<ConnectionStrings>? connectionStrings =
+            provider.GetService<IOptionsMonitor<ConnectionStrings>>();
         if (connectionStrings == null)
         {
             throw new InvalidOperationException("ConnectionStrings do not exist!");
         }
-        
-        ConnectionFactory factory = new ConnectionFactory() { HostName = connectionStrings.CurrentValue.RabbitMq };
+
+        ConnectionFactory factory = new ConnectionFactory()
+        {
+            HostName = connectionStrings.CurrentValue.RabbitMq,
+            DispatchConsumersAsync = true
+        };
         return factory.CreateConnection();
     });
-    
-    builder.Services.AddSingleton<IDatabase>(provider =>
+
+    builder.Services.AddScoped<IDatabase>(provider =>
     {
-        IOptionsMonitor<ConnectionStrings>? connectionStrings = provider.GetService<IOptionsMonitor<ConnectionStrings>>();
+        IOptionsMonitor<ConnectionStrings>? connectionStrings =
+            provider.GetService<IOptionsMonitor<ConnectionStrings>>();
         if (connectionStrings == null)
         {
             throw new InvalidOperationException("ConnectionStrings do not exist!");
@@ -114,11 +126,10 @@ try
         return multiplexer.GetDatabase();
     });
 
-    builder.Services.AddSingleton<IGisaxsService, RabbitMqService>();
-    
     builder.Services.AddScoped<IDbConnection>(provider =>
     {
-        IOptionsMonitor<ConnectionStrings>? connectionStrings = provider.GetService<IOptionsMonitor<ConnectionStrings>>();
+        IOptionsMonitor<ConnectionStrings>? connectionStrings =
+            provider.GetService<IOptionsMonitor<ConnectionStrings>>();
         if (connectionStrings == null)
         {
             throw new InvalidOperationException("ConnectionStrings do not exist!");

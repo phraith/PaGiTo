@@ -1,10 +1,10 @@
 class JobInfo {
     id: number;
-    info: any
+    config: any
     constructor(id: number, info: any)
     {
         this.id = id;
-        this.info = info; 
+        this.config = info; 
     }
 }
 
