@@ -12,7 +12,6 @@ import Sample from "../Sample/Sample";
 import { Coordinate, LineMode, LineProfile, LineProfileState } from "../../utility/LineProfile";
 import ImageTable from "./ImageTable";
 import { Button } from "@mui/material";
-// import LineProfileGraphVx from "./LineProfileGraphVx";
 import { ImageInfo } from "../../utility/ImageInfo";
 import { MessageHubConnectionProvider } from "../../utility/MessageHubConnectionProvider";
 import ColormapSelect from "../Colormap";
@@ -22,6 +21,7 @@ import LineProfileGraph from "./LineProfileGraphECharts";
 const Fitting = () => {
     const getLineprofiles = (hash: any) => {
         const url = `/api/job/${hash}`;
+        console.log(hash)
         fetch(url, {
             method: "GET",
             headers: {
@@ -31,6 +31,7 @@ const Fitting = () => {
         })
             .then((response) => response.json())
             .then((data) => {
+                console.log(data)
                 let json = JSON.parse(data.response)
                 let traces = []
                 let values = json.numericResults[0].modifiedData
@@ -286,8 +287,6 @@ const Fitting = () => {
                         {!openTable &&
                             <Box sx={{ height: "100%", width: "100%" }}>
                                 <LineProfileGraph simulatedData={simulatedPlotData} realData={realPlotData}/>
-
-                                {/* <LineProfileGraphVx simulatedData={simulatedPlotData} realData={realPlotData} /> */}
                             </Box>
                         }
                         {openTable &&

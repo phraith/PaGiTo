@@ -1,6 +1,5 @@
 import MiniDrawer from "../Drawer/MiniDrawer";
 import CssBaseline from "@mui/material/CssBaseline"
-
 import { useEffect, useState } from "react";
 import * as React from "react";
 import Grid from "@mui/material/Grid/Grid";
@@ -10,9 +9,10 @@ import { JsonViewer } from '@textea/json-viewer'
 import Box from "@mui/material/Box/Box";
 import Button from "@mui/material/Button/Button";
 import { MessageHubConnectionProvider } from "../../utility/MessageHubConnectionProvider";
+import Card from "@mui/material/Card/Card";
 
 const Jobs = () => {
-    const [jobInfo, setJobInfo] = React.useState<JobInfo>(new JobInfo(0, "{}"))
+    const [job, setJobInfo] = React.useState<JobInfo>(new JobInfo(0, "{}"))
 
     const receiveJobResult = (message: any) => {
         console.log(message)
@@ -32,7 +32,7 @@ const Jobs = () => {
     }, [hubConnection]);
 
     const sendJob = () => {
-        console.log(jobInfo.info)
+        console.log(job.config)
         const requestOptions = {
             method: 'POST',
             headers: {
@@ -43,7 +43,7 @@ const Jobs = () => {
 
             body: JSON.stringify(
                 {
-                    "jsonConfig": jobInfo.info
+                    "jsonConfig": job.config
                 })
         };
 
@@ -59,11 +59,13 @@ const Jobs = () => {
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={12} md={12} lg={8}>
                     <Box display="flex" sx={{ flexDirection: "column", padding: 10 }}>
-                        <Box display="flex" sx={{ paddingBottom: 1, width: "100%" }}>
-                            <JobsTable setJobsInfo={(updatedJobInfo: JobInfo) => { console.log(updatedJobInfo); setJobInfo(updatedJobInfo) }} />
-                            <Box sx={{ height: 500, overflow: 'auto', paddingLeft: 5, width: "50%" }}>
-                                <JsonViewer value={JSON.parse(jobInfo.info)} />
-                            </Box>
+                        <Box display="flex" sx={{ paddingBottom: 1, gap: 10  }}>
+                            <Card sx={{width: "100%"}}>
+                                <JobsTable setJob={(updatedJobInfo: JobInfo) => { setJobInfo(updatedJobInfo) }} />
+                            </Card>
+                            <Card sx={{width: "100%", height: 500, overflow: 'auto', paddingLeft: 5}}>
+                                    <JsonViewer value={JSON.parse(job.config)} />
+                            </Card>
                         </Box>
                         <Button onClick={sendJob}>
                             Send selected job
