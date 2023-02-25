@@ -1,8 +1,5 @@
 ﻿using System.Text;
 using System.Text.Json;
-using Microsoft.AspNetCore.SignalR;
-using ParallelGisaxsToolkit.Gisaxs.Configuration;
-using ParallelGisaxsToolkit.Gisaxs.Core.Hubs;
 using ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling;
 using ParallelGisaxsToolkit.Gisaxs.Core.ResultStore;
 using RabbitMQ.Client;
@@ -17,20 +14,20 @@ public interface IRabbitMqPublisher
 
 public class RabbitMqPublisher : IRabbitMqPublisher
 {
-    private readonly IHubContext<MessageHub> _notificationHub;
+    private readonly INotifier _notifier;
     private readonly IDatabase _redisClient;
     private readonly IResultStore _resultStore;
     private readonly IRequestResultDeserializer _requestResultDeserializer;
-    private readonly IModel _producerChannel;
+    private readonly IRabbitMqService _rabbitMqService;
 
-    public RabbitMqPublisher(IConnection connection, IHubContext<MessageHub> notificationHub, IDatabase redisClient,
-        IResultStore resultStore, IRequestResultDeserializer requestResultDeserializer)
+    public RabbitMqPublisher(INotifier notifier, IDatabase redisClient,
+        IResultStore resultStore, IRequestResultDeserializer requestResultDeserializer, IRabbitMqService rabbitMqService)
     {
-        _notificationHub = notificationHub;
+        _notifier = notifier;
         _redisClient = redisClient;
         _resultStore = resultStore;
         _requestResultDeserializer = requestResultDeserializer;
-        _producerChannel = CreateProducerModel(connection);
+        _rabbitMqService = rabbitMqService;
     }
 
     public async Task Publish(Request request)
@@ -47,13 +44,13 @@ public class RabbitMqPublisher : IRabbitMqPublisher
                 });
 
             await _resultStore.Insert(new Result(serializedResult, request.JobId, request.ClientId));
-            await _notificationHub.Clients.Group(request!.ClientId)
-                .SendAsync(request.RequestInformation.MetaInformation.Notification, request.JobId);
+            await _notifier.Notify(request!.ClientId, request.RequestInformation.MetaInformation.Notification,
+                request.JobId);
             return;
         }
 
-        IBasicProperties properties = _producerChannel.CreateBasicProperties();
-        properties.ReplyTo = RabbitMqConsumer.ConsumerQueueName.ToString();
+        IBasicProperties properties = _rabbitMqService.PublisherChannel.CreateBasicProperties();
+        properties.ReplyTo = _rabbitMqService.ConsumerQueueName;
         properties.CorrelationId = request.JobId;
         properties.Headers = new Dictionary<string, object>();
         properties.Headers["notification"] = request.RequestInformation.MetaInformation.Notification;
@@ -67,27 +64,11 @@ public class RabbitMqPublisher : IRabbitMqPublisher
 
         byte[] message = Encoding.UTF8.GetBytes(request.RawRequest);
 
-        _producerChannel.BasicPublish(exchange: "",
+        _rabbitMqService.PublisherChannel.BasicPublish(exchange: "",
             routingKey: $"{request.RequestInformation.MetaInformation.Type}",
             basicProperties: properties,
             body: message);
     }
 
-    private static IModel CreateProducerModel(IConnection connection)
-    {
-        IModel producerChannel = connection.CreateModel();
-        producerChannel.QueueDeclare(queue: $"{JobType.Simulation}",
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null);
 
-        producerChannel.QueueDeclare(queue: $"{JobType.Fitting}",
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null);
-
-        return producerChannel;
-    }
 }
