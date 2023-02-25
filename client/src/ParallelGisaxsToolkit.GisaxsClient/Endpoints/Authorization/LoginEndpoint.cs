@@ -1,4 +1,5 @@
-﻿using FastEndpoints;
+﻿using System.ComponentModel.DataAnnotations;
+using FastEndpoints;
 using Microsoft.AspNetCore.Authorization;
 using ParallelGisaxsToolkit.Gisaxs.Core.UserStore;
 using IAuthorizationHandler = ParallelGisaxsToolkit.Gisaxs.Core.Authorization.IAuthorizationHandler;
@@ -39,11 +40,10 @@ public class LoginEndpoint : Endpoint<LoginRequest, LoginResponse>
     }
 }
 
-public record LoginRequest(string Username, string Password)
+public sealed record LoginRequest
 {
-    public LoginRequest() : this(string.Empty, string.Empty)
-    {
-    }
+    [Required] public string Username { get; init; } = string.Empty;
+    [Required] public string Password { get; init; } = string.Empty;
 }
 
-public record LoginResponse(string Token);
+public sealed record LoginResponse(string Token);

@@ -22,4 +22,4 @@ public class ImagesEndpoint: EndpointWithoutRequest<ImagesResponse>
     }
 }
 
-public record ImagesResponse(IEnumerable<ImageInfoWithId> ImageInfosWithId);
+public sealed record ImagesResponse(IEnumerable<ImageInfoWithId> ImageInfosWithId);

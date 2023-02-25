@@ -22,4 +22,4 @@ public class JobsEndpoint : EndpointWithoutRequest<JobsResponse>
     }
 }
 
-public record JobsResponse(IEnumerable<Job> Jobs);
+public sealed record JobsResponse(IEnumerable<Job> Jobs);
