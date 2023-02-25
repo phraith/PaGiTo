@@ -63,13 +63,15 @@ try
     builder.Services.AddScoped<IRequestFactory, RequestFactory>();
     builder.Services.AddScoped<IUserStore, UserStore>();
     builder.Services.AddScoped<IResultStore, ResultStore>();
+    builder.Services.AddScoped<INotifier, MessageHubNotifier>();
     builder.Services.AddSingleton<IUserIdGenerator, HmacSha512UserIdGenerator>();
     builder.Services.AddSingleton<IHashComputer, Sha256HashComputer>();
     builder.Services.AddSingleton<IRequestResultDeserializer, RequestResultDeserializer>();
+    builder.Services.AddSingleton<IRabbitMqService, RabbitMqService>();
     // builder.Services.AddSingleton<IRequestHandler, MajordomoRequestHandler>();
 
-    builder.Services.AddScoped<IRabbitMqPublisher, RabbitMqPublisher>();
     builder.Services.AddHostedService<RabbitMqConsumer>();
+    builder.Services.AddScoped<IRabbitMqPublisher, RabbitMqPublisher>();
 
 
     builder.Services.AddLogging(x =>
@@ -81,47 +83,29 @@ try
     builder.Services
         .AddSingleton<ParallelGisaxsToolkit.Gisaxs.Core.Authorization.IAuthorizationHandler>(provider =>
         {
-            IOptionsMonitor<AuthConfig>? authConfig = provider.GetService<IOptionsMonitor<AuthConfig>>();
-            if (authConfig == null)
-            {
-                throw new InvalidOperationException("ConnectionStrings do not exist!");
-            }
-
-            IUserIdGenerator? userIdGenerator = provider.GetService<IUserIdGenerator>();
-            if (userIdGenerator == null)
-            {
-                throw new InvalidOperationException("UserIdGenerator does not exist!");
-            }
-
+            IOptionsMonitor<AuthConfig> authConfig = provider.GetRequiredService<IOptionsMonitor<AuthConfig>>();
+            IUserIdGenerator userIdGenerator = provider.GetRequiredService<IUserIdGenerator>();
             return new AuthorizationHandler(authConfig.CurrentValue.Token, userIdGenerator);
         });
 
     builder.Services.AddSingleton<IConnection>(provider =>
     {
         IOptionsMonitor<ConnectionStrings>? connectionStrings =
-            provider.GetService<IOptionsMonitor<ConnectionStrings>>();
-        if (connectionStrings == null)
-        {
-            throw new InvalidOperationException("ConnectionStrings do not exist!");
-        }
+            provider.GetRequiredService<IOptionsMonitor<ConnectionStrings>>();
 
         ConnectionFactory factory = new ConnectionFactory()
         {
             HostName = connectionStrings.CurrentValue.RabbitMq,
-            DispatchConsumersAsync = true
+            DispatchConsumersAsync = true,
+            
         };
         return factory.CreateConnection();
     });
 
     builder.Services.AddScoped<IDatabase>(provider =>
     {
-        IOptionsMonitor<ConnectionStrings>? connectionStrings =
-            provider.GetService<IOptionsMonitor<ConnectionStrings>>();
-        if (connectionStrings == null)
-        {
-            throw new InvalidOperationException("ConnectionStrings do not exist!");
-        }
-
+        IOptionsMonitor<ConnectionStrings> connectionStrings =
+            provider.GetRequiredService<IOptionsMonitor<ConnectionStrings>>();
         IConnectionMultiplexer multiplexer = ConnectionMultiplexer.Connect(connectionStrings.CurrentValue.Redis);
         return multiplexer.GetDatabase();
     });
@@ -129,13 +113,7 @@ try
     builder.Services.AddScoped<IDbConnection>(provider =>
     {
         IOptionsMonitor<ConnectionStrings>? connectionStrings =
-            provider.GetService<IOptionsMonitor<ConnectionStrings>>();
-        if (connectionStrings == null)
-        {
-            throw new InvalidOperationException("ConnectionStrings do not exist!");
-        }
-
-
+            provider.GetRequiredService<IOptionsMonitor<ConnectionStrings>>();
         IDbConnection connection = new NpgsqlConnection(connectionStrings.CurrentValue.Default);
         return connection;
     });
@@ -149,12 +127,7 @@ try
 
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
     {
-        string? authOptionsToken = builder.Configuration.GetSection("AuthOptions:Token").Value;
-        if (authOptionsToken == null)
-        {
-            throw new ArgumentNullException(nameof(authOptionsToken));
-        }
-
+        string authOptionsToken = builder.Configuration.GetRequiredSection("AuthOptions:Token").Value!;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
