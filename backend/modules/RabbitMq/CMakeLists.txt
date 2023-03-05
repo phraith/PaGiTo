@@ -7,6 +7,11 @@ target_sources(RabbitMq
         PRIVATE
         src/rabbitmq_client.cpp
         inc/rabbitmq_client.h
+        src/rabbitmq_worker.cpp
+        inc/rabbitmq_worker.h
+        src/rabbitmq_connection.cpp
+        inc/rabbitmq_connection.h
+        inc/rabbitmq_message.h
         )
 
 target_include_directories(RabbitMq

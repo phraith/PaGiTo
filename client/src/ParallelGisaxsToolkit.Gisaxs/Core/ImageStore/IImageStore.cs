@@ -1,4 +1,5 @@
 ﻿using ParallelGisaxsToolkit.Gisaxs.Utility.Images;
+using Image = ParallelGisaxsToolkit.Gisaxs.Utility.Images.Image;
 
 namespace ParallelGisaxsToolkit.Gisaxs.Core.ImageStore;
 

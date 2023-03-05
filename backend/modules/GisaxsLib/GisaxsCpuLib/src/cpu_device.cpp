@@ -15,7 +15,7 @@
 #include <iostream>
 #include <spdlog/spdlog.h>
 
-SimData CpuDevice::RunGISAXS(const SimJob &description,std::shared_ptr<ImageData> real_img, bool copy_intensities) {
+SimData CpuDevice::RunGISAXS(const SimJob &description, std::shared_ptr<ImageData> real_img, bool copy_intensities) {
     auto flat_unitcell = description.ExperimentInfo().Unitcell();
 
     auto randoms = std::vector<MyType>(
@@ -65,6 +65,38 @@ SimData CpuDevice::RunGISAXS(const SimJob &description,std::shared_ptr<ImageData
         log_val = std::max(0.f, log_val);
         normalized_intensities[i] = (unsigned char) (log_val * 255.0);
     }
+
+
+    float scale = 1;
+    if (real_img != nullptr) {
+
+        std::vector<MyType> combined_intensities = real_img->CombinedSimulationTargetIntensities();
+
+        float scale_prod = 0;
+        std::for_each(combined_intensities.begin(), combined_intensities.end(), [&](int n) {
+            scale_prod += n;
+        });
+
+        float scale_denom = 0;
+        std::for_each(intensities.begin(), intensities.end(), [&](int n) {
+            scale_denom += n;
+        });
+
+        //scale = scale_prod / scale_denom;
+
+        float fitness =  0;
+        int j = 0;
+        std::for_each(intensities.begin(), intensities.end(), [&](int n) {
+            float real_value = combined_intensities.at(j);
+
+            float abs_diff = real_value - n * scale;
+            fitness += (abs_diff * abs_diff);
+            j++;
+        });
+        spdlog::info("Fitness: {}", fitness);
+        return {fitness, {}, std::vector<unsigned char>(), {}, {}, {}, 0};
+    }
+
 
     return {0, std::vector<double>(intensities.begin(), intensities.end()), normalized_intensities,
             std::vector<float>(),

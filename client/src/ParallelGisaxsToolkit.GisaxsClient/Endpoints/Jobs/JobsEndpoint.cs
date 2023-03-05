@@ -1,6 +1,7 @@
 ﻿using FastEndpoints;
 using Microsoft.AspNetCore.Authorization;
 using ParallelGisaxsToolkit.Gisaxs.Core.JobStore;
+using Serilog;
 
 namespace ParallelGisaxsToolkit.GisaxsClient.Endpoints.Jobs;
 
@@ -9,10 +10,12 @@ namespace ParallelGisaxsToolkit.GisaxsClient.Endpoints.Jobs;
 public class JobsEndpoint : EndpointWithoutRequest<JobsResponse>
 {
     private readonly IJobStore _jobStore;
+    private readonly ILogger<JobsEndpoint> _logger;
 
-    public JobsEndpoint(IJobStore jobStore)
+    public JobsEndpoint(IJobStore jobStore, ILoggerFactory loggerFactory)
     {
         _jobStore = jobStore;
+        _logger = loggerFactory.CreateLogger<JobsEndpoint>();
     }
 
     public override async Task HandleAsync(CancellationToken ct)

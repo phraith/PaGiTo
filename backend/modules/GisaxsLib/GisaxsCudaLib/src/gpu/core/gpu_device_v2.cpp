@@ -213,7 +213,7 @@ namespace GpuDeviceV2 {
                       work_stream->Get());
 
             gpuErrchk(cudaStreamSynchronize(work_stream->Get()));
-            scale = scale_prod_ / scale_denom_;
+//            scale = scale_prod_ / scale_denom_;
 
             ScaledDiffSum(dev_real_intensities.Get(), dev_sim_intensities.Get(), dev_real_intensities.Size(),
                           dev_partial_sums.Get(), dev_fitness_, scale, work_stream->Get());
@@ -250,6 +250,7 @@ namespace GpuDeviceV2 {
         }
 
         //memoryProviderV2.UnlockAll();
+        spdlog::info("Fitness: {}", fitness_);
         return {fitness_, {}, std::vector<unsigned char>(), {}, {}, {}, 0};//scale};
     }
 

@@ -22,6 +22,7 @@ std::vector<Vector2<int>> SimJob::DetectorPositions() const {
     for (const auto &simulation_target: meta_information_.SimulationTargets()) {
         assert(simulation_target.start.y >= simulation_target.end.y);
         assert(simulation_target.start.x <= simulation_target.end.x);
+
         for (int y = simulation_target.start.y; y >= simulation_target.end.y; --y) {
             for (int x = simulation_target.start.x; x <= simulation_target.end.x; ++x) {
 

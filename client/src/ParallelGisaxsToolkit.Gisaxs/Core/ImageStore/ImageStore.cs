@@ -3,6 +3,8 @@ using System.Text.Json;
 using Dapper;
 using ParallelGisaxsToolkit.Gisaxs.Utility.Database;
 using ParallelGisaxsToolkit.Gisaxs.Utility.Images;
+using Image = ParallelGisaxsToolkit.Gisaxs.Utility.Images.Image;
+using ImageInfo = ParallelGisaxsToolkit.Gisaxs.Utility.Images.ImageInfo;
 
 namespace ParallelGisaxsToolkit.Gisaxs.Core.ImageStore
 {
@@ -26,7 +28,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.ImageStore
         public async Task<IEnumerable<ImageInfoWithId>> Get()
         {
             return await _connection.QueryAsync(@"SELECT info, id FROM images",
-                (string info, int id) => new ImageInfoWithId(id, JsonSerializer.Deserialize<Utility.Images.ImageInfo>(info)!));
+                (string info, int id) => new ImageInfoWithId(id, JsonSerializer.Deserialize<ImageInfo>(info)!));
         }
 
         public async Task<GreyScaleImage?> Get(long id)
@@ -34,7 +36,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.ImageStore
             IEnumerable<GreyScaleImage>? images = await _connection.QueryAsync(
                 @$"SELECT info, greyScaleData as greyScaleDataId FROM images WHERE id = {id}",
                 (string info, byte[] greyScaleData) =>
-                    new GreyScaleImage(JsonSerializer.Deserialize<Utility.Images.ImageInfo>(info)!, greyScaleData),
+                    new GreyScaleImage(JsonSerializer.Deserialize<ImageInfo>(info)!, greyScaleData),
                 splitOn: "greyScaleDataId");
             return images.FirstOrDefault();
         }
@@ -77,7 +79,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.ImageStore
 
         public async Task<double[]> GetHorizontalProfile(int id, int startX, int endX, int startY)
         {
-            int width = endX - startX;
+            int width = endX - startX + 1;
             int start = width * startY;
             int end = start + width - 1;
             IEnumerable<double[]> dataSliceEnumerator = await _connection.QueryAsync<double[]>(
@@ -99,7 +101,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.ImageStore
 
         public async Task<double[]> GetVerticalProfile(int id, int startY, int endY, int startX)
         {
-            int height = startY - endY;
+            int height = startY - endY + 1;
             int start = height * startX;
             int end = start + height - 1;
             IEnumerable<double[]>? dataSliceEnumerator = await _connection.QueryAsync<double[]>(

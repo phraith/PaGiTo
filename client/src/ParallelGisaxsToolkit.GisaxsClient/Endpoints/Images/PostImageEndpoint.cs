@@ -1,7 +1,7 @@
 ﻿using FastEndpoints;
 using Microsoft.AspNetCore.Authorization;
 using ParallelGisaxsToolkit.Gisaxs.Core.ImageStore;
-using ParallelGisaxsToolkit.Gisaxs.Utility.Images;
+using Image = ParallelGisaxsToolkit.Gisaxs.Utility.Images.Image;
 
 namespace ParallelGisaxsToolkit.GisaxsClient.Endpoints.Images;
 

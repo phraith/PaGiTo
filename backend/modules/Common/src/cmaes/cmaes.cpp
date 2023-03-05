@@ -60,7 +60,7 @@ Cmaes::EigenDecomposition() {
         extracted_eigenvalues[i] = rooted_real;
     }
 
-     D_ = std::make_shared<Eigen::VectorXd>(Eigen::Map<Eigen::VectorXd,
+    D_ = std::make_shared<Eigen::VectorXd>(Eigen::Map<Eigen::VectorXd,
             Eigen::Unaligned>(extracted_eigenvalues.data(), extracted_eigenvalues.size()));
 
     Eigen::MatrixXd diag_squared_d = D_->cwiseProduct(*D_).asDiagonal();
@@ -146,8 +146,7 @@ bool Cmaes::IsConverged() {
 
 Eigen::MatrixXd Cmaes::CreateBoundsMatrix(int dim, std::vector<double> upper, std::vector<double> lower) {
     Eigen::MatrixX<double> bounds = Eigen::MatrixX<double>::Constant(2, dim, 0);
-    if (upper.empty() || lower.empty() || upper.size() != dim || lower.size() != dim)
-    {
+    if (upper.empty() || lower.empty() || upper.size() != dim || lower.size() != dim) {
         return bounds;
     }
 
@@ -158,7 +157,7 @@ Eigen::MatrixXd Cmaes::CreateBoundsMatrix(int dim, std::vector<double> upper, st
     return bounds;
 }
 
-Eigen::VectorX<double> Cmaes::Ask() const{
+Eigen::VectorX<double> Cmaes::Ask() const {
     for (int i = 0; i < n_max_resampling_; i++) {
         auto x = SampleSolution();
         if (IsFeasable(x)) { return x; }
@@ -168,7 +167,7 @@ Eigen::VectorX<double> Cmaes::Ask() const{
     return x_new;
 }
 
-Eigen::VectorX<double> Cmaes::SampleSolution() const{
+Eigen::VectorX<double> Cmaes::SampleSolution() const {
 //    std::tuple<std::shared_ptr<Eigen::MatrixX<double>>, std::shared_ptr<Eigen::VectorX<double>>> bd_tuple = EigenDecomposition();
 //    auto B = std::get<std::shared_ptr<Eigen::MatrixX<double>>>(bd_tuple);
 //    auto D = std::get<std::shared_ptr<Eigen::VectorX<double>>>(bd_tuple);
@@ -186,6 +185,18 @@ Eigen::VectorX<double> Cmaes::SampleSolution() const{
     auto h = *B_ * D_->asDiagonal();
     auto y = PointwiseMultiplicationOnRows(h, z);
     auto x = mean_ + sigma_ * y;
+
+    std::vector<int> vec(x.size());
+    for (int i = 0; i < x.size(); ++i) {
+        vec.at(i) = x[i];
+    }
+
+    std::vector<int> vec2(x.size());
+    for (int i = 0; i < mean_.size(); ++i) {
+        vec2.at(i) = mean_[i];
+    }
+
+
     return x;
 }
 
@@ -205,7 +216,7 @@ Cmaes::PointwiseMultiplicationOnRows(Eigen::MatrixX<double> matrix, Eigen::Vecto
     return z;
 }
 
-bool Cmaes::IsFeasable(Eigen::VectorX<double> param) const{
+bool Cmaes::IsFeasable(Eigen::VectorX<double> param) const {
     if (bounds_.isZero(0)) {
         return true;
     }
@@ -219,13 +230,24 @@ bool Cmaes::IsFeasable(Eigen::VectorX<double> param) const{
     return isCorrectLower & isCorrectUpper;
 }
 
-Eigen::VectorX<double> Cmaes::RepairInfeasableParams(Eigen::VectorX<double> params) const{
+Eigen::VectorX<double> Cmaes::RepairInfeasableParams(Eigen::VectorX<double> params) const {
     if (bounds_.isZero(0)) {
         return params;
     }
 
-    Eigen::VectorX<double> newParam = params.transpose().cwiseMax(bounds_.row(0));
-    newParam = newParam.transpose().cwiseMin(bounds_.row(1));
+    Eigen::VectorX<double> newParam = params.transpose().cwiseMax(bounds_.row(1));
+    newParam = newParam.transpose().cwiseMin(bounds_.row(0));
+
+    std::vector<double> vec(params.size());
+    for (int i = 0; i < params.size(); ++i) {
+        vec.at(i) = newParam[i];
+    }
+
+    std::vector<double> vec2(newParam.size());
+    for (int i = 0; i < newParam.size(); ++i) {
+        vec2.at(i) = newParam[i];
+    }
+
     return newParam;
 }
 
