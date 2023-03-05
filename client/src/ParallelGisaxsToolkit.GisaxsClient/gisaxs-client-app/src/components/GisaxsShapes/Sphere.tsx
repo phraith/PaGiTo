@@ -15,6 +15,9 @@ import { SphereConfig } from "../Utility/DefaultConfigs"
 import LocationParameterWrapper from "./LocationParameterWrapper"
 import RefractionParameterWrapper from "./RefractionParameterWrapper"
 import ShapeParameterWrapper from "./ShapeParameterWrapper"
+import CircleIcon from '@mui/icons-material/Circle';
+
+import SphereIcon from '../../assets/sphere.png'
 
 interface SphereProps {
   id: string;
@@ -49,15 +52,15 @@ const Sphere = (props: SphereProps) => {
   }, [jsonData]);
 
   return (
-    <Card key={props.id} sx={{}}>
+    <Card key={props.id}>
       <CardContent>
-
         <Box display="flex" sx={{ justifyContent: "space-between" }}>
           <Button size="small" onClick={handleButtonClick}>
             {collapsed ? <ExpandMore /> : <ExpandLess />}
           </Button>
-          <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-            Sphere {collapsed ? `[${jsonData.radius.meanUpper}, ${jsonData.radius.stddevUpper}]` : ""}
+          <Typography sx={{ display: "flex" }} color="text.secondary" gutterBottom>
+            <Box  component="img" sx={{display:"flex", height: 25}} src={SphereIcon}/>
+            {collapsed ? `[${jsonData.radius.meanUpper}, ${jsonData.radius.stddevUpper}]` : ""}
           </Typography>
           <Button size="small" onClick={handleRemove}>
             <DeleteForever />
