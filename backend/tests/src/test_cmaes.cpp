@@ -10,15 +10,6 @@ class CmaesTest : public ::testing::TestWithParam<int>
 {
 };
 
-std::vector<double> QuadraticFunctionBulk(const std::vector<std::vector<double>> &dv)
-{
-    auto res = std::vector<double>(dv.size());
-    for (int i = 0; i < dv.size(); ++i)
-    {
-        res.at(i) = QuadraticFunction(dv.at(i));
-    }
-}
-
 double QuadraticFunction(const std::vector<double> &parameters)
 {
     double x1 = parameters[0];
@@ -26,12 +17,12 @@ double QuadraticFunction(const std::vector<double> &parameters)
     return std::pow((x1 - 3.0), 2) + std::pow((10.0 * (x2 + 2.0)), 2);
 }
 
-std::vector<double> EllipsoidFunctionBulk(const std::vector<std::vector<double>> &dv)
+std::vector<double> QuadraticFunctionBulk(const std::vector<std::vector<double>> &dv)
 {
     auto res = std::vector<double>(dv.size());
     for (int i = 0; i < dv.size(); ++i)
     {
-        res.at(i) = EllipsoidFunction(dv.at(i));
+        res.at(i) = QuadraticFunction(dv.at(i));
     }
 }
 
@@ -49,6 +40,15 @@ double EllipsoidFunction(const std::vector<double> &parameters)
         sum += std::pow(1000.0, (double)i / (parameters.size() - 1)) * std::pow(parameters.at(i), 2);
     }
     return sum;
+}
+
+std::vector<double> EllipsoidFunctionBulk(const std::vector<std::vector<double>> &dv)
+{
+    auto res = std::vector<double>(dv.size());
+    for (int i = 0; i < dv.size(); ++i)
+    {
+        res.at(i) = EllipsoidFunction(dv.at(i));
+    }
 }
 
 TEST(CmaesTest, EllipsoidFunction)
