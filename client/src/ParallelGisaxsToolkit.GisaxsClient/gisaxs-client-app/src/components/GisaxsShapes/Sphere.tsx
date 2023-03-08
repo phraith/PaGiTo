@@ -4,18 +4,14 @@ import ExpandMore from "@mui/icons-material/ExpandMore"
 import Box from "@mui/material/Box/Box"
 import Button from "@mui/material/Button"
 import Card from "@mui/material/Card"
-import CardActions from "@mui/material/CardActions"
 import CardContent from "@mui/material/CardContent"
 import Collapse from "@mui/material/Collapse"
-import FormControl from "@mui/material/FormControl"
-import Grid from "@mui/material/Grid"
 import Typography from "@mui/material/Typography"
 import { useEffect, useState } from "react";
 import { SphereConfig } from "../Utility/DefaultConfigs"
 import LocationParameterWrapper from "./LocationParameterWrapper"
 import RefractionParameterWrapper from "./RefractionParameterWrapper"
 import ShapeParameterWrapper from "./ShapeParameterWrapper"
-import CircleIcon from '@mui/icons-material/Circle';
 
 import SphereIcon from '../../assets/sphere.png'
 

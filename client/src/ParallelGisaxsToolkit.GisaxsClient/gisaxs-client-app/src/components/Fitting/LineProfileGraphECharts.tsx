@@ -14,7 +14,6 @@ import {
   CanvasRenderer,
   // SVGRenderer,
 } from 'echarts/renderers';
-import { height } from "@mui/system";
 
 // Register the required components
 echarts.use(

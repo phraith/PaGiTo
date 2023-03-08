@@ -6,7 +6,7 @@ import _debounce from "lodash/debounce"
 import GisaxsShapes from "../GisaxsShapes/GisaxsShapes";
 import Instrumentation from "../Instrumentation/Instrumentation";
 import UnitcellMeta from "../UnitcellMeta/UnitcellMeta";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as React from "react";
 import Sample from "../Sample/Sample";
 import { Coordinate, LineMode, LineProfile, LineProfileState } from "../../utility/LineProfile";
