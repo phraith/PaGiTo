@@ -42,7 +42,7 @@ const ImageTable = (props: ImageTableProps) => {
   }, [])
 
   return (
-      <DataGrid sx={{height: 500}} rows={tableData}
+      <DataGrid sx={{height: "100%", width: "100%"}} rows={tableData}
         columns={columns}
         onRowClick={(e) => { console.log(e); props.setImageInfo(new ImageInfo(e.row.id, e.row.width, e.row.height)) }}
       />

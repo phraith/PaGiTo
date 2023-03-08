@@ -1,4 +1,5 @@
-﻿using FastEndpoints;
+﻿using System.ComponentModel.DataAnnotations;
+using FastEndpoints;
 using Microsoft.AspNetCore.Authorization;
 using ParallelGisaxsToolkit.Gisaxs.Core.ImageStore;
 using Image = ParallelGisaxsToolkit.Gisaxs.Utility.Images.Image;
@@ -23,9 +24,7 @@ public class PostImageEndpoint : Endpoint<PostImageRequest>
     }
 }
 
-public record PostImageRequest(Image Image)
+public sealed record PostImageRequest
 {
-    public PostImageRequest() : this(Image.Empty)
-    {
-    }
+    [Required] public Image Image { get; init; } = Image.Empty;
 }

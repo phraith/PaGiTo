@@ -106,34 +106,29 @@ const Simulation = () => {
     <React.Fragment>
       <CssBaseline />
       <MiniDrawer />
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={12} md={12} lg={8}>
-          <Box display="flex"
-          component="img" src={intensities} 
-            sx={{
-              paddingTop: 10,
-              paddingRight: 5,
-              paddingLeft: 10,
-              paddingBottom: 10,
-              width: "100%",
-              height: "100%"
-            }}/>
+      <Grid container spacing={2} direction={"row"} padding={10}>
+        <Grid item xs={8} sm={8} md={8} lg={8}>
+          <Box sx={{ height: "100%", width: "100%", position: "relative" }}>
+            <Box component="img" src={intensities} sx={{ width: "100%", height: "100%", position: "absolute" }} />
+          </Box>
         </Grid>
+        <Grid item xs={4} sm={4} md={4} lg={4}>
+          <Box display="flex" flexDirection={"column"} sx={{ gap: 2 }}>
 
-        <Grid item xs={12} sm={12} md={12} lg={4}>
-          <Box display="flex" sx={{ flexDirection: "column", gap: 2, padding: 10, position: "sticky", top: 0, paddingTop: 10 }}>
-            <Box display="flex" sx={{ paddingBottom: 1, gap: 2 }}>
+            <Box display="flex" sx={{ gap: 2 }}>
               <Instrumentation jsonCallback={jsonCallback} />
               <UnitcellMeta jsonCallback={jsonCallback} />
             </Box>
-            <Box display="flex" sx={{ paddingBottom: 1 }}>
+
+            <Box display="flex" sx={{ gap: 2 }}>
               <ColormapSelect colormap={colormap} setColormap={setColorMap} />
             </Box>
-            <Grid container spacing={2}>
-              <Grid item xs={7} sm={7} md={7} lg={7}>
+
+            <Grid container spacing={2} sx={{ height: "60vh" }}>
+              <Grid item xs={7} sm={7} md={7} lg={7} sx={{ height: "100%" }}>
                 <GisaxsShapes isSimulation={true} jsonCallback={jsonCallback} />
               </Grid>
-              <Grid item xs={5} sm={5} md={5} lg={5}>
+              <Grid item xs={5} sm={5} md={5} lg={5} sx={{ height: "100%" }}>
                 <Sample jsonCallback={jsonCallback} />
               </Grid>
             </Grid>

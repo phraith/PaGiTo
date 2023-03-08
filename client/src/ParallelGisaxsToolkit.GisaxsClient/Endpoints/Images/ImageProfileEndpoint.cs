@@ -1,4 +1,5 @@
-﻿using FastEndpoints;
+﻿using System.ComponentModel.DataAnnotations;
+using FastEndpoints;
 using Microsoft.AspNetCore.Authorization;
 using ParallelGisaxsToolkit.Gisaxs.Configuration;
 using ParallelGisaxsToolkit.Gisaxs.Core.ImageStore;
@@ -39,11 +40,9 @@ public class ImageProfileEndpoint : Endpoint<ImageProfileRequest, ImageProfileRe
     }
 }
 
-public record ImageProfileResponse(double[] ModifiedData, int Width, int Height);
+public sealed record ImageProfileResponse(double[] ModifiedData, int Width, int Height);
 
-public record ImageProfileRequest(SimulationTargetWithId Target)
+public sealed record ImageProfileRequest
 {
-    public ImageProfileRequest() : this(SimulationTargetWithId.Empty)
-    {
-    }
+    [Required] public SimulationTargetWithId Target { get; init; } = SimulationTargetWithId.Empty;
 }

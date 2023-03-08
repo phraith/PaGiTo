@@ -1,4 +1,5 @@
-﻿using FastEndpoints;
+﻿using System.ComponentModel.DataAnnotations;
+using FastEndpoints;
 using Microsoft.AspNetCore.Authorization;
 using ParallelGisaxsToolkit.Gisaxs.Core.ResultStore;
 using StackExchange.Redis;
@@ -24,16 +25,13 @@ public class GetJobEndpoint : Endpoint<GetJobRequest, GetJobResponse>
         {
             throw new InvalidOperationException("Job result does not exist!");
         }
-        
+
         await SendAsync(new GetJobResponse(result.Data), cancellation: ct);
     }
 }
 
-public record GetJobResponse(string Response);
-
-public record GetJobRequest(string JobId)
+public sealed record GetJobResponse(string Response);
+public sealed record GetJobRequest
 {
-    public GetJobRequest() : this(string.Empty)
-    {
-    }
+    [Required] public string JobId { get; init; } = string.Empty;
 }

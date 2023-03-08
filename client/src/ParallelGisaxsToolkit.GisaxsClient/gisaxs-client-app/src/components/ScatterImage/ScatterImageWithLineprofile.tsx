@@ -39,12 +39,12 @@ const ScatterImageWithLineprofile = (props: ScatterImageWithLineprofileProps) =>
   const createLineProfile = (canvasWidth: number, canvasHeight: number, x: number, y: number) => {
     if (props.profileState.lineMode === LineMode.Vertical) {
       let start: Coordinate = new Coordinate((x / canvasWidth) * props.width, 0.0);
-      let end: Coordinate = new Coordinate((x / canvasWidth) * props.width, props.height);
+      let end: Coordinate = new Coordinate((x / canvasWidth) * props.width, props.height - 1);
       return new LineProfile(start, end);
     }
 
     let start: Coordinate = new Coordinate(0.0, (y / canvasHeight) * props.height);
-    let end: Coordinate = new Coordinate(props.width, (y / canvasHeight) * props.height);
+    let end: Coordinate = new Coordinate(props.width - 1, (y / canvasHeight) * props.height);
     return new LineProfile(start, end);
   }
 

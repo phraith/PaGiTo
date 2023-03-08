@@ -1,4 +1,5 @@
-﻿using FastEndpoints;
+﻿using System.ComponentModel.DataAnnotations;
+using FastEndpoints;
 using Microsoft.AspNetCore.Authorization;
 using ParallelGisaxsToolkit.Gisaxs.Core.UserStore;
 using IAuthorizationHandler = ParallelGisaxsToolkit.Gisaxs.Core.Authorization.IAuthorizationHandler;
@@ -29,15 +30,15 @@ public class RegisterEndpoint : Endpoint<RegisterRequest, RegisterResponse>
         }
 
         await _userStore.Insert(user);
-        await SendAsync(new RegisterResponse(user.UserId, user.PasswordHash, user.PasswordSalt), cancellation: ct);
+        RegisterResponse response = new RegisterResponse(user.UserId, user.PasswordHash, user.PasswordSalt);
+        await SendAsync(response, cancellation: ct);
     }
 }
 
-public record RegisterRequest(string Username, string Password)
+public sealed record RegisterRequest
 {
-    public RegisterRequest() : this(string.Empty, string.Empty)
-    {
-    }
+    [Required] public string Username { get; init; } = string.Empty;
+    [Required] public string Password { get; init; } = string.Empty;
 }
 
-public record RegisterResponse(long UserId, byte[] PasswordSalt, byte[] PasswordHash);
+public sealed record RegisterResponse(long UserId, byte[] PasswordSalt, byte[] PasswordHash);

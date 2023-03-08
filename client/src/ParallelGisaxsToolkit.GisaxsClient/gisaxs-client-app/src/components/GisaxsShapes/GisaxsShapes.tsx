@@ -8,6 +8,8 @@ import Typography from "@mui/material/Typography"
 import List from "@mui/material/List"
 import ListItem from "@mui/material/ListItem"
 import { useState, useEffect } from "react";
+
+
 import Cylinder from "./Cylinder";
 import Sphere from "./Sphere";
 import { v4 as uuidv4 } from "uuid";
@@ -117,16 +119,14 @@ const GisaxsShapes = (props: GisaxsShapesProps) => {
   };
 
   return (
-    <Card style={{ maxHeight: 700, overflow: "auto" }}>
-      <CardContent >
-        <Box display="flex" sx={{ flexDirection: "column" }}>
+    <Card sx={{ height: "100%" }}>
+      <CardContent sx={{ height: "100%" }}>
+        <Box display="flex" sx={{ flexDirection: "column", height: "100%" }}>
           <Box display="flex" justifyContent={"space-between"} sx={{ paddingBottom: 1 }}>
             <Typography>Shapes</Typography>
-
             <Button size="small" onClick={addShape}>
               <Add />
             </Button>
-
           </Box >
           <Menu
             anchorEl={anchorEl}
@@ -138,7 +138,7 @@ const GisaxsShapes = (props: GisaxsShapesProps) => {
             <MenuItem onClick={addCylinder}>Cylinder</MenuItem>
           </Menu>
 
-          <List>
+          <List sx={{ height: "100%", overflow: "auto" }}>
             {shapes.map((value) => {
               return <ListItem key={value.props.id}>{value}</ListItem>;
             })}

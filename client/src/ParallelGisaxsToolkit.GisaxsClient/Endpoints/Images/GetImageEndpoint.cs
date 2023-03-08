@@ -1,5 +1,7 @@
-﻿using FastEndpoints;
+﻿using System.ComponentModel.DataAnnotations;
+using FastEndpoints;
 using Microsoft.AspNetCore.Authorization;
+using ParallelGisaxsToolkit.Gisaxs.Configuration;
 using ParallelGisaxsToolkit.Gisaxs.Core.ImageStore;
 using ParallelGisaxsToolkit.Gisaxs.Utility.Images;
 using ParallelGisaxsToolkit.Gisaxs.Utility.ImageTransformations;
@@ -35,11 +37,10 @@ public class GetImageEndpoint : Endpoint<GetImageRequest, GetImageResponse>
     }
 }
 
-public record GetImageResponse(string ImageAsBase64, int Width, int Height);
+public sealed record GetImageResponse(string ImageAsBase64, int Width, int Height);
 
-public record GetImageRequest(int Id, string Colormap)
+public sealed record GetImageRequest
 {
-    public GetImageRequest() : this(-1, string.Empty)
-    {
-    }
+    [Required] public int Id { get; init; } = -1;
+    [Required] public string Colormap { get; init; } = string.Empty;
 }

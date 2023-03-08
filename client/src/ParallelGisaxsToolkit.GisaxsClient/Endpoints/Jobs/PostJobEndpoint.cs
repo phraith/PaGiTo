@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using FastEndpoints;
 using Microsoft.AspNetCore.Authorization;
 using ParallelGisaxsToolkit.Gisaxs.Core.ImageStore;
@@ -47,11 +48,8 @@ public class PostJobEndpoint : Endpoint<PostJobRequest, PostJobResponse>
     }
 }
 
-public record PostJobResponse(string JobId);
-
-public record PostJobRequest(string JsonConfig)
+public sealed record PostJobResponse(string JobId);
+public sealed record PostJobRequest
 {
-    public PostJobRequest() : this(string.Empty)
-    {
-    }
+    [Required] public string JsonConfig { get; init; } = string.Empty;
 }

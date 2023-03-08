@@ -31,6 +31,7 @@ const LineProfileGraph = (props: LineProfileGraphEChartsProps) => {
             text: 'Lineprofile Real vs. Simulated'
         },
         animation: true,
+        lazyUpdate: true,
         xAxis: {
             type: 'value'
         },
@@ -42,6 +43,7 @@ const LineProfileGraph = (props: LineProfileGraphEChartsProps) => {
             left: 400
 
         },
+
         series: [
             {
                 name: "Real",
@@ -64,9 +66,9 @@ const LineProfileGraph = (props: LineProfileGraphEChartsProps) => {
         ]
     };
     return (
-        <Card>
+        <Card sx={{height: "100%", width: "100%"}}>
             {/* <ReactEcharts theme={"dark"} option={option} /> */}
-            <ReactEChartsCore echarts={echarts}  option={option} />
+            <ReactEChartsCore style={{ height: '100%', width: '100%' }} echarts={echarts}  option={option} />
         </Card>
     );
 }
