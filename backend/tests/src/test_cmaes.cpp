@@ -24,6 +24,7 @@ std::vector<double> QuadraticFunctionBulk(const std::vector<std::vector<double>>
     {
         res.at(i) = QuadraticFunction(dv.at(i));
     }
+    return res;
 }
 
 double EllipsoidFunction(const std::vector<double> &parameters)
@@ -49,6 +50,7 @@ std::vector<double> EllipsoidFunctionBulk(const std::vector<std::vector<double>>
     {
         res.at(i) = EllipsoidFunction(dv.at(i));
     }
+    return res;
 }
 
 TEST(CmaesTest, EllipsoidFunction)
