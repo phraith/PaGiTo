@@ -17,7 +17,7 @@ import { CylinderConfig } from "../Utility/DefaultConfigs"
 import LocationParameterWrapper from "./LocationParameterWrapper"
 import RefractionParameterWrapper from "./RefractionParameterWrapper"
 import ShapeParameterWrapper from "./ShapeParameterWrapper"
-
+import RectangleIcon from '@mui/icons-material/Rectangle';
 interface CylinderProps {
   id: string;
   removeCallback: any;
@@ -59,8 +59,8 @@ const Cylinder = (props: CylinderProps) => {
               <Button size="small" onClick={handleButtonClick}>
                 {collapsed ? <ExpandMore /> : <ExpandLess />}
               </Button>
-              <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                Cylinder {collapsed ? `[${jsonData.radius.meanUpper}, ${jsonData.radius.stddevUpper}]` : ""}
+              <Typography sx={{display:"flex" }} color="text.secondary" gutterBottom>
+                <RectangleIcon sx={{display:"flex"}}/> {collapsed ? `[${jsonData.radius.meanUpper}, ${jsonData.radius.stddevUpper}]` : ""}
               </Typography>
               <Button size="small" onClick={handleRemove}>
                 <DeleteForever />

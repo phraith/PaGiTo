@@ -4,17 +4,16 @@ import ExpandMore from "@mui/icons-material/ExpandMore"
 import Box from "@mui/material/Box/Box"
 import Button from "@mui/material/Button"
 import Card from "@mui/material/Card"
-import CardActions from "@mui/material/CardActions"
 import CardContent from "@mui/material/CardContent"
 import Collapse from "@mui/material/Collapse"
-import FormControl from "@mui/material/FormControl"
-import Grid from "@mui/material/Grid"
 import Typography from "@mui/material/Typography"
 import { useEffect, useState } from "react";
 import { SphereConfig } from "../Utility/DefaultConfigs"
 import LocationParameterWrapper from "./LocationParameterWrapper"
 import RefractionParameterWrapper from "./RefractionParameterWrapper"
 import ShapeParameterWrapper from "./ShapeParameterWrapper"
+
+import SphereIcon from '../../assets/sphere.png'
 
 interface SphereProps {
   id: string;
@@ -49,15 +48,15 @@ const Sphere = (props: SphereProps) => {
   }, [jsonData]);
 
   return (
-    <Card key={props.id} sx={{}}>
+    <Card key={props.id}>
       <CardContent>
-
         <Box display="flex" sx={{ justifyContent: "space-between" }}>
           <Button size="small" onClick={handleButtonClick}>
             {collapsed ? <ExpandMore /> : <ExpandLess />}
           </Button>
-          <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-            Sphere {collapsed ? `[${jsonData.radius.meanUpper}, ${jsonData.radius.stddevUpper}]` : ""}
+          <Typography sx={{ display: "flex" }} color="text.secondary" gutterBottom>
+            <Box  component="img" sx={{display:"flex", height: 25}} src={SphereIcon}/>
+            {collapsed ? `[${jsonData.radius.meanUpper}, ${jsonData.radius.stddevUpper}]` : ""}
           </Typography>
           <Button size="small" onClick={handleRemove}>
             <DeleteForever />

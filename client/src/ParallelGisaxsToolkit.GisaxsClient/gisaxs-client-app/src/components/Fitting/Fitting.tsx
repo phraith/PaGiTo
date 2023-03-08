@@ -2,7 +2,7 @@ import MiniDrawer from "../Drawer/MiniDrawer";
 import Box from "@mui/material/Box"
 import CssBaseline from "@mui/material/CssBaseline"
 import Grid from "@mui/material/Grid"
-import throttle from "lodash/throttle";
+import _debounce from "lodash/debounce"
 import GisaxsShapes from "../GisaxsShapes/GisaxsShapes";
 import Instrumentation from "../Instrumentation/Instrumentation";
 import UnitcellMeta from "../UnitcellMeta/UnitcellMeta";
@@ -67,7 +67,6 @@ const Fitting = () => {
 
     const [intensities, setIntensities] = useState<string>();
     const [refIntensities, setRefIntensities] = useState<string>();
-    const [currentInfoPath, setCurrentInfoPath] = useState<string>();
     const [imgWidth, setImgWidth] = useState<number>();
     const [imgHeight, setImgHeight] = useState<number>();
     const [lineprofileState, setLineprofileState] = useState<LineProfileState>(new LineProfileState(LineMode.Horizontal, [], new LineProfile(new Coordinate(0, 0), new Coordinate(0, 1))));
@@ -75,7 +74,7 @@ const Fitting = () => {
     const [realPlotData, setRealPlotData] = React.useState([])
 
     const [openTable, setOpenTable] = React.useState<boolean>(false)
-    const [imageInfo, setImageInfo] = React.useState<ImageInfo>(new ImageInfo(0, 0, 0))
+    const [imageInfo, setImageInfo] = React.useState<ImageInfo>(new ImageInfo(1, 0, 0))
 
     useEffect(() => {
         hubConnection.connect()
@@ -93,15 +92,14 @@ const Fitting = () => {
 
     const [colormap, setColorMap] = React.useState("twilightShifted");
     const [jsonData, setJsonData] = React.useState({});
-    const [isActive, setIsActive] = React.useState(false);
 
     const jsonCallback = (value, key) => {
         jsonData[key] = value;
         setJsonData({ ...jsonData });
     };
 
-    const throttled = useRef(throttle((jsonConfigForSimulation, jsonConfigForRealImage) => {
 
+    const requestLineProfiles = (jsonConfigForSimulation, jsonConfigForRealImage) => {
         const requestOptions1 = {
             method: 'POST',
             headers: {
@@ -135,15 +133,23 @@ const Fitting = () => {
             .then((response) => response.json())
             .then((data) => {
                 let traces = []
+                console.log(data)
                 let values = data.modifiedData
-                let k = values.map((x: number, index: number) => { return [index, x]})
+                let k = values.map((x: number, index: number) => { return [index, x] })
                 traces.push(k)
                 console.log(traces)
                 setRealPlotData(traces[0])
             })
+    }
 
 
-    }, 50));
+    const debounced = useRef(_debounce((jsonConfigForSimulation, jsonConfigForRealImage) => {
+        requestLineProfiles(jsonConfigForSimulation, jsonConfigForRealImage)
+    }, 50))
+
+    // const throttled = useRef(throttle((jsonConfigForSimulation, jsonConfigForRealImage) => {
+    //     requestLineProfiles(jsonConfigForSimulation, jsonConfigForRealImage)
+    // }, 50));
 
     useEffect(() => {
         let jsonConfigForSimulation = JSON.stringify({
@@ -170,7 +176,7 @@ const Fitting = () => {
                 }
             })
 
-        throttled.current(jsonConfigForSimulation, jsonConfigForRealImage)
+        debounced.current(jsonConfigForSimulation, jsonConfigForRealImage)
     }, [lineprofileState?.currentLineProfile, jsonData]);
 
     useEffect(() => {
@@ -180,8 +186,6 @@ const Fitting = () => {
                 end: lp.end
             }
         }), "lineprofiles")
-
-        jsonCallback(imageInfo.id, "imageId")
     }, [lineprofileState.lineProfiles])
 
     useEffect(() => {
@@ -234,26 +238,33 @@ const Fitting = () => {
             },
         })
             .then((response) => response.json())
-            .then((data) => setRefIntensities(data.imageAsBase64));
+            .then((data) => {
+                setRefIntensities(data.imageAsBase64)
+                setImgWidth(data.width);
+                setImgHeight(data.height);
+                console.log("asdasd")
+                console.log(data)
+            }
+            );
     }, [imageInfo.id, colormap]);
 
     const sendJobInfo = () => {
         let jsonConfig = JSON.stringify({
-            info: {
-                body: JSON.stringify({
-                    config: jsonData,
-                    properties: {
-                        imageId: imageInfo.id,
-                        intensityFormat: "doublePrecision",
-                        simulationTargets: lineprofileState.lineProfiles
-                    },
-                    meta: {
-                        type: "fitting"
-                    }
-                }),
-                history: []
+            meta: {
+                type: "fitting",
+                notification: "receiveJobResult",
+                persist: true,
+                execute: false,
+                colormap: colormap
             },
-            userId: 0
+            properties: {
+                intensityFormat: "doublePrecision",
+                imageId: imageInfo.id,
+                simulationTargets: lineprofileState.lineProfiles
+            },
+            config: {
+                ...jsonData,
+            },
         });
 
         const requestOptions = {
@@ -263,9 +274,13 @@ const Fitting = () => {
                 Accept: "application/json",
                 'Content-Type': 'application/json'
             },
-            body: jsonConfig
+            body: JSON.stringify(
+                {
+                    "jsonConfig": jsonConfig
+                }
+            )
         };
-        const url = "/api/jobs";
+        const url = "/api/job";
         fetch(url, requestOptions)
             .then(data => console.log(data));
     }
@@ -274,51 +289,49 @@ const Fitting = () => {
         <React.Fragment>
             <CssBaseline />
             <MiniDrawer />
-            <Grid container spacing={2}>
-                <Grid item xs={6} sm={6} md={6} lg={8}>
-                    <Box sx={{ height: "100%", width: "100%", display: "flex", gap: 10, paddingTop: 10, paddingLeft: 10 }}>
-                        <ScatterImageWithLineprofile width={imgWidth} height={imgHeight} profileState={lineprofileState} setProfileState={setLineprofileState} intensities={refIntensities} />
-                        <ScatterImageWithLineprofile width={imgWidth} height={imgHeight} profileState={lineprofileState} setProfileState={setLineprofileState} intensities={intensities} />
-                    </Box>
+            <Grid container spacing={2} direction={"row"} sx={{ padding: 10 }}>
+                <Grid item xs={4} sm={4} md={4} lg={4}>
+                    <ScatterImageWithLineprofile width={imgWidth} height={imgHeight} profileState={lineprofileState} setProfileState={setLineprofileState} intensities={refIntensities} />
                 </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={4}>
-                    <Box display="flex" sx={{ flexDirection: "column", gap: 2, padding: 10 }}>
+                <Grid item xs={4} sm={6} md={4} lg={4}>
+                    <ScatterImageWithLineprofile width={imgWidth} height={imgHeight} profileState={lineprofileState} setProfileState={setLineprofileState} intensities={intensities} />
+                </Grid>
+                <Grid item xs={4} sm={4} md={4} lg={4}>
+                    <Box display="flex" flexDirection={"column"} sx={{ gap: 2 }}>
+                        <Box display="flex" sx={{ gap: 2, height: "30vh" }}>
+                            {!openTable
+                                ? <LineProfileGraph simulatedData={simulatedPlotData} realData={realPlotData} />
+                                : <ImageTable setImageInfo={(updatedImageInfo: ImageInfo) => { setImageInfo(updatedImageInfo) }} />
+                            }
+                        </Box>
 
-                        {!openTable &&
-                            <Box sx={{ height: "100%", width: "100%" }}>
-                                <LineProfileGraph simulatedData={simulatedPlotData} realData={realPlotData}/>
-                            </Box>
-                        }
-                        {openTable &&
-                            <Box sx={{ width: "100%", height: "100%" }}>
-                                <ImageTable setImageInfo={(updatedImageInfo: ImageInfo) => { console.log(updatedImageInfo); setImageInfo(updatedImageInfo) }} />
-                            </Box>
-                        }
-                        <Box display="flex" sx={{ paddingBottom: 1, gap: 2 }}>
+                        <Box display="flex" sx={{ gap: 2 }}>
                             <Instrumentation jsonCallback={jsonCallback} initialResX={imageInfo.width} initialResY={imageInfo.height} />
                             <UnitcellMeta jsonCallback={jsonCallback} />
                         </Box>
-                        <Box display="flex" sx={{ paddingBottom: 1 }}>
+
+                        <Box display="flex" sx={{ gap: 2 }}>
                             <ColormapSelect colormap={colormap} setColormap={setColorMap} />
-                            <Button onClick={() => sendJobInfo()}>
-                                Create Job Description
+                            <Button variant="outlined" onClick={() => sendJobInfo()}>
+                                Create
                             </Button>
-                            <Button onClick={() => { setOpenTable(prevState => !prevState) }}>
-                                {openTable ? "Show graph" : "Show images"}
+                            <Button variant="outlined" onClick={() => { setOpenTable(prevState => !prevState) }}>
+                                {openTable ? "Graph" : "Images"}
                             </Button>
                         </Box>
-                        <Grid container spacing={2}>
-                            <Grid item xs={7} sm={7} md={7} lg={7}>
+
+                        <Grid container spacing={2} sx={{ height: "30vh" }}>
+                            <Grid item xs={7} sm={7} md={7} lg={7} sx={{ height: "100%" }}>
                                 <GisaxsShapes isSimulation={false} jsonCallback={jsonCallback} />
                             </Grid>
-                            <Grid item xs={5} sm={5} md={5} lg={5}>
+                            <Grid item xs={5} sm={5} md={5} lg={5} sx={{ height: "100%" }}>
                                 <Sample jsonCallback={jsonCallback} />
                             </Grid>
                         </Grid>
                     </Box>
                 </Grid>
             </Grid>
-        </React.Fragment>
+        </React.Fragment >
     );
 };
 

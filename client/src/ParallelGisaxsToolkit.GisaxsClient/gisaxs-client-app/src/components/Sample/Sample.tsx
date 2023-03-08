@@ -28,13 +28,13 @@ const Sample = (props: SampleProps) => {
   useEffect(() => {
 
     let formattedShapes = Object.keys(jsonData).map((key) => jsonData[key]);
-    if (formattedShapes.length == 0) {return;}
-    
+    if (formattedShapes.length == 0) { return; }
+
     let substrate = formattedShapes[0]
     delete substrate["thickness"];
 
     let formattedLayers = formattedShapes.slice(1)
-    let layersWithOrder = formattedLayers.map((layer, i) => {layer["order"] = i; return layer;})
+    let layersWithOrder = formattedLayers.map((layer, i) => { layer["order"] = i; return layer; })
     let json = {
       "substrate": substrate,
       "layers": layersWithOrder
@@ -65,8 +65,7 @@ const Sample = (props: SampleProps) => {
 
       setLayers(cachedLayers);
     }
-    else
-    {
+    else {
       setLayers([<Layer
         key={"0"}
         id={"0"}
@@ -109,9 +108,9 @@ const Sample = (props: SampleProps) => {
   };
 
   return (
-    <Card style={{ maxHeight: 700, overflow: "auto" }}>
-      <CardContent >
-        <Box display="flex" sx={{ flexDirection: "column" }}>
+    <Card sx={{ height: "100%" }}>
+      <CardContent sx={{ height: "100%" }}>
+        <Box display="flex" sx={{ flexDirection: "column", height: "100%" }}>
           <Box display="flex" justifyContent={"space-between"} sx={{ paddingBottom: 1 }}>
             <Typography>Sample</Typography>
             <Button size="small" onClick={addLayer}>
@@ -119,7 +118,7 @@ const Sample = (props: SampleProps) => {
             </Button>
           </Box >
 
-          <List>
+          <List sx={{ height: "100%", overflow: "auto" }}>
             {layers.map((value) => {
               return <ListItem key={value.props.id}>{value}</ListItem>;
             })}
