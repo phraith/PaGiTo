@@ -11,21 +11,23 @@ namespace ParallelGisaxsToolkit.GisaxsClient;
 public class RabbitMqConsumer : BackgroundService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly IRabbitMqService _rabbitMqService;
+    private readonly IRabbitMqFactory _rabbitMqFactory;
+    private IModel _consumerChannel;
 
-    public RabbitMqConsumer(IServiceScopeFactory serviceScopeFactory, IRabbitMqService rabbitMqService)
+    public RabbitMqConsumer(IServiceScopeFactory serviceScopeFactory, IRabbitMqFactory rabbitMqFactory)
     {
         _serviceScopeFactory = serviceScopeFactory;
-        _rabbitMqService = rabbitMqService;
+        _rabbitMqFactory = rabbitMqFactory;
+        _consumerChannel = rabbitMqFactory.CreateConsumerModel();
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         stoppingToken.ThrowIfCancellationRequested();
-
-        AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(_rabbitMqService.ConsumerChannel);
+        AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(_consumerChannel);
         consumer.Received += EventConsume;
-        _rabbitMqService.ConsumerChannel.BasicConsume(
+        consumer.Shutdown += Reconnect;
+        _consumerChannel.BasicConsume(
             queue: string.Empty,
             autoAck: true,
             consumer: consumer
@@ -34,13 +36,24 @@ public class RabbitMqConsumer : BackgroundService
         await Task.CompletedTask;
     }
 
+    private Task Reconnect(object?  model, ShutdownEventArgs? args)
+    {
+        while (!_consumerChannel.IsOpen)
+        {
+            _consumerChannel = _rabbitMqFactory.CreateConsumerModel();
+        }
+
+        return Task.CompletedTask;
+    }
+    
     private async Task EventConsume(object? model, BasicDeliverEventArgs deliverEventArgs)
     {
         using IServiceScope scope = _serviceScopeFactory.CreateScope();
         IDatabase redisClient = scope.ServiceProvider.GetRequiredService<IDatabase>();
         IResultStore resultStore = scope.ServiceProvider.GetRequiredService<IResultStore>();
         INotifier notifier = scope.ServiceProvider.GetRequiredService<INotifier>();
-        IRequestResultDeserializer requestResultDeserializer = scope.ServiceProvider.GetRequiredService<IRequestResultDeserializer>();
+        IRequestResultDeserializer requestResultDeserializer =
+            scope.ServiceProvider.GetRequiredService<IRequestResultDeserializer>();
 
         IBasicProperties basicProperties = deliverEventArgs.BasicProperties;
 

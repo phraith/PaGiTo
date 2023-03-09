@@ -22,7 +22,7 @@ public:
     std::string ServiceName() const override;
 
     RequestResult
-    HandleRequest(const std::string &request, std::vector<std::byte> image_data, const std::string &origin) override;
+    HandleRequest(const std::string &request) override;
 
     std::vector<TimeMeasurement> GetDeviceTimings() const;
 

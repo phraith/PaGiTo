@@ -5,6 +5,7 @@ using ParallelGisaxsToolkit.Gisaxs.Configuration;
 using ParallelGisaxsToolkit.Gisaxs.Core.ImageStore;
 using ParallelGisaxsToolkit.Gisaxs.Utility.Images;
 using ParallelGisaxsToolkit.Gisaxs.Utility.ImageTransformations;
+using ImageInfo = SixLabors.ImageSharp.ImageInfo;
 
 namespace ParallelGisaxsToolkit.GisaxsClient.Endpoints.Images;
 
@@ -31,11 +32,12 @@ public class GetImageEndpoint : Endpoint<GetImageRequest, GetImageResponse>
             image.Info.Width,
             image.Info.Height, false, request.Colormap);
 
-        await SendAsync(new GetImageResponse(colorizedImageAsBase64), cancellation: ct);
+        await SendAsync(new GetImageResponse(colorizedImageAsBase64, image.Info.Width, image.Info.Height),
+            cancellation: ct);
     }
 }
 
-public sealed record GetImageResponse(string ImageAsBase64);
+public sealed record GetImageResponse(string ImageAsBase64, int Width, int Height);
 
 public sealed record GetImageRequest
 {

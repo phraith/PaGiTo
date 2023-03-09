@@ -16,7 +16,7 @@ public:
 
     [[nodiscard]] virtual std::string ServiceName() const = 0;
 
-    [[nodiscard]] virtual RequestResult HandleRequest(const std::string &request, std::vector<std::byte> image_data, const std::string &origin) = 0;
+    [[nodiscard]] virtual RequestResult HandleRequest(const std::string &request) = 0;
 };
 
 

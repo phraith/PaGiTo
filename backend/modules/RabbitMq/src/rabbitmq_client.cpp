@@ -18,90 +18,15 @@ uint64_t now_microseconds(void) {
     return (uint64_t) tv.tv_sec * 1000000 + (uint64_t) tv.tv_usec;
 }
 
-void RabbitMqClient::Run() {
-    uint64_t start_time = now_microseconds();
-    int received = 0;
-    int previous_received = 0;
-    uint64_t previous_report_time = start_time;
-    uint64_t next_summary_time = start_time + SUMMARY_EVERY_US;
 
-    amqp_frame_t frame;
-
-    uint64_t now;
-
-    for (;;) {
-        amqp_rpc_reply_t ret;
-        amqp_envelope_t envelope;
-
-        now = now_microseconds();
-        if (now > next_summary_time) {
-            int countOverInterval = received - previous_received;
-            double intervalRate =
-                    countOverInterval / ((now - previous_report_time) / 1000000.0);
-
-            int current_ms = (int) (now - start_time) / 1000;
-            spdlog::info("{} ms: Received {} - {} since last report ({} Hz)", current_ms, received, countOverInterval,
-                         (int) intervalRate);
-
-            previous_received = received;
-            previous_report_time = now;
-            next_summary_time += SUMMARY_EVERY_US;
-        }
-
-        amqp_maybe_release_buffers(connection_);
-        ret = amqp_consume_message(connection_, &envelope, nullptr, 0);
-
-        bool success = EvaluateRpcOperation(ret);
-        if (!success) {
-            SetUpConnection();
-            continue;
-        }
-
-        received++;
-
-        std::string message(static_cast<const char *>(envelope.message.body.bytes), envelope.message.body.len);
-        auto result = service_->HandleRequest(message, {}, "");
-
-        std::string message2(static_cast<const char *>(envelope.message.properties.reply_to.bytes),
-                             envelope.message.properties.reply_to.len);
-
-
-        amqp_basic_properties_t props;
-        props._flags = AMQP_BASIC_CONTENT_TYPE_FLAG |
-                        AMQP_BASIC_HEADERS_FLAG |
-                       AMQP_BASIC_DELIVERY_MODE_FLAG |
-                       AMQP_BASIC_CORRELATION_ID_FLAG;
-
-        props.correlation_id = envelope.message.properties.correlation_id;
-        props.content_type = amqp_cstring_bytes("text/plain");
-        props.delivery_mode = 2; /* persistent delivery mode */
-        props.headers = envelope.message.properties.headers;
-        amqp_bytes_t result_bytes{result.data.size(), &result.data[0]};
-        int publish_result = amqp_basic_publish(connection_, 2, amqp_cstring_bytes(""),
-                                                envelope.message.properties.reply_to, 1, 0, &props,
-                                                result_bytes);
-
-        amqp_destroy_envelope(&envelope);
-
-        if (publish_result < 0) {
-            spdlog::error("Publishing failed! Resetting connection...");
-            SetUpConnection();
-        }
-    }
-}
-
-
-RabbitMqClient::RabbitMqClient(const std::string &host_name, int port, const std::string &queue_name,
-                               std::unique_ptr<Service> service)
+RabbitMqClient::RabbitMqClient(const std::string &host_name, int port, const std::string &queue_name)
         :
         host_name_(host_name),
         queue_name_(queue_name),
         port_(port),
-        service_(std::move(service)),
         connection_(nullptr) {
 
     SetUpConnection();
-    Run();
 }
 
 void RabbitMqClient::SetUpConnection() {
@@ -147,7 +72,10 @@ void RabbitMqClient::SetUpConnection() {
         amqp_channel_open(connection_, 1);
         amqp_channel_open(connection_, 2);
 
-        amqp_get_rpc_reply(connection_);
+        if (!EvaluateRpcOperation(amqp_get_rpc_reply(connection_)))
+        {
+            continue;
+        }
 
         amqp_bytes_t amq_queue_name{queue_name_.size(), (void *) queue_name_.c_str()};
         amqp_basic_consume(connection_, 1, amq_queue_name, amqp_empty_bytes, 0, 1, 0,

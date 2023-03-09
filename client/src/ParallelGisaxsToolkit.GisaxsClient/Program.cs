@@ -19,11 +19,11 @@ using ParallelGisaxsToolkit.Gisaxs.Core.UserStore;
 using ParallelGisaxsToolkit.Gisaxs.Utility.HashComputer;
 using ParallelGisaxsToolkit.GisaxsClient;
 using ParallelGisaxsToolkit.GisaxsClient.Configuration;
-using RabbitMQ.Client;
 using Serilog;
 using Serilog.Events;
 using StackExchange.Redis;
 using Steeltoe.Extensions.Configuration.Placeholder;
+using Steeltoe.Extensions.Configuration.RandomValue;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -32,9 +32,7 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     Log.Information("Starting web application");
-
     WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-
 
     builder.Host.UseSerilog((context, services, configuration) => configuration
         .ReadFrom.Configuration(context.Configuration)
@@ -48,8 +46,9 @@ try
         builder.Configuration.SetBasePath("/vault/secrets/").AddJsonFile("appsettings.json", false, true);
     }
 
+    builder.Configuration.AddEnvironmentVariables("ConnectionStrings");
+    builder.Configuration.AddRandomValueSource();
     builder.Configuration.AddPlaceholderResolver();
-
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerDoc();
     builder.Services.AddFastEndpoints();
@@ -67,12 +66,9 @@ try
     builder.Services.AddSingleton<IUserIdGenerator, HmacSha512UserIdGenerator>();
     builder.Services.AddSingleton<IHashComputer, Sha256HashComputer>();
     builder.Services.AddSingleton<IRequestResultDeserializer, RequestResultDeserializer>();
-    builder.Services.AddSingleton<IRabbitMqService, RabbitMqService>();
-    // builder.Services.AddSingleton<IRequestHandler, MajordomoRequestHandler>();
 
     builder.Services.AddHostedService<RabbitMqConsumer>();
     builder.Services.AddScoped<IRabbitMqPublisher, RabbitMqPublisher>();
-
 
     builder.Services.AddLogging(x =>
     {
@@ -80,26 +76,24 @@ try
         x.AddSerilog(dispose: true);
     });
 
-    builder.Services
-        .AddSingleton<ParallelGisaxsToolkit.Gisaxs.Core.Authorization.IAuthorizationHandler>(provider =>
-        {
-            IOptionsMonitor<AuthConfig> authConfig = provider.GetRequiredService<IOptionsMonitor<AuthConfig>>();
-            IUserIdGenerator userIdGenerator = provider.GetRequiredService<IUserIdGenerator>();
-            return new AuthorizationHandler(authConfig.CurrentValue.Token, userIdGenerator);
-        });
+    builder.Services.AddSingleton<ParallelGisaxsToolkit.Gisaxs.Core.Authorization.IAuthorizationHandler>(provider =>
+    {
+        IOptionsMonitor<AuthConfig> authConfig = provider.GetRequiredService<IOptionsMonitor<AuthConfig>>();
+        IUserIdGenerator userIdGenerator = provider.GetRequiredService<IUserIdGenerator>();
+        return new AuthorizationHandler(authConfig.CurrentValue.Token, userIdGenerator);
+    });
 
-    builder.Services.AddSingleton<IConnection>(provider =>
+    builder.Services.AddSingleton<IRabbitMqFactory>(provider =>
     {
         IOptionsMonitor<ConnectionStrings>? connectionStrings =
             provider.GetRequiredService<IOptionsMonitor<ConnectionStrings>>();
 
-        ConnectionFactory factory = new ConnectionFactory()
-        {
-            HostName = connectionStrings.CurrentValue.RabbitMq,
-            DispatchConsumersAsync = true,
-            
-        };
-        return factory.CreateConnection();
+        string rabbitMqConsumerQueueName = connectionStrings.CurrentValue.RabbitMqConsumerQueueName;
+        Environment.SetEnvironmentVariable("RABBIT_MQ_CONSUMER_QUEUE_NAME", rabbitMqConsumerQueueName,
+            EnvironmentVariableTarget.User);
+        return new RabbitMqFactory(connectionStrings.CurrentValue.RabbitMqUser,
+            connectionStrings.CurrentValue.RabbitMqPassword, connectionStrings.CurrentValue.RabbitMqHost,
+            rabbitMqConsumerQueueName);
     });
 
     builder.Services.AddScoped<IDatabase>(provider =>

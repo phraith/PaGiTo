@@ -19,8 +19,7 @@ ModelSimulatorV2::~ModelSimulatorV2() {
 }
 
 
-RequestResult ModelSimulatorV2::HandleRequest(const std::string &request, std::vector<std::byte> image_data,
-                                              const std::string &origin) {
+RequestResult ModelSimulatorV2::HandleRequest(const std::string &request) {
     try {
         Timer localTimer;
         Timer globalTimer;
@@ -29,7 +28,18 @@ RequestResult ModelSimulatorV2::HandleRequest(const std::string &request, std::v
         globalTimer.Start();
         localTimer.Start();
 
-        SimJob job = GisaxsTransformationContainer::CreateSimJobFromRequest(request);
+        int message_size = *reinterpret_cast<int32_t const *>(&request[0]);
+        std::string config(static_cast<const char *>(&request[sizeof(int32_t)]), message_size);
+        int image_size = *reinterpret_cast<int32_t const *>(&request[sizeof(int) + message_size]);
+
+        std::vector<std::byte> image_data(image_size);
+        if (image_size > 0) {
+            std::copy(reinterpret_cast<const std::byte *>(&request[2 * sizeof(int) + message_size]),
+                      reinterpret_cast<const std::byte *>(&request[2 * sizeof(int)] + message_size + image_size),
+                      &image_data[0]);
+        }
+
+        SimJob job = GisaxsTransformationContainer::CreateSimJobFromRequest(config);
         localTimer.End();
         spdlog::info("Preparing data took {} ms", localTimer.Duration());
 
@@ -41,7 +51,6 @@ RequestResult ModelSimulatorV2::HandleRequest(const std::string &request, std::v
             img_data = std::make_shared<ImageData>(simulation_target_data);
             copy_intensities = false;
         }
-
 
         localTimer.Start();
         SimData sim_data = RunGISAXS(job, img_data, copy_intensities);

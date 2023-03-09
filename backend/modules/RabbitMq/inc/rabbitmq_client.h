@@ -12,16 +12,16 @@
 
 class RabbitMqClient {
 public:
-    RabbitMqClient(const std::string &host_name, int port, const std::string &queue_name, std::unique_ptr<Service> service);
+    RabbitMqClient(const std::string &host_name, int port, const std::string &queue_name);
+
+
 private:
-    void Run();
     void SetUpConnection();
     bool EvaluateRpcOperation(amqp_rpc_reply_t reply);
 
     std::string host_name_;
     std::string queue_name_;
     int port_;
-    std::unique_ptr<Service> service_;
     amqp_connection_state_t connection_;
 };
 

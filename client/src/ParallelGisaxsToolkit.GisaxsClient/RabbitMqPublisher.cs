@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
+using ParallelGisaxsToolkit.Gisaxs.Configuration;
 using ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling;
 using ParallelGisaxsToolkit.Gisaxs.Core.ResultStore;
 using RabbitMQ.Client;
@@ -18,16 +19,17 @@ public class RabbitMqPublisher : IRabbitMqPublisher
     private readonly IDatabase _redisClient;
     private readonly IResultStore _resultStore;
     private readonly IRequestResultDeserializer _requestResultDeserializer;
-    private readonly IRabbitMqService _rabbitMqService;
+    private readonly IRabbitMqFactory _rabbitMqFactory;
 
     public RabbitMqPublisher(INotifier notifier, IDatabase redisClient,
-        IResultStore resultStore, IRequestResultDeserializer requestResultDeserializer, IRabbitMqService rabbitMqService)
+        IResultStore resultStore, IRequestResultDeserializer requestResultDeserializer,
+        IRabbitMqFactory rabbitMqFactory)
     {
         _notifier = notifier;
         _redisClient = redisClient;
         _resultStore = resultStore;
         _requestResultDeserializer = requestResultDeserializer;
-        _rabbitMqService = rabbitMqService;
+        _rabbitMqFactory = rabbitMqFactory;
     }
 
     public async Task Publish(Request request)
@@ -49,8 +51,11 @@ public class RabbitMqPublisher : IRabbitMqPublisher
             return;
         }
 
-        IBasicProperties properties = _rabbitMqService.PublisherChannel.CreateBasicProperties();
-        properties.ReplyTo = _rabbitMqService.ConsumerQueueName;
+        var publisherQueueName = $"{request.RequestInformation.MetaInformation.Type}";
+
+        using IModel publisherChannel = _rabbitMqFactory.CreatePublisherModel(publisherQueueName);
+        IBasicProperties properties = publisherChannel.CreateBasicProperties();
+        properties.ReplyTo = _rabbitMqFactory.ConsumerQueueName;
         properties.CorrelationId = request.JobId;
         properties.Headers = new Dictionary<string, object>();
         properties.Headers["notification"] = request.RequestInformation.MetaInformation.Notification;
@@ -61,14 +66,20 @@ public class RabbitMqPublisher : IRabbitMqPublisher
         {
             properties.Headers["colormap"] = colormap;
         }
+        
+        byte[] message = RequestToBytes(request);
 
-        byte[] message = Encoding.UTF8.GetBytes(request.RawRequest);
-
-        _rabbitMqService.PublisherChannel.BasicPublish(exchange: "",
+        publisherChannel.BasicPublish(exchange: "",
             routingKey: $"{request.RequestInformation.MetaInformation.Type}",
             basicProperties: properties,
             body: message);
     }
 
-
+    private static byte[] RequestToBytes(Request request)
+    {
+        byte[] message = Encoding.UTF8.GetBytes(request.RawRequest);
+        byte[] messageSize = BitConverter.GetBytes(message.Length);
+        byte[] imageSize = BitConverter.GetBytes(request.ImageDataForFitting.Length);
+        return messageSize.Concat(message).Concat(imageSize).Concat(request.ImageDataForFitting).ToArray();
+    }
 }

@@ -62,8 +62,8 @@ namespace GisaxsTransformationContainer {
                     shapes.parameters.emplace_back(Vector2<MyType>{radiusMeanUpper, radiusStddevUpper});
 
                     shapes.parameter_indices.emplace_back(shapes.parameters.size());
-                    auto heightMeanUpper = shape.at("radius").at("meanUpper");
-                    auto heightMeanLower = shape.at("radius").at("meanLower");
+                    auto heightMeanUpper = shape.at("height").at("meanUpper");
+                    auto heightMeanLower = shape.at("height").at("meanLower");
 
                     auto heightStddevUpper = shape.at("height").at("stddevUpper");
                     auto heightStddevLower = shape.at("height").at("stddevLower");
@@ -105,8 +105,10 @@ namespace GisaxsTransformationContainer {
             switch (shape_type) {
                 case ShapeTypeV2::sphere: {
                     auto radius = shapes.parameters[first_parameter];
-                    shape["radius"]["mean"] = radius.x;
-                    shape["radius"]["stddev"] = radius.y;
+                    shape["radius"]["meanUpper"] = radius.x;
+                    shape["radius"]["meanLower"] = radius.x;
+                    shape["radius"]["stddevUpper"] = radius.y;
+                    shape["radius"]["stddevLower"] = radius.y;
                     j.push_back(shape);
                     break;
                 }
@@ -114,11 +116,15 @@ namespace GisaxsTransformationContainer {
                     auto radius = shapes.parameters[first_parameter];
                     auto height = shapes.parameters[first_parameter + 1];
 
-                    shape["radius"]["mean"] = radius.x;
-                    shape["radius"]["stddev"] = radius.y;
+                    shape["radius"]["meanUpper"] = radius.x;
+                    shape["radius"]["meanLower"] = radius.x;
+                    shape["radius"]["stddevUpper"] = radius.y;
+                    shape["radius"]["stddevLower"] = radius.y;
 
-                    shape["height"]["mean"] = height.x;
-                    shape["height"]["stddev"] = height.y;
+                    shape["height"]["meanUpper"] = height.x;
+                    shape["height"]["meanLower"] = height.x;
+                    shape["height"]["stddevUpper"] = height.y;
+                    shape["height"]["stddevLower"] = height.y;
                     j.push_back(shape);
                     break;
                 }
@@ -212,7 +218,7 @@ namespace GisaxsTransformationContainer {
 
     json UpdateShapes(const json &input, const FlatShapeContainer &shape_container) {
         json j(input);
-        j["shapes"] = shape_container;
+        j["config"]["shapes"] = shape_container;
         return j;
     }
 
