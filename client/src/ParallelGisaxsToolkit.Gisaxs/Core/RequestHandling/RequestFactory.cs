@@ -26,12 +26,12 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling
                 return null;
             }
 
-            if (!TryExtract<MetaInformation>(jsonObject, "meta", out MetaInformation? metaInformation))
+            if (!TryExtract(jsonObject, "meta", out MetaInformation? metaInformation))
             {
                 return null;
             }
 
-            if (!TryExtract<JobProperties>(jsonObject, "properties", out JobProperties? jobProperties))
+            if (!TryExtract(jsonObject, "properties", out JobProperties? jobProperties))
             {
                 return null;
             }

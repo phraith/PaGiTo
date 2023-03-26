@@ -1,13 +1,10 @@
-#find_package(cppzmq REQUIRED)
-find_package(rabbitmq-c CONFIG REQUIRED)
+find_package(amqpcpp REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(spdlog REQUIRED)
 
 file(GLOB_RECURSE MODEL_SIMULATOR_FILES "src/*.cpp" "inc/*.h")
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${MODEL_SIMULATOR_FILES})
 
-find_path(CPPZMQ_INCLUDE_DIR NAMES zmq.hpp)
-message(STATUS "cppzmq dir: ${CPPZMQ_INCLUDE_DIR}")
 
 add_library(
         ModelSimulatorLib STATIC
@@ -38,7 +35,7 @@ target_link_libraries(
         ModelSimulatorLib
         PUBLIC CommonLib GisaxsLib RabbitMq nlohmann_json spdlog::spdlog
         nlohmann_json::nlohmann_json
-        PRIVATE rabbitmq::rabbitmq-static)
+        PRIVATE amqpcpp)
 
 if (UNIX)
 

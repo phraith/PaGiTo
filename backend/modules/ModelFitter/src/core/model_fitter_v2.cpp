@@ -1,28 +1,18 @@
-#include <iostream>
 #include "core/model_fitter_v2.h"
+
+#include <iostream>
 #include "common/standard_defs.h"
 #include "core/fitting_description.h"
 #include "parameter_definitions/transformation_container.h"
 #include "common/timer.h"
 #include "common/binary_serialization_utility.h"
-//#include "majordomo_utility.h"
 #include "cmaes/cmaes_optimizer.h"
-#include "rabbitmq_connection.h"
-
-#include <utility>
 #include <spdlog/spdlog.h>
-#include <barrier>
 
-
-ModelFitterV2::ModelFitterV2(std::shared_ptr<RabbitMqConnection> connection)
+ModelFitterV2::ModelFitterV2(const std::string &host, int port, const std::string &username,
+                             const std::string &password)
         :
-        connection_(connection) {
-    std::tuple<std::string, uint16_t> consumer_data = connection_->QueueDeclare();
-    consumer_channel_ = std::get<1>(consumer_data);
-    consumer_queue_name_ = std::get<0>(consumer_data);
-    publisher_channel_ = connection_->NextChannel();
-
-    connection_->RegisterConsumer(consumer_queue_name_, consumer_channel_);
+        client_(host, port, username, password) {
 }
 
 ModelFitterV2::~ModelFitterV2() = default;
@@ -33,6 +23,7 @@ std::string ModelFitterV2::ServiceName() const {
 
 RequestResult
 ModelFitterV2::HandleRequest(const std::string &request) {
+
 
 
 
@@ -71,6 +62,7 @@ ModelFitterV2::HandleRequest(const std::string &request) {
             const std::vector<std::vector<double>> &input_vectors) {
 
         std::vector<double> results(input_vectors.size());
+        std::vector<std::vector<std::byte>> configs;
         for (int k = 0; k < input_vectors.size(); ++k) {
             auto baseShapes = fit_job->BaseShapes();
             std::vector<double> dv = input_vectors.at(k);
@@ -79,7 +71,8 @@ ModelFitterV2::HandleRequest(const std::string &request) {
 
             std::vector<Vector2<MyType>> parameters;
             for (int i = 0; i < parameters_count; ++i) {
-                parameters.emplace_back(Vector2<MyType>{static_cast<MyType>(dv[i]), static_cast<MyType>(dv[i + parameters_count])});
+                parameters.emplace_back(
+                        Vector2<MyType>{static_cast<MyType>(dv[i]), static_cast<MyType>(dv[i + parameters_count])});
             }
 
             baseShapes.parameters = parameters;
@@ -104,48 +97,18 @@ ModelFitterV2::HandleRequest(const std::string &request) {
                       reinterpret_cast<const std::byte *>(&image_data[0] + image_size),
                       &sim_message[2 * sizeof(int) + m.length()]);
 
-            try {
-                connection_->Publish(publisher_channel_, "Simulation", consumer_queue_name_, std::to_string(k),
-                                     sim_message);
-            }
-            catch (const RabbitMqConnectionException &e) {
-                connection_->ConnectSafe();
-                publisher_channel_ = connection_->NextChannel();
+            configs.emplace_back(sim_message);
 
-                std::tuple<std::string, uint16_t> consumer_data = connection_->QueueDeclare();
-                consumer_channel_ = std::get<1>(consumer_data);
-                consumer_queue_name_ = std::get<0>(consumer_data);
-                connection_->RegisterConsumer(consumer_queue_name_, consumer_channel_);
-            }
-        }
+            auto local_results = client_.PublishBatch(configs);
 
-        for (int k = 0; k < input_vectors.size(); ++k) {
-            try {
-                std::tuple<std::string, std::string> res = connection_->Consume();
-                std::string message = std::get<0>(res);
+            for (auto local_result: local_results) {
+                std::string message = std::get<1>(local_result);
                 float fitness = *reinterpret_cast<float *>(&message[0]);
-                int correlation_id = std::stoi(std::get<1>(res));
+                int correlation_id = std::stoi(std::get<0>(local_result));
                 results.at(correlation_id) = fitness;
             }
-            catch (const RabbitMqConnectionException &e) {
-                connection_->ConnectSafe();
-                publisher_channel_ = connection_->NextChannel();
-
-                std::tuple<std::string, uint16_t> consumer_data = connection_->QueueDeclare();
-                consumer_channel_ = std::get<1>(consumer_data);
-                consumer_queue_name_ = std::get<0>(consumer_data);
-
-                connection_->RegisterConsumer(consumer_queue_name_, consumer_channel_);
-            }
+            return results;
         }
-
-//
-//        if (!fitness_bytes.empty()) {
-//            MyType* bt = fitness_bytes.data<MyType>();
-//            MyType final = *bt;
-//            return final;
-//        }
-        return results;
     };
 
     std::vector<double> initial(2 * fit_job->BaseShapes().parameters.size());

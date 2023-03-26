@@ -7,23 +7,25 @@
 
 #include <string>
 #include <memory>
+#include <thread>
 #include "common/service.h"
-#include "rabbitmq_client.h"
-#include "rabbitmq_connection.h"
 
 class RabbitMqWorker {
 public:
-    RabbitMqWorker(std::shared_ptr<RabbitMqConnection> connection, const std::string &queue_name, std::unique_ptr<Service> service);
+    RabbitMqWorker(const std::string &host, int port, const std::string &user, const std::string &password,
+                   const std::string &queue_name, std::unique_ptr<Service> service);
 
 private:
 
     std::vector<std::byte> HandleRequest(std::string message);
 
     void Run();
+    std::string user_name_;
+    std::string password_;
+    std::string host_;
+    int port_;
     std::unique_ptr<Service> service_;
-    std::shared_ptr<RabbitMqConnection> connection_;
     std::string queue_name_;
-
 };
 
 

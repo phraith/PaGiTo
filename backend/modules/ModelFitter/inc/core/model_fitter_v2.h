@@ -3,28 +3,28 @@
 
 #include "common/service.h"
 #include "common/standard_defs.h"
-#include "rabbitmq_connection.h"
+#include "fit_job_client.h"
 #include <barrier>
 #include <thread>
+#include <amqpcpp.h>
+#include <amqpcpp/linux_tcp.h>
 
 class ModelFitterV2 : public Service {
 public:
-    explicit ModelFitterV2(std::shared_ptr<RabbitMqConnection> connection);
+    explicit ModelFitterV2(const std::string &host, int port, const std::string &username, const std::string &password);
 
     ~ModelFitterV2();
 
     [[nodiscard]] std::string ServiceName() const override;
 
     [[nodiscard]]RequestResult HandleRequest(const std::string &request) override;
+
     static std::vector<double> ConvertFlat(const std::vector<Vector2<MyType>> &input);
+
 private:
     static double Fitness(const std::vector<double> &parameters);
 
-    std::shared_ptr<RabbitMqConnection> connection_;
-    uint16_t  consumer_channel_;
-    uint16_t  publisher_channel_;
-    std::string consumer_queue_name_;
-
+    FitJobClient client_;
 };
 
 #endif

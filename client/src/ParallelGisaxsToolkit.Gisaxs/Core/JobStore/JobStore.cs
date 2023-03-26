@@ -5,7 +5,7 @@ using ParallelGisaxsToolkit.Gisaxs.Utility.Database;
 
 namespace ParallelGisaxsToolkit.Gisaxs.Core.JobStore
 {
-    public record Job(string Config, string JobId, string UserId);
+    public record Job(string Config, string JobId, string UserId, bool Finished = false);
 
     public class JobStore : IJobStore
     {
@@ -25,8 +25,15 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.JobStore
 
         public async Task<IEnumerable<Job>> Get()
         {
-            const string sql = @"SELECT Config, JobId, UserId FROM jobs";
+            const string sql =
+                @"select jobs.Config, jobs.JobId, jobs.UserId, case when results.JobId is NULL then false else true end as Finished from jobs left outer join results on jobs.JobId = results.JobId where jsonb_path_exists(config, '$ ? ($.meta.type like_regex ""fitting"")')";
             return await _dbConnection.QueryAsync<Job>(sql);
+        }
+
+        public async Task<IEnumerable<long>> Count()
+        {
+            const string sql = @"select count(distinct id) from jobs where jsonb_path_exists(config, '$ ? ($.meta.type like_regex ""fitting"")')";
+            return await _dbConnection.QueryAsync<long>(sql);
         }
 
         public async Task<Job?> Get(long jobId)
@@ -49,7 +56,7 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.JobStore
         public async Task Insert(Job job)
         {
             var parameters = new
-                { job.UserId, job.JobId, Config = new JsonParameter(JsonSerializer.Serialize(job.Config)) };
+                { job.UserId, job.JobId, Config = new JsonParameter(job.Config) };
             const string sql = $@"INSERT INTO jobs (userId, jobId, config) VALUES (@UserId, @JobId, @Config)";
             await _dbConnection.ExecuteAsync(sql, parameters);
         }

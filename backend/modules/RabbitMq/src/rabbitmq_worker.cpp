@@ -3,71 +3,88 @@
 //
 
 #include "rabbitmq_worker.h"
-
-#include <sys/time.h>
-#include "rabbitmq_client.h"
-#include "amqp.h"
+#include "gisaxs_tcp_handler.h"
 #include <iostream>
 #include <spdlog/spdlog.h>
+#include <amqpcpp.h>
+#include <amqpcpp/libuv.h>
+#include <uv.h>
 
-#define SUMMARY_EVERY_US 1000000
+using namespace std::chrono_literals;
 
-uint64_t now_microseconds(void) {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return (uint64_t) tv.tv_sec * 1000000 + (uint64_t) tv.tv_usec;
-}
-
-RabbitMqWorker::RabbitMqWorker(std::shared_ptr<RabbitMqConnection> connection, const std::string &queue_name,
-                               std::unique_ptr<Service> service)
+RabbitMqWorker::RabbitMqWorker(const std::string &host, int port, const std::string &user, const std::string &password,
+                               const std::string &queue_name, std::unique_ptr<Service> service)
         :
-        connection_(connection),
+        host_(host),
+        user_name_(user),
+        password_(password),
+        port_(port),
         service_(std::move(service)),
         queue_name_(queue_name) {
     Run();
 }
 
 void RabbitMqWorker::Run() {
-    uint64_t start_time = now_microseconds();
-    int received = 0;
-    int previous_received = 0;
-    uint64_t previous_report_time = start_time;
-    uint64_t next_summary_time = start_time + SUMMARY_EVERY_US;
 
-    connection_->RegisterConsumer(queue_name_);
-    uint16_t publisher_channel_id = connection_->NextChannel();
+    auto loop = std::make_shared<uv_loop_s>();
+    uv_loop_init(loop.get());
 
-    auto function_pointer = std::bind(&RabbitMqWorker::HandleRequest, this, std::placeholders::_1);
+    auto login = AMQP::Login(user_name_, password_);
+    auto address = AMQP::Address(host_, port_, login, "/");
+    GisaxsTcpHandler handler = GisaxsTcpHandler(loop.get());
+    AMQP::TcpConnection connection(&handler, address);
+    AMQP::TcpChannel consumer_channel(&connection);
+    AMQP::TcpChannel publisher_channel(&connection);
+    auto request_handler = std::bind(&RabbitMqWorker::HandleRequest, this, std::placeholders::_1);
 
-    for (;;) {
-        amqp_rpc_reply_t ret;
-        amqp_envelope_t envelope;
+    auto source = std::stop_source();
+    auto heartbeat_runner = std::jthread([&, stop_token = source.get_token()] {
+        while (!stop_token.stop_requested()) {
+            connection.heartbeat();
+            spdlog::info("FitJobClient: heartbeat");
+            std::this_thread::sleep_for(2s);
+        };
+    });
 
-        uint64_t now = now_microseconds();
-        if (now > next_summary_time) {
-            int countOverInterval = received - previous_received;
-            double intervalRate =
-                    countOverInterval / ((now - previous_report_time) / 1000000.0);
+    consumer_channel.declareQueue(queue_name_, AMQP::durable).onSuccess(
+                    [&consumer_channel, &publisher_channel, &request_handler](const std::string &queue_name,
+                                                                              uint32_t messagecount,
+                                                                              uint32_t consumercount) {
+                        spdlog::info("declared queue {}", queue_name);
+                        consumer_channel.consume(queue_name).onSuccess([](const std::string &tag) {
+                                    spdlog::info("started consuming with tag {}", tag);
+                                })
+                                .onReceived(
+                                        [&consumer_channel, &publisher_channel, &request_handler](
+                                                const AMQP::Message &message,
+                                                uint64_t deliveryTag,
+                                                bool redelivered) {
+                                            std::string job_config(message.body(), message.bodySize());
+                                            spdlog::info("received {}", deliveryTag);
+                                            const std::vector<std::byte> &data = request_handler(job_config);
+                                            auto result = reinterpret_cast<const char *>(&data[0]);
 
-            int current_ms = (int) (now - start_time) / 1000;
-            spdlog::info("{} ms: Received {} - {} since last report ({} Hz)", current_ms, received, countOverInterval,
-                         (int) intervalRate);
+                                            if (result == nullptr) {
+                                                consumer_channel.ack(deliveryTag);
+                                                return;
+                                            }
 
-            previous_received = received;
-            previous_report_time = now;
-            next_summary_time += SUMMARY_EVERY_US;
-        }
+                                            AMQP::Envelope envelope(result, data.size());
+                                            envelope.setHeaders(message.headers());
+                                            envelope.setCorrelationID(message.correlationID());
+                                            envelope.setContentType("text/plain");
+                                            envelope.setDeliveryMode(2);
+                                            publisher_channel.publish("", message.replyTo(), envelope, AMQP::headers);
+                                            consumer_channel.ack(deliveryTag);
+                                        });
 
-        try {
-            connection_->ConsumeAndPublish(publisher_channel_id, function_pointer);
-        }
-        catch (const RabbitMqConnectionException &e) {
-            connection_->ConnectSafe();
-            connection_->RegisterConsumer(queue_name_);
-            publisher_channel_id = connection_->NextChannel();
-        }
-        received++;
-    }
+                    })
+            .onError([](const char *message) {
+                spdlog::error(message);
+            });
+
+    uv_run(loop.get(), UV_RUN_DEFAULT);
+    source.request_stop();
 }
 
 std::vector<std::byte> RabbitMqWorker::HandleRequest(std::string message) {
