@@ -6,13 +6,13 @@ using Serilog;
 namespace ParallelGisaxsToolkit.GisaxsClient.Endpoints.Jobs;
 
 [Authorize]
-[HttpGet("/api/jobs")]
-public class JobsEndpoint : EndpointWithoutRequest<JobsResponse>
+[HttpGet("/api/jobs/count")]
+public class JobsCountEndpoint : EndpointWithoutRequest<JobsCountResponse>
 {
     private readonly IJobStore _jobStore;
     private readonly ILogger<JobsEndpoint> _logger;
 
-    public JobsEndpoint(IJobStore jobStore, ILoggerFactory loggerFactory)
+    public JobsCountEndpoint(IJobStore jobStore, ILoggerFactory loggerFactory)
     {
         _jobStore = jobStore;
         _logger = loggerFactory.CreateLogger<JobsEndpoint>();
@@ -20,9 +20,9 @@ public class JobsEndpoint : EndpointWithoutRequest<JobsResponse>
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        IEnumerable<Job> jobs = await _jobStore.Get();
-        await SendAsync(new JobsResponse(jobs), cancellation: ct);
+        IEnumerable<long> counts = await _jobStore.Count();
+        await SendAsync(new JobsCountResponse(counts.First()), cancellation: ct);
     }
 }
 
-public sealed record JobsResponse(IEnumerable<Job> Jobs);
+public sealed record JobsCountResponse(long JobCount);
