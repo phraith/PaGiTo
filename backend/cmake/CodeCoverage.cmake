@@ -270,7 +270,7 @@ function(setup_target_for_coverage_lcov)
         ${LCOV_PATH} ${Coverage_LCOV_ARGS} --gcov-tool ${GCOV_PATH} -c -i -d . -b 
         ${BASEDIR} -o ${Coverage_NAME}.base
     )
-    # Run tests
+    # PublishBatch tests
     set(LCOV_EXEC_TESTS_CMD 
         ${Coverage_EXECUTABLE} ${Coverage_EXECUTABLE_ARGS}
     )    
@@ -437,7 +437,7 @@ function(setup_target_for_coverage_gcovr_xml)
     endforeach()
     
     # Set up commands which will be run to generate coverage data
-    # Run tests
+    # PublishBatch tests
     set(GCOVR_XML_EXEC_TESTS_CMD
         ${Coverage_EXECUTABLE} ${Coverage_EXECUTABLE_ARGS}
     )
@@ -529,7 +529,7 @@ function(setup_target_for_coverage_gcovr_html)
     endforeach()
 
     # Set up commands which will be run to generate coverage data
-    # Run tests
+    # PublishBatch tests
     set(GCOVR_HTML_EXEC_TESTS_CMD
         ${Coverage_EXECUTABLE} ${Coverage_EXECUTABLE_ARGS}
     )
