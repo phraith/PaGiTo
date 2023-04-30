@@ -19,10 +19,8 @@ public:
 
     [[nodiscard]]RequestResult HandleRequest(const std::string &request) override;
 
-    static std::vector<double> ConvertFlat(const std::vector<Vector2<MyType>> &input);
-
 private:
-    static double Fitness(const std::vector<double> &parameters);
+    static std::vector<std::byte> SerializeResult(const FitData &fit_data);
 
     FitJobClient client_;
 };

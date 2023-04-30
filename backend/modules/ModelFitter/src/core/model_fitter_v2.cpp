@@ -58,11 +58,11 @@ ModelFitterV2::HandleRequest(const std::string &request) {
     auto fit_job = std::make_shared<FitJob>(sim_data, img_data, evolutions, individuals, populations);
     int dim = fit_job->BaseShapes().parameters.size();
 
-    std::function<std::vector<double>(const std::vector<std::vector<double>> &input_vectors)> func = [=](
+    std::function<std::vector<double>(const std::vector<std::vector<double>> &input_vectors)> func = [&](
             const std::vector<std::vector<double>> &input_vectors) {
 
         std::vector<double> results(input_vectors.size());
-        std::vector<std::vector<std::byte>> configs;
+        std::vector<std::vector<std::byte>> configs(input_vectors.size());
         for (int k = 0; k < input_vectors.size(); ++k) {
             auto baseShapes = fit_job->BaseShapes();
             std::vector<double> dv = input_vectors.at(k);
@@ -97,18 +97,17 @@ ModelFitterV2::HandleRequest(const std::string &request) {
                       reinterpret_cast<const std::byte *>(&image_data[0] + image_size),
                       &sim_message[2 * sizeof(int) + m.length()]);
 
-            configs.emplace_back(sim_message);
-
-            auto local_results = client_.PublishBatch(configs);
-
-            for (auto local_result: local_results) {
-                std::string message = std::get<1>(local_result);
-                float fitness = *reinterpret_cast<float *>(&message[0]);
-                int correlation_id = std::stoi(std::get<0>(local_result));
-                results.at(correlation_id) = fitness;
-            }
-            return results;
+            configs.at(k) = sim_message;
         }
+
+        auto local_results = client_.PublishBatch(configs);
+        for (auto local_result : local_results) {
+            std::string message = std::get<1>(local_result);
+            float fitness = *reinterpret_cast<float *>(&message[0]);
+            int correlation_id = std::stoi(std::get<0>(local_result));
+            results.at(correlation_id) = fitness;
+        }
+        return results;
     };
 
     std::vector<double> initial(2 * fit_job->BaseShapes().parameters.size());
@@ -138,24 +137,43 @@ ModelFitterV2::HandleRequest(const std::string &request) {
     }
 
     CmaesOptimizer o(func, initial, lower, upper, 2.0, 300);
-    std::shared_ptr<Solution> best_solution = o.Optimize();
+    FitData fitData = o.Optimize();
 
-
-    return {std::vector<std::byte>{}};
+    std::vector<std::byte> bytes = SerializeResult(fitData);
+    return {bytes};
 }
 
-std::vector<double> ModelFitterV2::ConvertFlat(const std::vector<Vector2<MyType>> &input) {
-    std::vector<double> converted_vector;
-    for (const auto &element: input) {
-        converted_vector.emplace_back(element.x);
-        converted_vector.emplace_back(element.y);
-    }
+std::vector<std::byte> ModelFitterV2::SerializeResult(const FitData &fit_data) {
+    int parameters_count = fit_data.parameters.size();
+    int fitness_count = fit_data.fitness_values.size();
 
-    return converted_vector;
-}
+    size_t parameters_size = parameters_count * sizeof(double);
+    size_t fitness_size = fitness_count * sizeof(double);
 
-double ModelFitterV2::Fitness(const std::vector<double> &parameters) {
-    return 0;
+    std::vector<std::byte> bytes(2 * sizeof(int) + parameters_size + fitness_size);
+
+
+    int current_offset = 0;
+    std::copy(reinterpret_cast<const std::byte *>(&parameters_count),
+              reinterpret_cast<const std::byte *>(&parameters_count) + sizeof(int),
+              &bytes[0] + current_offset);
+    current_offset += sizeof(int);
+
+    std::copy(reinterpret_cast<const std::byte *>(&fit_data.parameters[0]),
+              reinterpret_cast<const std::byte *>(&fit_data.parameters[0]) + parameters_size,
+              &bytes[0] + current_offset);
+    current_offset += parameters_size;
+
+    std::copy(reinterpret_cast<const std::byte *>(&fitness_count),
+              reinterpret_cast<const std::byte *>(&fitness_count) + sizeof(int),
+              &bytes[0] + current_offset);
+    current_offset += sizeof(int);
+
+    std::copy(reinterpret_cast<const std::byte *>(&fit_data.fitness_values[0]),
+              reinterpret_cast<const std::byte *>(&fit_data.fitness_values[0]) + fitness_size,
+              &bytes[0] + current_offset);
+    current_offset += fitness_size;
+    return bytes;
 }
 
 

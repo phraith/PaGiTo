@@ -60,6 +60,8 @@ const ScatterImageWithLineprofile = (props: ScatterImageWithLineprofileProps) =>
         drawLine(new LineProfile(canvasStart, canvasEnd), ctxSafe);
       })
 
+      if(props.profileState.currentLineProfile === null) {return;}
+
       let canvasStart = new Coordinate((props.profileState.currentLineProfile.start.x / props.width) * canvas.width, (props.profileState.currentLineProfile.start.y / props.height) * canvas.height)
       let canvasEnd = new Coordinate((props.profileState.currentLineProfile.end.x / props.width) * canvas.width, (props.profileState.currentLineProfile.end.y / props.height) * canvas.height)
       drawLine(new LineProfile(canvasStart, canvasEnd), ctxSafe);

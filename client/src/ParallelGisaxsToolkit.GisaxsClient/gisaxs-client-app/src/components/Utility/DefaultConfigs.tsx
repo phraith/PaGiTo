@@ -6,8 +6,8 @@ export const InstrumentationConfig = {
   detector: {
     pixelsize: 57.3e-3,
     resolution: {
-      width: 200,
-      height: 200,
+      width: 1475,
+      height: 1679,
     },
     sampleDistance: 1000,
     beamImpact: {

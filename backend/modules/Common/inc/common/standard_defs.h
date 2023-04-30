@@ -65,6 +65,12 @@ typedef struct SimData
     float scale;
 } SimData;
 
+typedef struct FitData
+{
+    std::vector<double> fitness_values;
+    std::vector<double> parameters;
+} FitData;
+
 typedef struct RequestResult
 {
     std::vector<std::byte> data;

@@ -108,24 +108,26 @@ const Sample = (props: SampleProps) => {
   };
 
   return (
-    <Card sx={{ height: "100%" }}>
-      <CardContent sx={{ height: "100%" }}>
-        <Box display="flex" sx={{ flexDirection: "column", height: "100%" }}>
-          <Box display="flex" justifyContent={"space-between"} sx={{ paddingBottom: 1 }}>
-            <Typography>Sample</Typography>
-            <Button size="small" onClick={addLayer}>
-              <Add />
-            </Button>
-          </Box >
+    <Box sx={{ height: "100%" }}>
+      <Card sx={{ height: "100%" }}>
+        <CardContent sx={{ height: "100%" }}>
+          <Box display="flex" sx={{ flexDirection: "column", height: "100%" }}>
+            <Box display="flex" justifyContent={"space-between"} sx={{ paddingBottom: 1 }}>
+              <Typography>Sample</Typography>
+              <Button size="small" onClick={addLayer}>
+                <Add />
+              </Button>
+            </Box >
 
-          <List sx={{ height: "100%", overflow: "auto" }}>
-            {layers.map((value) => {
-              return <ListItem key={value.props.id}>{value}</ListItem>;
-            })}
-          </List>
-        </Box>
-      </CardContent>
-    </Card>
+            <List sx={{ height: "100%", overflow: "auto" }}>
+              {layers.map((value) => {
+                return <ListItem key={value.props.id}>{value}</ListItem>;
+              })}
+            </List>
+          </Box>
+        </CardContent>
+      </Card>
+    </Box>
   );
 };
 

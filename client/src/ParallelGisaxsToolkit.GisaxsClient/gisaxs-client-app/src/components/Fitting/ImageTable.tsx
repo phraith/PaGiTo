@@ -41,6 +41,15 @@ const ImageTable = (props: ImageTableProps) => {
       .then((data) => setTableData(data))
   }, [])
 
+
+  useEffect(() => {
+    if(tableData.length > 0)
+    {
+      let entry = tableData[0]
+      props.setImageInfo(new ImageInfo(entry.id, entry.width, entry.height))
+    }
+  }, [tableData])
+
   return (
       <DataGrid sx={{height: "100%", width: "100%"}} rows={tableData}
         columns={columns}

@@ -41,7 +41,7 @@ void RabbitMqWorker::Run() {
     auto heartbeat_runner = std::jthread([&, stop_token = source.get_token()] {
         while (!stop_token.stop_requested()) {
             connection.heartbeat();
-            spdlog::info("FitJobClient: heartbeat");
+            spdlog::info("client {}: heartbeat", queue_name_);
             std::this_thread::sleep_for(2s);
         };
     });

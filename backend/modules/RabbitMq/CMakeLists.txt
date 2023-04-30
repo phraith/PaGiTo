@@ -11,12 +11,8 @@ target_sources(RabbitMq
         inc/gisaxs_tcp_handler.h
         src/fit_job_client.cpp
         inc/fit_job_client.h
-        #        src/rabbitmq_client.cpp
-        #        inc/rabbitmq_client.h
         src/rabbitmq_worker.cpp
         inc/rabbitmq_worker.h
-        #        src/rabbitmq_connection.cpp
-        #        inc/rabbitmq_connection.h
         )
 
 target_include_directories(RabbitMq

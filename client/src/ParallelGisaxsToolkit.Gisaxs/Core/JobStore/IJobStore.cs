@@ -3,9 +3,9 @@
 public interface IJobStore
 {
     Task<IEnumerable<Job>> Get();
+    Task Update(Job job);
     Task<IEnumerable<long>> Count();
-    Task<Job?> Get(long jobId);
+    Task<Job?> Get(string jobId, string userId, bool includeConfig, bool includeResult);
     Task Delete(long jobId);
     Task Insert(Job job);
-    Task Insert(IReadOnlyCollection<Job> jobs);
 }

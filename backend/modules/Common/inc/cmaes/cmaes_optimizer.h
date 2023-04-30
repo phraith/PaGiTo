@@ -6,6 +6,7 @@
 #define GISAXSMODELINGFRAMEWORK_CMAES_OPTIMIZER_H
 
 #include "cmaes.h"
+#include "common/standard_defs.h"
 
 class CmaesOptimizer {
 public:
@@ -13,7 +14,7 @@ public:
                    const std::vector<double> &lower, const std::vector<double> &upper, double sigma,
                    int max_iterations, int rand_seed = 0);
 
-    std::shared_ptr<Solution> Optimize();
+    FitData Optimize();
 
 private:
     Cmaes cma_;
