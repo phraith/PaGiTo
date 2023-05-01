@@ -19,51 +19,51 @@ services:
 #       - "8080:80"
 #       - "8081:443"
 
-  client_tests:
-      build:
-        context: client
-        dockerfile: Dockerfile
-        target: tests
-      command:
-        - /bin/sh
-        - -c
-        - |
-          dotnet test --logger "trx;LogFileName=/reports/client/test-results.trx" --collect:"XPlat Code Coverage"
-          find /tests/ -name coverage.cobertura.xml -exec cp "{}" /reports/client/ \;
-      volumes:
-      - /reports:/reports
-  backend_tests:
-    build:
-      context: backend
-      dockerfile: Dockerfile.alpine
-    command: 
-      - /bin/sh
-      - -c
-      - |
-        ./tests/GisaxsTests --gtest_output=xml:/reports/backend/test-results.xml
-        make GisaxsCoverage
-        cp -r GisaxsCoverage* /reports/backend
-    volumes:
-      - /reports:/reports
+  # client_tests:
+  #     build:
+  #       context: client
+  #       dockerfile: Dockerfile
+  #       target: tests
+  #     command:
+  #       - /bin/sh
+  #       - -c
+  #       - |
+  #         dotnet test --logger "trx;LogFileName=/reports/client/test-results.trx" --collect:"XPlat Code Coverage"
+  #         find /tests/ -name coverage.cobertura.xml -exec cp "{}" /reports/client/ \;
+  #     volumes:
+  #     - /reports:/reports
+  # backend_tests:
+  #   build:
+  #     context: backend
+  #     dockerfile: Dockerfile.alpine
+  #   command: 
+  #     - /bin/sh
+  #     - -c
+  #     - |
+  #       ./tests/GisaxsTests --gtest_output=xml:/reports/backend/test-results.xml
+  #       make GisaxsCoverage
+  #       cp -r GisaxsCoverage* /reports/backend
+  #   volumes:
+  #     - /reports:/reports
 
   redis:
     image: redis:latest
     ports:
       - 6379:6379
   pg_admin4:
-    image: dpage/pgadmin4:latest
+    image: dpage/pgadmin4:7.0
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     ports:
       - "5050:80"
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3.9.29-management
     ports:
       - 5672:5672
       - 15672:15672
   postgres:
-    image: postgres:latest
+    image: postgres:15.2-bullseye
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}

@@ -68,69 +68,71 @@ const UnitcellMeta = (props: UnitcellMetaProps) => {
   }, []);
 
   return (
-    <Card sx={{}}>
-      <CardContent>
-        <Typography>UnitcellMeta</Typography>
-        <Box display="flex" sx={{ flexDirection: "column" }}>
-          <Box display="flex" sx={{ paddingBottom: 1 }}>
-            <TextField
-              label="repX"
-              value={repX}
-              type="number"
-              onChange={(e) => {
-                setRepX(Number(e.target.value));
-              }}
-            />
+    <Box sx={{ height: "100%" }}>
+      <Card sx={{ height: "100%" }}>
+        <CardContent sx={{ height: "100%" }}>
+          <Typography>UnitcellMeta</Typography>
+          <Box display="flex" sx={{ flexDirection: "column" }}>
+            <Box display="flex" sx={{ paddingBottom: 1 }}>
+              <TextField
+                label="repX"
+                value={repX}
+                type="number"
+                onChange={(e) => {
+                  setRepX(Number(e.target.value));
+                }}
+              />
 
-            <TextField
-              label="repY"
-              value={repY}
-              type="number"
-              onChange={(e) => {
-                setRepY(Number(e.target.value));
-              }}
-            />
+              <TextField
+                label="repY"
+                value={repY}
+                type="number"
+                onChange={(e) => {
+                  setRepY(Number(e.target.value));
+                }}
+              />
 
-            <TextField
-              label="repZ"
-              value={repZ}
-              type="number"
-              onChange={(e) => {
-                setRepZ(Number(e.target.value));
-              }}
-            />
+              <TextField
+                label="repZ"
+                value={repZ}
+                type="number"
+                onChange={(e) => {
+                  setRepZ(Number(e.target.value));
+                }}
+              />
+            </Box>
+            <Box display="flex" sx={{ paddingBottom: 1 }}>
+              <TextField
+                label="posX"
+                value={posX}
+                type="number"
+                onChange={(e) => {
+                  setPosX(Number(e.target.value));
+                }}
+              />
+
+              <TextField
+                label="posY"
+                value={posY}
+                type="number"
+                onChange={(e) => {
+                  setPosY(Number(e.target.value));
+                }}
+              />
+
+              <TextField
+                label="posZ"
+                value={posZ}
+                type="number"
+                onChange={(e) => {
+                  setPosZ(Number(e.target.value));
+                }}
+              />
+            </Box>
           </Box>
-          <Box display="flex" sx={{ paddingBottom: 1 }}>
-            <TextField
-              label="posX"
-              value={posX}
-              type="number"
-              onChange={(e) => {
-                setPosX(Number(e.target.value));
-              }}
-            />
-
-            <TextField
-              label="posY"
-              value={posY}
-              type="number"
-              onChange={(e) => {
-                setPosY(Number(e.target.value));
-              }}
-            />
-
-            <TextField
-              label="posZ"
-              value={posZ}
-              type="number"
-              onChange={(e) => {
-                setPosZ(Number(e.target.value));
-              }}
-            />
-          </Box>
-        </Box>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </Box>
   );
 };
 

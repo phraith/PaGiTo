@@ -22,7 +22,7 @@ public class GetJobRangeEndpoint : Endpoint<GetJobRangeRequest, GetJobRangeRespo
     {
         int start = request.Page * request.Size;
         IEnumerable<Job> jobs = await _jobStore.Get();
-        IEnumerable<Job> jobsInRange = jobs.ToArray().Skip(start).Take(request.Size + 1);
+        IEnumerable<Job> jobsInRange = jobs.ToArray().Skip(start).Take(request.Size);
         await SendAsync(new GetJobRangeResponse(jobsInRange), cancellation: ct);
     }
 }

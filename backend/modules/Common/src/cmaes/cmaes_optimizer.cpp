@@ -19,7 +19,10 @@ CmaesOptimizer::CmaesOptimizer(
 
 }
 
-std::shared_ptr<Solution> CmaesOptimizer::Optimize() {
+FitData CmaesOptimizer::Optimize() {
+
+    std::vector<double> fitness_value_per_iteration;
+
     for (int i = 0; i < max_iterations_; ++i) {
         auto solutions = std::vector<Solution>();
 
@@ -39,21 +42,24 @@ std::shared_ptr<Solution> CmaesOptimizer::Optimize() {
         }
 
         cma_.Tell(solutions);
+
+        const auto best_solution_it = std::min_element(std::begin(solutions), std::end(solutions));
+        fitness_value_per_iteration.emplace_back(best_solution_it->Fitness());
+
 //        cma_.ShouldStop()
-        if (i == max_iterations_ - 1) {
-
-            const auto best_solution_it = std::min_element(std::begin(solutions), std::end(solutions));
+        if (cma_.ShouldStop()) {
+            std::vector<double> final_parameters;
             std::shared_ptr<Solution> best_solution = std::make_shared<Solution>(*best_solution_it);
-
             if (best_solution != nullptr) {
                 std::cout << "Fitness: " << (*best_solution_it).Fitness() << " Params: ";
                 std::string params;
                 for (auto parameter: (*best_solution_it).Parameters()) {
+                    final_parameters.emplace_back(parameter);
                     params = params + " " + std::to_string(parameter);
                 }
                 std::cout << params << std::endl;
             }
-            return best_solution;
+            return {fitness_value_per_iteration, final_parameters};
         }
     }
 }

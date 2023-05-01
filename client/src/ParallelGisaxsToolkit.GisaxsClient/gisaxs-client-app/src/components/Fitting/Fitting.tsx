@@ -9,7 +9,7 @@ import UnitcellMeta from "../UnitcellMeta/UnitcellMeta";
 import { useEffect, useRef, useState } from "react";
 import * as React from "react";
 import Sample from "../Sample/Sample";
-import { Coordinate, LineMode, LineProfile, LineProfileState } from "../../utility/LineProfile";
+import { LineMode, LineProfileState } from "../../utility/LineProfile";
 import ImageTable from "./ImageTable";
 import { Button } from "@mui/material";
 import { ImageInfo } from "../../utility/ImageInfo";
@@ -17,43 +17,62 @@ import { MessageHubConnectionProvider } from "../../utility/MessageHubConnection
 import ColormapSelect from "../Colormap";
 import ScatterImageWithLineprofile from "../ScatterImage/ScatterImageWithLineprofile";
 import LineProfileGraph from "./LineProfileGraphECharts";
+import useJsonCallback from "../../hooks/useJsonCallback";
+import useJobEffect from "../../hooks/useJobEffect";
 
 const Fitting = () => {
     const getLineprofiles = (hash: any) => {
-        const url = `/api/job/${hash}`;
-        console.log(hash)
-        fetch(url, {
-            method: "GET",
-            headers: {
+        const requestOptions1 = {
+            method: 'POST',
+            headers: 
+            {
                 Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
                 Accept: "application/json",
+                'Content-Type': 'application/json'
             },
+            body: JSON.stringify(
+                {
+                  jobId: hash,
+                  includeResult: true
+                }
+            )
+        };
+      
+        let url1 = "/api/job/state";
+        fetch(url1, requestOptions1)
+        .then((response) => response.json())
+        .then((data) => {
+            let json = JSON.parse(data.job.result)
+            let traces = []
+            let values = json.numericResults[0].modifiedData
+            let k = values.map((x: number, index: number) => { return [index, x] })
+            traces.push(k)
+            setSimulatedPlotData(traces[0])
         })
-            .then((response) => response.json())
-            .then((data) => {
-                console.log(data)
-                let json = JSON.parse(data.response)
-                let traces = []
-                let values = json.numericResults[0].modifiedData
-                let k = values.map((x: number, index: number) => { return [index, x] })
-                traces.push(k)
-                setSimulatedPlotData(traces[0])
-            })
     }
 
     const receiveJobResult = (hash: any) => {
-        const url = `/api/job/${hash}`;
-        console.log(hash)
-        fetch(url, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
-                Accept: "application/json",
-            },
-        })
-            .then((response) => response.json())
-            .then((data) => handleData(data));
-    };
+        const requestOptions1 = {
+          method: 'POST',
+          headers: 
+          {
+              Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
+              Accept: "application/json",
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(
+              {
+                jobId: hash,
+                includeResult: true
+              }
+          )
+      };
+    
+      let url1 = "/api/job/state";
+      fetch(url1, requestOptions1)
+      .then((data) => data.json())
+      .then((data) => handleData(data));
+      };
 
     const [hubConnection, _] = useState<MessageHubConnectionProvider>(
         new MessageHubConnectionProvider(
@@ -69,12 +88,14 @@ const Fitting = () => {
     const [refIntensities, setRefIntensities] = useState<string>();
     const [imgWidth, setImgWidth] = useState<number>();
     const [imgHeight, setImgHeight] = useState<number>();
-    const [lineprofileState, setLineprofileState] = useState<LineProfileState>(new LineProfileState(LineMode.Horizontal, [], new LineProfile(new Coordinate(0, 0), new Coordinate(0, 1))));
+    const [lineprofileState, setLineprofileState] = useState<LineProfileState>(new LineProfileState(LineMode.Horizontal, [], null));
     const [simulatedPlotData, setSimulatedPlotData] = React.useState([])
     const [realPlotData, setRealPlotData] = React.useState([])
-
-    const [openTable, setOpenTable] = React.useState<boolean>(false)
-    const [imageInfo, setImageInfo] = React.useState<ImageInfo>(new ImageInfo(1, 0, 0))
+    const [openTable, setOpenTable] = React.useState<boolean>(true)
+    const [imageInfo, setImageInfo] = React.useState<ImageInfo>(null)
+    const [json, jsonCallback] = useJsonCallback();
+    const [colormap, setColorMap] = React.useState("twilightShifted");
+    const reponse = useJobEffect(json, colormap);
 
     useEffect(() => {
         hubConnection.connect()
@@ -82,7 +103,7 @@ const Fitting = () => {
 
     const handleData = (input: any) => {
         let startTime = performance.now();
-        let json = JSON.parse(input.response);
+        let json = JSON.parse(input.job.result)
         setIntensities(json.jpegResults[0].data);
         setImgWidth(json.jpegResults[0].width);
         setImgHeight(json.jpegResults[0].height);
@@ -90,14 +111,7 @@ const Fitting = () => {
         console.log(`Handling data took ${endTime - startTime} milliseconds`);
     };
 
-    const [colormap, setColorMap] = React.useState("twilightShifted");
-    const [jsonData, setJsonData] = React.useState({});
-
-    const jsonCallback = (value, key) => {
-        jsonData[key] = value;
-        setJsonData({ ...jsonData });
-    };
-
+    
 
     const requestLineProfiles = (jsonConfigForSimulation, jsonConfigForRealImage) => {
         const requestOptions1 = {
@@ -116,8 +130,6 @@ const Fitting = () => {
 
         let url1 = "/api/job";
         fetch(url1, requestOptions1)
-            .then(data => console.log(data));
-
 
         const requestOptions = {
             method: 'POST',
@@ -133,11 +145,9 @@ const Fitting = () => {
             .then((response) => response.json())
             .then((data) => {
                 let traces = []
-                console.log(data)
                 let values = data.modifiedData
                 let k = values.map((x: number, index: number) => { return [index, x] })
                 traces.push(k)
-                console.log(traces)
                 setRealPlotData(traces[0])
             })
     }
@@ -147,11 +157,13 @@ const Fitting = () => {
         requestLineProfiles(jsonConfigForSimulation, jsonConfigForRealImage)
     }, 50))
 
-    // const throttled = useRef(throttle((jsonConfigForSimulation, jsonConfigForRealImage) => {
-    //     requestLineProfiles(jsonConfigForSimulation, jsonConfigForRealImage)
-    // }, 50));
-
     useEffect(() => {
+        if(lineprofileState.currentLineProfile === null || imageInfo === null) {
+            return;
+        }
+
+
+        console.log(lineprofileState?.currentLineProfile)
         let jsonConfigForSimulation = JSON.stringify({
             meta: {
                 type: "simulation",
@@ -164,7 +176,7 @@ const Fitting = () => {
                 ]
             },
             config: {
-                ...jsonData,
+                ...json,
             },
         });
 
@@ -177,7 +189,7 @@ const Fitting = () => {
             })
 
         debounced.current(jsonConfigForSimulation, jsonConfigForRealImage)
-    }, [lineprofileState?.currentLineProfile, jsonData]);
+    }, [lineprofileState?.currentLineProfile, json]);
 
     useEffect(() => {
         jsonCallback(lineprofileState.lineProfiles.map(lp => {
@@ -189,46 +201,12 @@ const Fitting = () => {
     }, [lineprofileState.lineProfiles])
 
     useEffect(() => {
-        let jsonConfig = JSON.stringify({
-            meta: {
-                type: "simulation",
-                notification: "receiveJobResult",
-                persist: true,
-                execute: false,
-                colormap: colormap
-            },
-            properties: {
-                intensityFormat: "greyscale",
-                simulationTargets: []
-            },
-            config: {
-                ...jsonData,
-            },
-        });
-        localStorage.setItem("simulation_config", jsonConfig);
+        if(imageInfo == null)
+        {
+            return;
+        }
 
 
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
-                Accept: "application/json",
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(
-                {
-                    "jsonConfig": jsonConfig
-                }
-            )
-        };
-
-        const url = "/api/job";
-        fetch(url, requestOptions)
-            .then(data => console.log(data));
-
-    }, [jsonData, colormap]);
-
-    useEffect(() => {
         const url = `/api/image/${imageInfo.id}/${colormap}`;
         fetch(url, {
             method: "GET",
@@ -242,11 +220,9 @@ const Fitting = () => {
                 setRefIntensities(data.imageAsBase64)
                 setImgWidth(data.width);
                 setImgHeight(data.height);
-                console.log("asdasd")
-                console.log(data)
             }
             );
-    }, [imageInfo.id, colormap]);
+    }, [imageInfo, colormap]);
 
     const sendJobInfo = () => {
         let jsonConfig = JSON.stringify({
@@ -263,7 +239,7 @@ const Fitting = () => {
                 simulationTargets: lineprofileState.lineProfiles
             },
             config: {
-                ...jsonData,
+                ...json,
             },
         });
 
@@ -306,20 +282,20 @@ const Fitting = () => {
                         </Box>
 
                         <Box display="flex" sx={{ gap: 2 }}>
-                            <Instrumentation jsonCallback={jsonCallback} initialResX={imageInfo.width} initialResY={imageInfo.height} />
-                            <UnitcellMeta jsonCallback={jsonCallback} />
+                            <Instrumentation jsonCallback={jsonCallback} initialResX={imageInfo === null ? 0 : imageInfo.width } initialResY={imageInfo === null ? 0 : imageInfo.height} />
+                            <Box display="flex" flexDirection={"column"} sx={{ gap: 2 }}>
+                                <UnitcellMeta jsonCallback={jsonCallback} />
+                                <Box display="flex" sx={{ gap: 2 }}>
+                                    <ColormapSelect colormap={colormap} setColormap={setColorMap} />
+                                    <Button variant="outlined" onClick={() => sendJobInfo()}>
+                                        Create
+                                    </Button>
+                                    <Button variant="outlined" onClick={() => { setOpenTable(prevState => !prevState) }}>
+                                        {openTable ? "Graph" : "Images"}
+                                    </Button>
+                                </Box>
+                            </Box>
                         </Box>
-
-                        <Box display="flex" sx={{ gap: 2 }}>
-                            <ColormapSelect colormap={colormap} setColormap={setColorMap} />
-                            <Button variant="outlined" onClick={() => sendJobInfo()}>
-                                Create
-                            </Button>
-                            <Button variant="outlined" onClick={() => { setOpenTable(prevState => !prevState) }}>
-                                {openTable ? "Graph" : "Images"}
-                            </Button>
-                        </Box>
-
                         <Grid container spacing={2} sx={{ height: "30vh" }}>
                             <Grid item xs={7} sm={7} md={7} lg={7} sx={{ height: "100%" }}>
                                 <GisaxsShapes isSimulation={false} jsonCallback={jsonCallback} />

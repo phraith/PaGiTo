@@ -70,13 +70,8 @@ namespace ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling
 
             string? colormap = request.RequestInformation.MetaInformation.Colormap;
 
-            RequestData resultData = _requestResultDeserializer.Deserialize(contentFrameData, colormap);
-            string serialized = JsonSerializer.Serialize(
-                resultData, new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                });
-
+            IRequestData resultData = _requestResultDeserializer.Deserialize(contentFrameData, request.RequestInformation.MetaInformation.Type, colormap);
+            string serialized = resultData.Serialize();
             _db.StringSet(request.JobId, serialized);
             return new RequestResult(request.JobId, request.RequestInformation.MetaInformation.Notification);
         }

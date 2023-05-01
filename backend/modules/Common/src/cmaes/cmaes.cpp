@@ -77,7 +77,7 @@ double Cmaes::RootTemp(double input) {
 }
 
 bool Cmaes::ShouldStop() {
-//    EigenDecomposition();
+    EigenDecomposition();
     auto dC = C_->asDiagonal();
 
     const auto [min, max] = std::minmax_element(std::begin(function_history_), std::end(function_history_));
@@ -85,27 +85,27 @@ bool Cmaes::ShouldStop() {
         return true;
     }
 
-//    bool dc_is_small_enough = true;
-//    for (size_t i = 0; i < dC.size(); i++) {
-//        auto value = dC.diagonal()(i);
-//        if (sigma_ * value >= tolx_) {
-//            dc_is_small_enough = false;
-//            break;
-//        }
-//    }
-//
-//    bool pc_is_small_enough = true;
-//    for (size_t i = 0; i < pc_.size(); i++) {
-//        auto value = pc_.diagonal()(i);;
-//        if (sigma_ * value >= tolx_) {
-//            pc_is_small_enough = false;
-//            break;
-//        }
-//    }
-//
-//    if (dc_is_small_enough && pc_is_small_enough) {
-//        return true;
-//    }
+    bool dc_is_small_enough = true;
+    for (size_t i = 0; i < dC.size(); i++) {
+        auto value = dC.diagonal()(i);
+        if (sigma_ * value >= tolx_) {
+            dc_is_small_enough = false;
+            break;
+        }
+    }
+
+    bool pc_is_small_enough = true;
+    for (size_t i = 0; i < pc_.size(); i++) {
+        auto value = pc_[i];
+        if (sigma_ * value >= tolx_) {
+            pc_is_small_enough = false;
+            break;
+        }
+    }
+
+    if (dc_is_small_enough && pc_is_small_enough) {
+        return true;
+    }
 
     if (sigma_ * D_->maxCoeff() > tolxup_) {
         return true;

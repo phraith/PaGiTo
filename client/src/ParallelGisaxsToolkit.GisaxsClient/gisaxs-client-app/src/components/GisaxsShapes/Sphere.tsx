@@ -50,17 +50,18 @@ const Sphere = (props: SphereProps) => {
   return (
     <Card key={props.id}>
       <CardContent>
-        <Box display="flex" sx={{ justifyContent: "space-between" }}>
+        <Box display="flex" >
           <Button size="small" onClick={handleButtonClick}>
             {collapsed ? <ExpandMore /> : <ExpandLess />}
           </Button>
-          <Typography sx={{ display: "flex" }} color="text.secondary" gutterBottom>
-            <Box  component="img" sx={{display:"flex", height: 25}} src={SphereIcon}/>
-            {collapsed ? `[${jsonData.radius.meanUpper}, ${jsonData.radius.stddevUpper}]` : ""}
-          </Typography>
           <Button size="small" onClick={handleRemove}>
             <DeleteForever />
-          </Button>
+          </Button> 
+          <Box  component="img" sx={{height: 25}} src={SphereIcon}/>
+          <Typography color="text.secondary" gutterBottom>
+            {collapsed ? `r: ${jsonData.radius.meanUpper}` : ""}
+          </Typography>
+
         </Box>
 
         <Collapse in={!collapsed}>

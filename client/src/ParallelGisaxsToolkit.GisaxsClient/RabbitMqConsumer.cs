@@ -1,7 +1,8 @@
 using System.Text;
 using System.Text.Json;
+using ParallelGisaxsToolkit.Gisaxs.Configuration;
+using ParallelGisaxsToolkit.Gisaxs.Core.JobStore;
 using ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling;
-using ParallelGisaxsToolkit.Gisaxs.Core.ResultStore;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using StackExchange.Redis;
@@ -36,7 +37,7 @@ public class RabbitMqConsumer : BackgroundService
         await Task.CompletedTask;
     }
 
-    private Task Reconnect(object?  model, ShutdownEventArgs? args)
+    private Task Reconnect(object? model, ShutdownEventArgs? args)
     {
         while (!_consumerChannel.IsOpen)
         {
@@ -45,12 +46,12 @@ public class RabbitMqConsumer : BackgroundService
 
         return Task.CompletedTask;
     }
-    
+
     private async Task EventConsume(object? model, BasicDeliverEventArgs deliverEventArgs)
     {
         using IServiceScope scope = _serviceScopeFactory.CreateScope();
         IDatabase redisClient = scope.ServiceProvider.GetRequiredService<IDatabase>();
-        IResultStore resultStore = scope.ServiceProvider.GetRequiredService<IResultStore>();
+        IJobStore jobStore = scope.ServiceProvider.GetRequiredService<IJobStore>();
         INotifier notifier = scope.ServiceProvider.GetRequiredService<INotifier>();
         IRequestResultDeserializer requestResultDeserializer =
             scope.ServiceProvider.GetRequiredService<IRequestResultDeserializer>();
@@ -61,6 +62,7 @@ public class RabbitMqConsumer : BackgroundService
 
         string jobId = basicProperties.CorrelationId;
 
+        string? jobTypeAsString = TryGetHeaderValue("jobType");
         string? jobHash = TryGetHeaderValue("jobHash");
         string? clientId = TryGetHeaderValue("clientId");
         string? notification = TryGetHeaderValue("notification");
@@ -68,22 +70,27 @@ public class RabbitMqConsumer : BackgroundService
 
         byte[] response = deliverEventArgs.Body.ToArray();
 
-        if (response.Length <= 0 || jobHash == null || clientId == null || notification == null)
+        if (response.Length <= 0 || jobHash == null || clientId == null || notification == null ||
+            jobTypeAsString == null)
         {
             throw new InvalidDataException("Response was empty!");
         }
 
         await redisClient.StringSetAsync(jobHash, response);
 
-        RequestData resultData = requestResultDeserializer.Deserialize(response, colormap);
-        string serializedResult = JsonSerializer.Serialize(
-            resultData, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            });
+        JobType jobType = Enum.Parse<JobType>(jobTypeAsString);
+        IRequestData resultData = requestResultDeserializer.Deserialize(response, jobType, colormap);
+        string serializedResult = resultData.Serialize();
 
-        await resultStore.Insert(new Result(serializedResult, jobId, clientId));
+        Job? job = await jobStore.Get(jobId, clientId, false, false);
+        if (job == null)
+        {
+            throw new ArgumentNullException(nameof(Job), "Job to update does not exist");
+        }
+
+        await jobStore.Update(job with { FinishDate = DateTime.Now, Result = serializedResult });
         await notifier.Notify(clientId, notification, jobId);
+
 
         string? TryGetHeaderValue(string key)
         {

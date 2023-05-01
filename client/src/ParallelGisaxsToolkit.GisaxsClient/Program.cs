@@ -14,7 +14,6 @@ using ParallelGisaxsToolkit.Gisaxs.Core.Hubs;
 using ParallelGisaxsToolkit.Gisaxs.Core.ImageStore;
 using ParallelGisaxsToolkit.Gisaxs.Core.JobStore;
 using ParallelGisaxsToolkit.Gisaxs.Core.RequestHandling;
-using ParallelGisaxsToolkit.Gisaxs.Core.ResultStore;
 using ParallelGisaxsToolkit.Gisaxs.Core.UserStore;
 using ParallelGisaxsToolkit.Gisaxs.Utility.HashComputer;
 using ParallelGisaxsToolkit.GisaxsClient;
@@ -61,7 +60,6 @@ try
     builder.Services.AddScoped<IJobStore, JobStore>();
     builder.Services.AddScoped<IRequestFactory, RequestFactory>();
     builder.Services.AddScoped<IUserStore, UserStore>();
-    builder.Services.AddScoped<IResultStore, ResultStore>();
     builder.Services.AddScoped<INotifier, MessageHubNotifier>();
     builder.Services.AddSingleton<IUserIdGenerator, HmacSha512UserIdGenerator>();
     builder.Services.AddSingleton<IHashComputer, Sha256HashComputer>();

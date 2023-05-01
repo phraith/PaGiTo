@@ -2,10 +2,10 @@ import { DataGrid } from '@mui/x-data-grid/DataGrid';
 import { Box, Button, CircularProgress, makeStyles, Typography } from '@mui/material';
 import { memo, useState, useEffect } from 'react';
 import { JobInfo } from '../../utility/JobInfo';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import  { CircularProgressProps } from '@mui/material/CircularProgress';
+import { CircularProgressProps } from '@mui/material/CircularProgress';
 interface JobsTableProps {
-  setJob: any
+  setJsonData: any
+  resultNotifier: any
 }
 
 function CircularProgressWithLabel(
@@ -39,6 +39,11 @@ function CircularProgressWithLabel(
 const JobsTable = (props: JobsTableProps) => {
 
   const [tableData, setTableData] = useState([])
+  const [tableCount, setTableCount] = useState(0)
+  const [result, setResult] = useState({})
+
+  const pageSize = 20;
+
 
   const renderConfigsButton = (params) => {
     return (
@@ -47,7 +52,7 @@ const JobsTable = (props: JobsTableProps) => {
           variant="contained"
           color="primary"
           size="small"
-          onClick={() => props.setJob(new JobInfo(params.row.id, params.row.config))}
+          onClick={() => fetchConfig(params.row.id)}
         >
           Show
         </Button>
@@ -57,39 +62,117 @@ const JobsTable = (props: JobsTableProps) => {
   const renderResultButton = (params) => {
 
     return (
-      <strong>{
-        <Button
-          variant="contained"
-          color="primary"
-          size="small"
-          disabled={true}
-          onClick={() => props.setJob(new JobInfo(params.row.id, params.row.config))}
-        >
-          Show
-        </Button>}
-      </strong>
+      <Button
+        variant="contained"
+        color="primary"
+        size="small"
+        disabled={!params.row.finishDate}
+        onClick={() => fetchResult(params.row.id)}
+      >
+        Show
+      </Button>
     )
   }
 
+  const fetchResult = (jobId) => {
+    const requestOptions1 = {
+      method: 'POST',
+      headers:
+      {
+        Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
+        Accept: "application/json",
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(
+        {
+          jobId: jobId,
+          includeResult: true
+        }
+      )
+    };
+
+    let url1 = "/api/job/state";
+    fetch(url1, requestOptions1)
+      .then((data) => data.json())
+      .then((data) => {
+        props.setJsonData(data.job.result)
+      })
+  }
+
+  const fetchConfig = (jobId) => {
+    const requestOptions1 = {
+      method: 'POST',
+      headers:
+      {
+        Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
+        Accept: "application/json",
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(
+        {
+          jobId: jobId,
+          includeConfig: true
+        }
+      )
+    };
+
+    let url1 = "/api/job/state";
+    fetch(url1, requestOptions1)
+      .then((data) => data.json())
+      .then((data) => {
+        props.setJsonData(data.job.config)
+      })
+  }
+
+
   const renderProgressButton = (params) => {
-
-
     return (
-      // <CheckCircleOutlineIcon color="primary" />
       <CircularProgressWithLabel value={20} />
     )
   }
 
 
   const columns = [
-    { field: 'id', headerName: 'Job-ID', width: 300 },
+    { field: 'id', headerName: 'Job-ID', width: 100 },
+    { field: 'issueDate', headerName: "IssueDate", width: 200 },
+    { field: 'finishDate', headerName: "FinishDate", width: 200 },
     { field: 'config', headerName: "Config", renderCell: renderConfigsButton },
-    { field: 'progress', headerName: "Progress", renderCell: renderProgressButton },
-    { field: 'result', headerName: "Result", renderCell: renderResultButton }
+    // { field: 'progress', headerName: "Progress", renderCell: renderProgressButton },
+    { field: 'result', headerName: "Result", renderCell: renderResultButton },
+
   ]
 
   useEffect(() => {
-    fetch("/api/jobs", {
+    fetch(`/api/jobs/count`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
+        Accept: "application/json",
+      },
+    })
+      .then((data) => data.json())
+      .then((json) => setTableCount(json.jobCount))
+    updateTableData(0)
+  }, [])
+
+  useEffect(() => {
+
+  }, [props.resultNotifier])
+
+
+  const updateTableData = (page: any) => {
+    fetch(`/api/jobs/count`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
+        Accept: "application/json",
+      },
+    })
+      .then((data) => data.json())
+      .then((json) => setTableCount(json.jobCount))
+
+    console.log(page)
+    fetch(`/api/jobs/${page}/${pageSize}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
@@ -98,28 +181,35 @@ const JobsTable = (props: JobsTableProps) => {
     })
       .then((data) => data.json())
       .then((data) => data.jobs.map(entry => {
-        console.log(JSON.parse(entry.config))
         return {
           id: entry.jobId,
-          config: JSON.parse(entry.config),
+          issueDate: entry.issueDate,
+          finishDate: entry.finishDate
         }
       })
       )
-      .then((data) => setTableData(data))
-  }, [])
-
+      .then((data) => { console.log(data); setTableData(data) })
+  }
 
   return (
     <DataGrid sx={{
       height: 500, "&.MuiDataGrid-root .MuiDataGrid-cell:focus-within": {
         outline: "none !important",
-      },
-    }} rows={tableData}
+      }
+    }}
+      initialState={{
+        sorting: {
+          sortModel: [{ field: 'issueDate', sort: 'desc' }],
+        },
+      }}
+      rows={tableData}
+      paginationMode="server"
+      rowCount={tableCount}
+      pageSize={pageSize}
       disableColumnSelector={true}
-
       columns={columns}
+      onPageChange={(p) => updateTableData(p)}
     />
-
   );
 }
 

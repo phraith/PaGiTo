@@ -43,20 +43,20 @@ int main(int argc, char **argv) {
     std::shared_ptr<HardwareInformation> hw_info = std::make_shared<HardwareInformation>();
     std::thread t1(RunSimWorker, hw_info);
     std::thread t2(RunFitWorker);
-    std::thread t3(RunFitWorker);
-    std::thread t4(RunFitWorker);
+//    std::thread t3(RunFitWorker);
+//    std::thread t4(RunFitWorker);
 
-    std::thread t5(RunSimWorker, hw_info);
-    std::thread t6(RunSimWorker, hw_info);
-    std::thread t7(RunSimWorker, hw_info);
+//    std::thread t5(RunSimWorker, hw_info);
+//    std::thread t6(RunSimWorker, hw_info);
+//    std::thread t7(RunSimWorker, hw_info);
 
     t1.join();
     t2.join();
-    t3.join();
-    t4.join();
-    t5.join();
-    t6.join();
-    t7.join();
+//    t3.join();
+//    t4.join();
+//    t5.join();
+//    t6.join();
+//    t7.join();
 
     return 0;
 }
