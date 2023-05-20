@@ -23,7 +23,7 @@ const RefractionParameterWrapper = (props: RefractionParameterWrapperProps) => {
   }, [delta, beta]);
 
   return (
-    <Box display="flex" sx={{paddingBottom: 1}}>
+    <Box display="flex" gap={2}>
       <ParameterWrapper
         defaultValue={delta}
         valueSetter={setDelta}

@@ -31,10 +31,10 @@ const ShapeParameter = (props: ShapeParameterProps) => {
   }, [meanLower, meanUpper, stddevLower, stddevUpper]);
 
   return (
-    <Box display="flex" sx={{ flexDirection: "column" }}>
+    <Box display="flex" gap={2} sx={{ flexDirection: "column" }}>
       <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>{props.parameterName}</Typography>
       {!props.isSimulation &&
-        <Box display="flex" sx={{ paddingBottom: 1 }}>
+        <Box display="flex" gap={2}>
           <ParameterWrapper
             defaultValue={meanLower}
             valueSetter={setMeanLower}
@@ -58,7 +58,7 @@ const ShapeParameter = (props: ShapeParameterProps) => {
         </Box>
       }
       {props.isSimulation &&
-        <Box display="flex" sx={{ paddingBottom: 1 }}>
+        <Box display="flex" gap={2}>
           <ParameterWrapper
             defaultValue={meanUpper}
             valueSetter={(value) => { setMeanUpper(value); setMeanLower(value); }}

@@ -50,24 +50,26 @@ const Sphere = (props: SphereProps) => {
   return (
     <Card key={props.id}>
       <CardContent>
-        <Box display="flex" >
-          <Button size="small" onClick={handleButtonClick}>
+        <Box display="flex" gap={2}>
+          <Button size="small" sx={{ color: "text.primary" }} onClick={handleButtonClick}>
             {collapsed ? <ExpandMore /> : <ExpandLess />}
           </Button>
-          <Button size="small" onClick={handleRemove}>
+          <Button size="small" sx={{ color: "text.primary" }} onClick={handleRemove}>
             <DeleteForever />
-          </Button> 
-          <Box  component="img" sx={{height: 25}} src={SphereIcon}/>
-          <Typography color="text.secondary" gutterBottom>
+          </Button>
+          <Box component="img" sx={{ height: 25 }} src={SphereIcon} />
+          <Typography color="text.primary" gutterBottom>
             {collapsed ? `r: ${jsonData.radius.meanUpper}` : ""}
           </Typography>
 
         </Box>
 
-        <Collapse in={!collapsed}>
-          <ShapeParameterWrapper isSimulation={props.isSimulation} initialParameterConfig={props.initialConfig.radius} jsonCallback={jsonCallback} parameterName="radius" />
-          <RefractionParameterWrapper initialRefractionConfig={props.initialConfig.refraction} jsonCallback={jsonCallback} />
-          <LocationParameterWrapper initialLocationsConfig={props.initialConfig.locations[0]} jsonCallback={jsonCallback} />
+        <Collapse in={!collapsed} sx={{ gap: "2" }}>
+          <Box display="flex" gap={2} sx={{ flexDirection: "column" }}>
+            <ShapeParameterWrapper isSimulation={props.isSimulation} initialParameterConfig={props.initialConfig.radius} jsonCallback={jsonCallback} parameterName="radius" />
+            <RefractionParameterWrapper initialRefractionConfig={props.initialConfig.refraction} jsonCallback={jsonCallback} />
+            <LocationParameterWrapper initialLocationsConfig={props.initialConfig.locations[0]} jsonCallback={jsonCallback} />
+          </Box>
         </Collapse>
       </CardContent>
     </Card>

@@ -8,6 +8,7 @@ import { JsonViewer } from '@textea/json-viewer'
 import Box from "@mui/material/Box/Box";
 import { MessageHubConnectionProvider } from "../../utility/MessageHubConnectionProvider";
 import Card from "@mui/material/Card/Card";
+import Graph from "./Graph";
 
 const Jobs = () => {
     const [jsonData, setJsonData] = React.useState<string>("{}")
@@ -46,6 +47,11 @@ const Jobs = () => {
                                 <JsonViewer value={JSON.parse(jsonData)} />
                             </Card>
                         </Box>
+                    </Box>
+                </Grid>
+                <Grid item xs={12} sm={12} md={12} lg={8}>
+                    <Box sx={{height: "600px"}}>
+                        <Graph data={JSON.parse(jsonData).fitness} />
                     </Box>
                 </Grid>
             </Grid>

@@ -25,7 +25,7 @@ const LocationParameterWrapper = (props: LocationParameterWrapperProps) => {
   }, [x, y, z]);
 
   return (
-    <Box display="flex" sx={{paddingBottom: 1}}>
+    <Box display="flex" gap={2}>
       <ParameterWrapper
         defaultValue={x}
         valueSetter={setX}

@@ -105,108 +105,115 @@ const Instrumentation = ({ initialResX = 0, initialResY = 0, ...props }) => {
   }, []);
 
   return (
-    <Box>
-      <Card sx={{ height: "100%" }} >
-        <CardContent>
-          <Typography>Instrumentation</Typography>
-          <Box display="flex" sx={{ flexDirection: "column" }}>
-            <Box display="flex" sx={{ paddingBottom: 1 }}>
-              <TextField
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">°</InputAdornment>
-                  ),
-                }}
-                label="alphaI"
-                value={alphaI}
-                type="number"
-                onChange={(e) => {
-                  setAlphaI(Number(e.target.value));
-                }}
-              />
-              <TextField
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">eV</InputAdornment>
-                  ),
-                }}
-                label="photonEv"
-                value={photonEv}
-                type="number"
-                onChange={(e) => {
-                  setPhotonEv(Number(e.target.value));
-                }}
-              />
-            </Box>
-            <Box display="flex" sx={{ paddingBottom: 1 }}>
-              <TextField
-                label="beamX"
-                value={beamX}
-                type="number"
-                onChange={(e) => {
-                  setBeamX(Number(e.target.value));
-                }}
-              />
-              <TextField
-                label="beamY"
-                value={beamY}
-                type="number"
-                onChange={(e) => {
-                  setBeamY(Number(e.target.value));
-                }}
-              />
-
-              <TextField
-                disabled={initialResX != 0}
-                label="resX"
-                value={resX}
-                type="number"
-                onChange={(e) => {
-                  setResX(Number(e.target.value));
-                }}
-              />
-              <TextField
-                disabled={initialResY != 0}
-                label="resY"
-                value={resY}
-                type="number"
-                onChange={(e) => {
-                  setResY(Number(e.target.value));
-                }}
-              />
-            </Box>
-            <Box display="flex" sx={{ paddingBottom: 1 }}>
-              <TextField
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">mm</InputAdornment>
-                  ),
-                }}
-                label="pixelsize"
-                value={pixelsize}
-                type="number"
-                onChange={(e) => {
-                  setPixelsize(Number(e.target.value));
-                }}
-              />
-              <TextField
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">mm</InputAdornment>
-                  ),
-                }}
-                label="sampleDistance"
-                value={sampleDistance}
-                type="number"
-                onChange={(e) => {
-                  setSampleDistance(Number(e.target.value));
-                }}
-              />
-            </Box>
+    <Card sx={{ height: "100%" }}>
+      <CardContent sx={{ height: "100%" }}>
+        
+        <Box display="flex" gap={2} sx={{ flexDirection: "column" }}>
+        <Typography>Instrumentation</Typography>
+          <Box display="flex" gap={2}>
+            <TextField
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">°</InputAdornment>
+                ),
+              }}
+              style={{width: "50%"}}
+              label="alphaI"
+              value={alphaI}
+              type="number"
+              onChange={(e) => {
+                setAlphaI(Number(e.target.value));
+              }}
+            />
+            <TextField
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">eV</InputAdornment>
+                ),
+              }}
+              style={{width: "50%"}}
+              label="photonEv"
+              value={photonEv}
+              type="number"
+              onChange={(e) => {
+                setPhotonEv(Number(e.target.value));
+              }}
+            />
           </Box>
-        </CardContent>
-      </Card>
-    </Box>
+          <Box display="flex" gap={2}>
+            <TextField
+              label="beamX"
+              value={beamX}
+              type="number"
+              onChange={(e) => {
+                setBeamX(Number(e.target.value));
+              }}
+              style={{width: "25%"}}
+            />
+            <TextField
+              label="beamY"
+              value={beamY}
+              type="number"
+              onChange={(e) => {
+                setBeamY(Number(e.target.value));
+              }}
+              style={{width: "25%"}}
+            />
+
+            <TextField
+              disabled={initialResX != 0}
+              label="resX"
+              value={resX}
+              type="number"
+              onChange={(e) => {
+                setResX(Number(e.target.value));
+              }}
+              style={{width: "25%"}}
+            />
+            <TextField
+              disabled={initialResY != 0}
+              label="resY"
+              value={resY}
+              type="number"
+              onChange={(e) => {
+                setResY(Number(e.target.value));
+              }}
+              style={{width: "25%"}}
+            />
+          </Box>
+          <Box display="flex" gap={2}>
+            <TextField
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">mm</InputAdornment>
+                ),
+              }}
+              label="pixelsize"
+              value={pixelsize}
+              type="number"
+              onChange={(e) => {
+                setPixelsize(Number(e.target.value));
+              }}
+              style={{width: "50%"}}
+            />
+            <TextField
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">mm</InputAdornment>
+                ),
+              }}
+              label="sampleDistance"
+              value={sampleDistance}
+              type="number"
+              onChange={(e) => {
+                setSampleDistance(Number(e.target.value));
+              }}
+              style={{width: "50%"}}
+            />
+          </Box>
+        </Box>
+      </CardContent>
+    </Card>
   );
 };
 

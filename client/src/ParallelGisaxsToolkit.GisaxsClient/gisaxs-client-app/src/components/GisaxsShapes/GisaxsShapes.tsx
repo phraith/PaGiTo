@@ -119,35 +119,33 @@ const GisaxsShapes = (props: GisaxsShapesProps) => {
   };
 
   return (
-    <Box sx={{ height: "100%", width: "100%" }}>
-      <Card sx={{ height: "100%" }}>
-        <CardContent sx={{ height: "100%" }}>
-          <Box display="flex" sx={{ flexDirection: "column", height: "100%" }}>
-            <Box display="flex" justifyContent={"space-between"}>
-              <Typography>Shapes</Typography>
-              <Button size="small" onClick={addShape}>
-                <Add />
-              </Button>
-            </Box >
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-            >
-              <MenuItem onClick={addSphere}>Sphere</MenuItem>
-              <MenuItem onClick={addCylinder}>Cylinder</MenuItem>
-            </Menu>
+    <Card sx={{ height: "100%" }}>
+      <CardContent sx={{ height: "100%" }}>
+        <Box display="flex" sx={{ flexDirection: "column", height: "100%" }}>
+          <Box display="flex" justifyContent={"space-between"}>
+            <Typography>Shapes</Typography>
+            <Button size="small"  sx={{color: "text.primary"}} onClick={addShape}>
+              <Add />
+            </Button>
+          </Box >
+          <Menu
+            anchorEl={anchorEl}
+            keepMounted
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+          >
+            <MenuItem onClick={addSphere}>Sphere</MenuItem>
+            <MenuItem onClick={addCylinder}>Cylinder</MenuItem>
+          </Menu>
 
-            <List sx={{ height: "100%", overflow: "auto" }}>
-              {shapes.map((value) => {
-                return <ListItem key={value.props.id}>{value}</ListItem>;
-              })}
-            </List>
-          </Box>
-        </CardContent>
-      </Card>
-    </Box>
+          <List sx={{ height: "100%", overflow: "auto" }}>
+            {shapes.map((value) => {
+              return <ListItem key={value.props.id}>{value}</ListItem>;
+            })}
+          </List>
+        </Box>
+      </CardContent>
+    </Card>
   );
 };
 

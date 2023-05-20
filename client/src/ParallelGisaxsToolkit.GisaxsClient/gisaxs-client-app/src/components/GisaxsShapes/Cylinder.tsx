@@ -54,35 +54,25 @@ const Cylinder = (props: CylinderProps) => {
   return (
     <Card key={props.id} sx={{}}>
       <CardContent>
-        <Grid container sx={{ paddingBottom: collapsed ? 0 : 2 }}>
-          <Grid item xs={12}>
-            <Box display="flex" sx={{ justifyContent: "space-between" }}>
-              <Button size="small" onClick={handleButtonClick}>
-                {collapsed ? <ExpandMore /> : <ExpandLess />}
-              </Button>
-              <Box component="img" sx={{ height: 25 }} src={CylinderIcon} />
-              <Typography color="text.secondary" gutterBottom>
-                {collapsed ? `r: ${jsonData.radius.meanUpper} h: ${jsonData.height.meanUpper}` : ""}
-              </Typography>
-              <Button size="small" onClick={handleRemove}>
-                <DeleteForever />
-              </Button>
-            </Box>
-          </Grid>
-        </Grid>
+        <Box display="flex" gap={2}>
+          <Button size="small" sx={{ color: "text.primary" }} onClick={handleButtonClick}>
+            {collapsed ? <ExpandMore /> : <ExpandLess />}
+          </Button>
+          <Button size="small" sx={{ color: "text.primary" }} onClick={handleRemove}>
+            <DeleteForever />
+          </Button>
+          <Box component="img" sx={{ height: 25 }} src={CylinderIcon} />
+          <Typography color="text.primary" gutterBottom>
+            {collapsed ? `r: ${jsonData.radius.meanUpper} h: ${jsonData.height.meanUpper}` : ""}
+          </Typography>
+        </Box>
         <Collapse in={!collapsed}>
-          <FormControl>
-            <Grid container direction={"row"} rowSpacing={1}>
-              <Grid item xs={12}>
-                <Box display="flex" sx={{ flexDirection: "column" }}>
-                  <ShapeParameterWrapper isSimulation={props.isSimulation} initialParameterConfig={props.initialConfig.radius} jsonCallback={jsonCallback} parameterName="radius" />
-                  <ShapeParameterWrapper isSimulation={props.isSimulation} initialParameterConfig={props.initialConfig.radius} jsonCallback={jsonCallback} parameterName="height" />
-                  <RefractionParameterWrapper initialRefractionConfig={props.initialConfig.refraction} jsonCallback={jsonCallback} />
-                  <LocationParameterWrapper initialLocationsConfig={props.initialConfig.locations[0]} jsonCallback={jsonCallback} />
-                </Box>
-              </Grid>
-            </Grid>
-          </FormControl>
+          <Box display="flex" gap={2} sx={{ flexDirection: "column" }}>
+            <ShapeParameterWrapper isSimulation={props.isSimulation} initialParameterConfig={props.initialConfig.radius} jsonCallback={jsonCallback} parameterName="radius" />
+            <ShapeParameterWrapper isSimulation={props.isSimulation} initialParameterConfig={props.initialConfig.radius} jsonCallback={jsonCallback} parameterName="height" />
+            <RefractionParameterWrapper initialRefractionConfig={props.initialConfig.refraction} jsonCallback={jsonCallback} />
+            <LocationParameterWrapper initialLocationsConfig={props.initialConfig.locations[0]} jsonCallback={jsonCallback} />
+          </Box>
         </Collapse>
       </CardContent>
       <CardActions></CardActions>

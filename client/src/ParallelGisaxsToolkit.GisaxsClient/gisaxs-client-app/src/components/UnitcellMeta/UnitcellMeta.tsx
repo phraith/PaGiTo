@@ -1,13 +1,7 @@
-import Button from "@mui/material/Button"
 import Card from "@mui/material/Card"
-import CardActions from "@mui/material/CardActions"
 import CardContent from "@mui/material/CardContent"
-import Collapse from "@mui/material/Collapse"
-import FormControl from "@mui/material/FormControl"
-import Grid from "@mui/material/Grid"
 import Typography from "@mui/material/Typography"
 import TextField from "@mui/material/TextField"
-import Stack from "@mui/material/Stack"
 import { useState, useEffect } from "react";
 import {
   SetLocalStorageEntity,
@@ -68,12 +62,11 @@ const UnitcellMeta = (props: UnitcellMetaProps) => {
   }, []);
 
   return (
-    <Box sx={{ height: "100%" }}>
-      <Card sx={{ height: "100%" }}>
-        <CardContent sx={{ height: "100%" }}>
+      <Card>
+        <CardContent>
+          <Box display="flex" gap={2} sx={{ flexDirection: "column" }}>
           <Typography>UnitcellMeta</Typography>
-          <Box display="flex" sx={{ flexDirection: "column" }}>
-            <Box display="flex" sx={{ paddingBottom: 1 }}>
+            <Box display="flex" gap={2}>
               <TextField
                 label="repX"
                 value={repX}
@@ -101,7 +94,7 @@ const UnitcellMeta = (props: UnitcellMetaProps) => {
                 }}
               />
             </Box>
-            <Box display="flex" sx={{ paddingBottom: 1 }}>
+            <Box display="flex" gap={2}>
               <TextField
                 label="posX"
                 value={posX}
@@ -132,7 +125,6 @@ const UnitcellMeta = (props: UnitcellMetaProps) => {
           </Box>
         </CardContent>
       </Card>
-    </Box>
   );
 };
 

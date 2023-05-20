@@ -32,7 +32,7 @@ const ColormapSelect = (props: ColormapSelectProps) => {
     ];
 
     return (
-        <FormControl fullWidth>
+        <FormControl>
             <Select value={props.colormap} onChange={(event) => { props.setColormap(event.target.value as string) }}>
                 {colors.map((value) => (
                     <MenuItem key={value} value={value}>
