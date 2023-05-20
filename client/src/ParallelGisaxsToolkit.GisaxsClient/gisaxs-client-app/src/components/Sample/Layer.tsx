@@ -54,25 +54,25 @@ const Layer = (props: LayerProps) => {
       <CardContent>
         {!isSubstrate ?
           <Box display="flex" sx={{ justifyContent: "space-between" }}>
-            <Button size="small" onClick={handleButtonClick}>
+            <Button size="small" sx={{color: "text.primary"}} onClick={handleButtonClick}>
               {collapsed ? <ExpandMore /> : <ExpandLess />}
             </Button>
 
-            <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+            <Typography sx={{ fontSize: 14 }}  gutterBottom>
               Layer
             </Typography>
 
-            <Button size="small" onClick={handleRemove}>
+            <Button size="small" sx={{color: "text.primary"}} onClick={handleRemove}>
               <DeleteForever />
             </Button>
 
           </Box>
           :
-          <Box display="flex" sx={{ justifyContent: "space-between" }}>
-            <Button size="small" onClick={handleButtonClick}>
-              {collapsed ? <ExpandMore /> : <ExpandLess />}
+          <Box display="flex" gap={2} sx={{ justifyContent: "space-between" }}>
+            <Button size="small" sx={{color: "text.primary"}} onClick={handleButtonClick}>
+              {collapsed ? <ExpandMore/> : <ExpandLess />}
             </Button>
-            <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+            <Typography sx={{ fontSize: 14 }} gutterBottom>
               Substrate
             </Typography>
           </Box>

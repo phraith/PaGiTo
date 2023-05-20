@@ -108,13 +108,12 @@ const Sample = (props: SampleProps) => {
   };
 
   return (
-    <Box sx={{ height: "100%" }}>
       <Card sx={{ height: "100%" }}>
         <CardContent sx={{ height: "100%" }}>
           <Box display="flex" sx={{ flexDirection: "column", height: "100%" }}>
             <Box display="flex" justifyContent={"space-between"} sx={{ paddingBottom: 1 }}>
               <Typography>Sample</Typography>
-              <Button size="small" onClick={addLayer}>
+              <Button size="small"  sx={{color: "text.primary"}} onClick={addLayer}>
                 <Add />
               </Button>
             </Box >
@@ -127,7 +126,6 @@ const Sample = (props: SampleProps) => {
           </Box>
         </CardContent>
       </Card>
-    </Box>
   );
 };
 

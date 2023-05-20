@@ -1,6 +1,7 @@
 import ListItem from "@mui/material/ListItem/ListItem";
 import ListItemIcon from "@mui/material/ListItemIcon/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText/ListItemText";
+import Typography from "@mui/material/Typography/Typography";
 
 interface DrawerLinkProps {
     children: React.ReactNode;
@@ -19,7 +20,7 @@ const DrawerLink: React.FC<DrawerLinkProps> = (props: DrawerLinkProps) => {
                 px: 2.5,
             }}>
             <ListItemText
-                primary={props.description}
+                primary={<Typography  sx={{ color: 'text.primary' }}>{props.description}</Typography>}
                 sx={{ opacity: props.open ? 1 : 0 }} />
             <ListItemIcon
                 sx={{

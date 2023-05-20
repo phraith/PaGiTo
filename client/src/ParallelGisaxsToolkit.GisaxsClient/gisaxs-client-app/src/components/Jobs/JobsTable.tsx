@@ -1,7 +1,6 @@
 import { DataGrid } from '@mui/x-data-grid/DataGrid';
-import { Box, Button, CircularProgress, makeStyles, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Typography } from '@mui/material';
 import { memo, useState, useEffect } from 'react';
-import { JobInfo } from '../../utility/JobInfo';
 import { CircularProgressProps } from '@mui/material/CircularProgress';
 interface JobsTableProps {
   setJsonData: any

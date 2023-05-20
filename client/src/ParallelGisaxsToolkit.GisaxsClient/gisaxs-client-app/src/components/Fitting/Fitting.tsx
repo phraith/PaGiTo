@@ -19,12 +19,13 @@ import ScatterImageWithLineprofile from "../ScatterImage/ScatterImageWithLinepro
 import LineProfileGraph from "./LineProfileGraphECharts";
 import useJsonCallback from "../../hooks/useJsonCallback";
 import useJobEffect from "../../hooks/useJobEffect";
+import Settings from "../Settings";
 
 const Fitting = () => {
     const getLineprofiles = (hash: any) => {
         const requestOptions1 = {
             method: 'POST',
-            headers: 
+            headers:
             {
                 Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
                 Accept: "application/json",
@@ -32,47 +33,47 @@ const Fitting = () => {
             },
             body: JSON.stringify(
                 {
-                  jobId: hash,
-                  includeResult: true
+                    jobId: hash,
+                    includeResult: true
                 }
             )
         };
-      
+
         let url1 = "/api/job/state";
         fetch(url1, requestOptions1)
-        .then((response) => response.json())
-        .then((data) => {
-            let json = JSON.parse(data.job.result)
-            let traces = []
-            let values = json.numericResults[0].modifiedData
-            let k = values.map((x: number, index: number) => { return [index, x] })
-            traces.push(k)
-            setSimulatedPlotData(traces[0])
-        })
+            .then((response) => response.json())
+            .then((data) => {
+                let json = JSON.parse(data.job.result)
+                let traces = []
+                let values = json.numericResults[0].modifiedData
+                let k = values.map((x: number, index: number) => { return [index, x] })
+                traces.push(k)
+                setSimulatedPlotData(traces[0])
+            })
     }
 
     const receiveJobResult = (hash: any) => {
         const requestOptions1 = {
-          method: 'POST',
-          headers: 
-          {
-              Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
-              Accept: "application/json",
-              'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(
-              {
-                jobId: hash,
-                includeResult: true
-              }
-          )
-      };
-    
-      let url1 = "/api/job/state";
-      fetch(url1, requestOptions1)
-      .then((data) => data.json())
-      .then((data) => handleData(data));
-      };
+            method: 'POST',
+            headers:
+            {
+                Authorization: `Bearer ${localStorage.getItem("apiToken")}`,
+                Accept: "application/json",
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(
+                {
+                    jobId: hash,
+                    includeResult: true
+                }
+            )
+        };
+
+        let url1 = "/api/job/state";
+        fetch(url1, requestOptions1)
+            .then((data) => data.json())
+            .then((data) => handleData(data));
+    };
 
     const [hubConnection, _] = useState<MessageHubConnectionProvider>(
         new MessageHubConnectionProvider(
@@ -111,7 +112,7 @@ const Fitting = () => {
         console.log(`Handling data took ${endTime - startTime} milliseconds`);
     };
 
-    
+
 
     const requestLineProfiles = (jsonConfigForSimulation, jsonConfigForRealImage) => {
         const requestOptions1 = {
@@ -158,7 +159,7 @@ const Fitting = () => {
     }, 50))
 
     useEffect(() => {
-        if(lineprofileState.currentLineProfile === null || imageInfo === null) {
+        if (lineprofileState.currentLineProfile === null || imageInfo === null) {
             return;
         }
 
@@ -201,8 +202,7 @@ const Fitting = () => {
     }, [lineprofileState.lineProfiles])
 
     useEffect(() => {
-        if(imageInfo == null)
-        {
+        if (imageInfo == null) {
             return;
         }
 
@@ -265,48 +265,33 @@ const Fitting = () => {
         <React.Fragment>
             <CssBaseline />
             <MiniDrawer />
-            <Grid container spacing={2} direction={"row"} sx={{ padding: 10 }}>
-                <Grid item xs={4} sm={4} md={4} lg={4}>
+            <Box display={"flex"} flexDirection={"row"} padding={10} gap={2} sx={{ height: "100vh" }}>
+                <Box display={"flex"} flexDirection={"row"} gap={2} sx={{ height: "100%", width: "70%" }}>
                     <ScatterImageWithLineprofile width={imgWidth} height={imgHeight} profileState={lineprofileState} setProfileState={setLineprofileState} intensities={refIntensities} />
-                </Grid>
-                <Grid item xs={4} sm={6} md={4} lg={4}>
                     <ScatterImageWithLineprofile width={imgWidth} height={imgHeight} profileState={lineprofileState} setProfileState={setLineprofileState} intensities={intensities} />
-                </Grid>
-                <Grid item xs={4} sm={4} md={4} lg={4}>
-                    <Box display="flex" flexDirection={"column"} sx={{ gap: 2 }}>
-                        <Box display="flex" sx={{ gap: 2, height: "30vh" }}>
-                            {!openTable
-                                ? <LineProfileGraph simulatedData={simulatedPlotData} realData={realPlotData} />
-                                : <ImageTable setImageInfo={(updatedImageInfo: ImageInfo) => { setImageInfo(updatedImageInfo) }} />
-                            }
-                        </Box>
+                </Box>
 
-                        <Box display="flex" sx={{ gap: 2 }}>
-                            <Instrumentation jsonCallback={jsonCallback} initialResX={imageInfo === null ? 0 : imageInfo.width } initialResY={imageInfo === null ? 0 : imageInfo.height} />
-                            <Box display="flex" flexDirection={"column"} sx={{ gap: 2 }}>
-                                <UnitcellMeta jsonCallback={jsonCallback} />
-                                <Box display="flex" sx={{ gap: 2 }}>
-                                    <ColormapSelect colormap={colormap} setColormap={setColorMap} />
-                                    <Button variant="outlined" onClick={() => sendJobInfo()}>
-                                        Create
-                                    </Button>
-                                    <Button variant="outlined" onClick={() => { setOpenTable(prevState => !prevState) }}>
-                                        {openTable ? "Graph" : "Images"}
-                                    </Button>
-                                </Box>
-                            </Box>
-                        </Box>
-                        <Grid container spacing={2} sx={{ height: "30vh" }}>
-                            <Grid item xs={7} sm={7} md={7} lg={7} sx={{ height: "100%" }}>
-                                <GisaxsShapes isSimulation={false} jsonCallback={jsonCallback} />
-                            </Grid>
-                            <Grid item xs={5} sm={5} md={5} lg={5} sx={{ height: "100%" }}>
-                                <Sample jsonCallback={jsonCallback} />
-                            </Grid>
-                        </Grid>
+                <Box display={"flex"} flexDirection={"column"} gap={2} sx={{ height: "100%", width: "30%" }}>
+                    <Box display={"flex"} flexDirection={"row"} gap={2} sx={{ height: "35%" }}>
+                        {!openTable
+                            ? <LineProfileGraph simulatedData={simulatedPlotData} realData={realPlotData} />
+                            : <ImageTable setImageInfo={(updatedImageInfo: ImageInfo) => { setImageInfo(updatedImageInfo) }} />
+                        }
                     </Box>
-                </Grid>
-            </Grid>
+
+                    <Box display={"flex"} flexDirection={"row"} sx={{ height: "5%" }} justifyContent={"space-between"}>
+                        <Button variant="contained" onClick={() => sendJobInfo()}>
+                            Create
+                        </Button>
+                        <Button variant="contained" onClick={() => { setOpenTable(prevState => !prevState) }}>
+                            {openTable ? "Graph" : "Images"}
+                        </Button>
+                    </Box>
+                    <Box sx={{ height: "60%" }}>
+                        <Settings isSimulation={false} jsonCallback={jsonCallback} colormap={colormap} setColorMap={setColorMap} />
+                    </Box>
+                </Box>
+            </Box >
         </React.Fragment >
     );
 };
