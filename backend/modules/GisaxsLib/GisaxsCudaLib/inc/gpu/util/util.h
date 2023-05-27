@@ -57,5 +57,5 @@ typedef struct MyComplex4
     void Preprocess(float* input, int size, float* output, float *my_max, cudaStream_t work_stream);
     void Reorder(float* input, int size, float* output, int width, int height, int blockSize, cudaStream_t work_stream);
     void Normalize(float* input, int size, unsigned char* output, cudaStream_t work_stream);
-
+    void CalculateDiff(float* data_real, float *data_sim, int size, float* out_diff, float* partial_sums, float* res, cudaStream_t work_stream);
 #endif

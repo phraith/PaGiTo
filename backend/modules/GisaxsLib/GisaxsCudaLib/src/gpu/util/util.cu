@@ -2,6 +2,7 @@
 
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
+#include <cfloat>
 
 __global__ void reduce_sum(float* in, float* sum, int n) {
     extern __shared__ float sdata[];
@@ -84,6 +85,26 @@ __global__ void reduce_scaled_diff(float* in_real, float* in_sim, float* sum, fl
 
     if (tid == 0) {
         sum[blockIdx.x] = sdata[0];
+    }
+}
+
+__global__ void calculate_diff(float* in_real, float* in_sim, float* out_diff, int n) {
+
+    int tid = threadIdx.x;
+
+    for (int i = blockDim.x * blockIdx.x + tid; i < n; i += blockDim.x * gridDim.x)
+    {
+        out_diff[i] = fabs(in_real[i] - in_sim[i]);
+    }
+}
+
+__global__ void calculate_diff_const(float* in_data, float* const_value, float* out_diff, int n) {
+
+    int tid = threadIdx.x;
+
+    for (int i = blockDim.x * blockIdx.x + tid; i < n; i += blockDim.x * gridDim.x)
+    {
+        out_diff[i] = fabs(in_data[i] - *const_value);
     }
 }
 
@@ -177,6 +198,53 @@ __global__ void reduce_max(float* in, float* sum, int n) {
     }
 }
 
+__global__ void reduce_min(float* in, float* sum, int n) {
+    extern __shared__ float sdata[];
+
+    int tid = threadIdx.x;
+
+    float local_min = FLT_MAX;
+    for (int i = blockDim.x * blockIdx.x + tid; i < n; i += blockDim.x * gridDim.x)
+    {
+        float val = in[i];
+        if (val < local_min)
+            local_min = val;
+    }
+
+    sdata[tid] = local_min;
+    __syncthreads();
+
+    for (int active_threads = blockDim.x >> 1; active_threads; active_threads >>= 1) {
+        if (tid < active_threads) {
+            float val = sdata[tid + active_threads];
+            if (val < sdata[tid])
+                sdata[tid] = val;
+        }
+        __syncthreads();
+    }
+
+    if (tid == 0) {
+        sum[blockIdx.x] = sdata[0];
+    }
+}
+
+void CalculateDiff(float* data_real, float *data_sim, int size, float* out_diff, float* partial_sums, float* res, cudaStream_t work_stream)
+{
+    int num_threads = 256;
+    int num_blocks = 256;
+    calculate_diff<<<num_blocks, num_threads, 0, work_stream>>>(data_real, data_sim, out_diff, size);
+
+    int shared_size = num_threads * sizeof(float);
+    reduce_min << <num_blocks, num_threads, shared_size, work_stream >> > (out_diff, partial_sums, size);
+    reduce_min << <1, num_threads, shared_size, work_stream >> > (partial_sums, res, num_blocks);
+
+    calculate_diff_const<<<num_blocks, num_threads, 0, work_stream>>>(out_diff, res, out_diff, size);
+
+    reduce_sum << <num_blocks, num_threads, shared_size, work_stream >> > (out_diff, partial_sums, size);
+    reduce_sum << <1, num_threads, shared_size, work_stream >> > (partial_sums, res, num_blocks);
+}
+
+
 void CalculateMaximumIntensity(float* data, int size, float* partial_sums, float* res, cudaStream_t work_stream)
 {
     int num_threads = 256;
@@ -221,6 +289,17 @@ void Reorder(float* input, int size, float *output, int width, int height, int b
 }
 
 void SumReduce(float* data, int size, float* partial_sums, float* res, cudaStream_t work_stream)
+{
+    int num_threads = 256;
+    int num_blocks = 256;
+
+    int shared_size = num_threads * sizeof(float);
+
+    reduce_sum << <num_blocks, num_threads, shared_size, work_stream >> > (data, partial_sums, size);
+    reduce_sum << <1, num_threads, shared_size, work_stream >> > (partial_sums, res, num_blocks);
+}
+
+void MinReduce(float* data, int size, float* partial_sums, float* res, cudaStream_t work_stream)
 {
     int num_threads = 256;
     int num_blocks = 256;

@@ -205,18 +205,29 @@ namespace GpuDeviceV2 {
 
             MemoryBlock<MyType> dev_real_intensities = memoryProviderV2.RequestMemory<MyType>(
                     combined_intensities.size());
+
+            MemoryBlock<MyType> dev_diff = memoryProviderV2.RequestMemory<MyType>(
+                    combined_intensities.size());
+
             dev_real_intensities.InitializeHtD(combined_intensities);
 
-            SumReduce(dev_real_intensities.Get(), dev_real_intensities.Size(), dev_partial_sums.Get(), dev_scale_prod_,
-                      work_stream->Get());
-            SumReduce(dev_sim_intensities.Get(), dev_sim_intensities.Size(), dev_partial_sums.Get(), dev_scale_denom_,
-                      work_stream->Get());
+//            void CalculateDiff(float* data_real, float *data_sim, int size, float* out_diff, float* partial_sums, float* res, cudaStream_t work_stream)
 
-            gpuErrchk(cudaStreamSynchronize(work_stream->Get()));
+//            CalculateDiff(dev_real_intensities.Get(), dev_sim_intensities.Get(), dev_real_intensities.Size(), dev_diff.Get(),
+//                          dev_partial_sums.Get(), dev_fitness_, work_stream->Get());
+
+//            SumReduce(dev_real_intensities.Get(), dev_real_intensities.Size(), dev_partial_sums.Get(), dev_scale_prod_,
+//                      work_stream->Get());
+//            SumReduce(dev_sim_intensities.Get(), dev_sim_intensities.Size(), dev_partial_sums.Get(), dev_scale_denom_,
+//                      work_stream->Get());
+//
+//            gpuErrchk(cudaStreamSynchronize(work_stream->Get()));
 //            scale = scale_prod_ / scale_denom_;
+//
+//            ScaledDiffSum(dev_real_intensities.Get(), dev_sim_intensities.Get(), dev_real_intensities.Size(),
+//                          dev_partial_sums.Get(), dev_fitness_, scale, work_stream->Get());
 
-            ScaledDiffSum(dev_real_intensities.Get(), dev_sim_intensities.Get(), dev_real_intensities.Size(),
-                          dev_partial_sums.Get(), dev_fitness_, scale, work_stream->Get());
+
         }
         stop->Record();
         gpuErrchk(cudaDeviceSynchronize());
@@ -243,15 +254,16 @@ namespace GpuDeviceV2 {
             std::vector<MyType> copied_intensities(dev_sim_intensities.Size());
             gpuErrchk(cudaMemcpy(&copied_intensities[0], dev_sim_intensities.Get(),
                                  dev_sim_intensities.Size() * sizeof(MyType), cudaMemcpyDeviceToHost));
-            //memoryProviderV2.UnlockAll();
-            return {fitness_, {copied_intensities.begin(), copied_intensities.end()}, copied_normalized_intensities,
+            memoryProviderV2.UnlockAll();
+            return {std::log(fitness_), {copied_intensities.begin(), copied_intensities.end()},
+                    copied_normalized_intensities,
                     container_qx.CopyToHost(),
                     container_qy.CopyToHost(), container_qz.CopyToHost(), 0};
         }
 
-        //memoryProviderV2.UnlockAll();
+        memoryProviderV2.UnlockAll();
         spdlog::info("Fitness: {}", fitness_);
-        return {fitness_, {}, std::vector<unsigned char>(), {}, {}, {}, 0};//scale};
+        return {std::log(fitness_), {}, std::vector<unsigned char>(), {}, {}, {}, 0};//scale};
     }
 
     int GpuDeviceV2::Bind() const {
