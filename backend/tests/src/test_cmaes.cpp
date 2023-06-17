@@ -58,12 +58,11 @@ TEST(CmaesTest, EllipsoidFunction)
     int dim = 5;
     std::vector<double> initial(dim, 3);
     CmaesOptimizer o(EllipsoidFunctionBulk, initial, std::vector<double>(), std::vector<double>(), 2.0, 1000);
-    std::shared_ptr<Solution> best_solution = o.Optimize();
+    FitData best_solution = o.Optimize();
 
-    EXPECT_NE(nullptr, best_solution);
     for (int i = 0; i < dim; ++i)
     {
-        EXPECT_NEAR(0.0, best_solution->Parameters()[i], 1e-7);
+        EXPECT_NEAR(0.0, best_solution.parameters[i], 1e-7);
     }
 }
 
@@ -73,9 +72,8 @@ TEST(CmaesTest, QuadraticFunction)
     initial.emplace_back(0);
     initial.emplace_back(0);
     CmaesOptimizer o(QuadraticFunctionBulk, initial, std::vector<double>(), std::vector<double>(), 1.3, 1000);
-    std::shared_ptr<Solution> best_solution = o.Optimize();
+    FitData best_solution = o.Optimize();
 
-    EXPECT_NE(nullptr, best_solution);
-    EXPECT_FLOAT_EQ(3.0, best_solution->Parameters()[0]);
-    EXPECT_FLOAT_EQ(-2.0, best_solution->Parameters()[1]);
+    EXPECT_FLOAT_EQ(3.0, best_solution.parameters[0]);
+    EXPECT_FLOAT_EQ(-2.0, best_solution.parameters[1]);
 }

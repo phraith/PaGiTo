@@ -1,50 +1,50 @@
-# version: "2"
+version: "2"
 services:
-#   dotnet_client:
-#     environment:
-#       POSTGRES_URL: postgres
-#       GISAXS_BACKEND: gisaxs_backend
-#       REDIS_URL: redis
-#       POSTGRES_USER: ${POSTGRES_USER}
-#       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-#       AUTH_TOKEN: ${AUTH_TOKEN}
+  dotnet_client:
+    environment:
+      POSTGRES_URL: postgres
+      GISAXS_BACKEND: gisaxs_backend
+      REDIS_URL: redis
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      AUTH_TOKEN: ${AUTH_TOKEN}
 
-#     build:
-#       context: client
-#       dockerfile: Dockerfile
-#     command: tail -f /dev/null
-#     links:
-#       - redis
-#     ports:
-#       - "8080:80"
-#       - "8081:443"
+    build:
+      context: client
+      dockerfile: Dockerfile
+    command: tail -f /dev/null
+    links:
+      - redis
+    ports:
+      - "8080:80"
+      - "8081:443"
 
-  # client_tests:
-  #     build:
-  #       context: client
-  #       dockerfile: Dockerfile
-  #       target: tests
-  #     command:
-  #       - /bin/sh
-  #       - -c
-  #       - |
-  #         dotnet test --logger "trx;LogFileName=/reports/client/test-results.trx" --collect:"XPlat Code Coverage"
-  #         find /tests/ -name coverage.cobertura.xml -exec cp "{}" /reports/client/ \;
-  #     volumes:
-  #     - /reports:/reports
-  # backend_tests:
-  #   build:
-  #     context: backend
-  #     dockerfile: Dockerfile.alpine
-  #   command: 
-  #     - /bin/sh
-  #     - -c
-  #     - |
-  #       ./tests/GisaxsTests --gtest_output=xml:/reports/backend/test-results.xml
-  #       make GisaxsCoverage
-  #       cp -r GisaxsCoverage* /reports/backend
-  #   volumes:
-  #     - /reports:/reports
+  client_tests:
+      build:
+        context: client
+        dockerfile: Dockerfile
+        target: tests
+      command:
+        - /bin/sh
+        - -c
+        - |
+          dotnet test --logger "trx;LogFileName=/reports/client/test-results.trx" --collect:"XPlat Code Coverage"
+          find /tests/ -name coverage.cobertura.xml -exec cp "{}" /reports/client/ \;
+      volumes:
+      - /reports:/reports
+  backend_tests:
+    build:
+      context: backend
+      dockerfile: Dockerfile.alpine
+    command: 
+      - /bin/sh
+      - -c
+      - |
+        ./tests/GisaxsTests --gtest_output=xml:/reports/backend/test-results.xml
+        make GisaxsCoverage
+        cp -r GisaxsCoverage* /reports/backend
+    volumes:
+      - /reports:/reports
 
   redis:
     image: redis:latest
@@ -74,22 +74,22 @@ services:
     volumes:
       - db:/var/lib/postgresql/data
 
-  # gisaxs-backend:
-  #   build:
-  #     context: backend
-  #     dockerfile: Dockerfile.cuda
-  #   ports:
-  #     - '5555:5555'
-  #   cap_add:
-  #     - SYS_PTRACE
-  #   entrypoint: ["./apps/ModelingFramework/ModelingFramework"]
-  #   deploy:
-  #     resources:
-  #       reservations:
-  #         devices:
-  #           - driver: nvidia
-  #             count: 1
-  #             capabilities: [ gpu ]
+  gisaxs-backend:
+    build:
+      context: backend
+      dockerfile: Dockerfile.cuda
+    ports:
+      - '5555:5555'
+    cap_add:
+      - SYS_PTRACE
+    entrypoint: ["./apps/ModelingFramework/ModelingFramework"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
 volumes:
   db:
     driver: local
