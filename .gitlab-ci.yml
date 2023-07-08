@@ -1,0 +1,17 @@
+before_script:
+- docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+
+after_script:
+- docker logout $CI_REGISTRY
+
+build:
+  stage: build
+  variables:
+    VERSION: 0.0.1
+    REGISTRY: "$CI_REGISTRY_IMAGE"
+  script:
+  - docker compose build dotnet_client
+  - docker push "$CI_REGISTRY_IMAGE"/client:"$VERSION"
+
+  - docker compose build gisaxs-backend
+  - docker push "$CI_REGISTRY_IMAGE"/gisaxs-backend:"$VERSION"
