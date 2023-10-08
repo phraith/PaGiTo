@@ -12,7 +12,10 @@ ENV VCPKG_FORCE_SYSTEM_BINARIES="1"
 WORKDIR /src
 COPY . .
 
-RUN apt-get -y update && apt-get -y install gcc cmake git zip curl ninja-build pkg-config
+RUN apt-get -y update && apt-get -y install python3 build-base gcc cmake git zip curl ninja-build pkg-config
+
+RUN python3 -m ensurepip --upgrade && pip3 install gcovr
+
 
 RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg
 WORKDIR /opt/vcpkg
