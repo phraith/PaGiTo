@@ -77,7 +77,7 @@ services:
   gisaxs-backend:
     build:
       context: backend
-      dockerfile: Dockerfile.cuda
+      dockerfile: Dockerfile.alpine
     ports:
       - '5555:5555'
     cap_add:
